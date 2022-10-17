@@ -1,0 +1,22 @@
+`r if(knitr:::is_latex_output()) '\\appendix'`
+
+`r if(!knitr:::is_latex_output()) '# (APPENDIX) Appendix {-}'` 
+
+\app{Overview of Structured Latent Growth Curve}
+
+\secapp{Level 1 header}
+
+\subapp{Level 2 header}
+
+\subsubapp{Level 3 header}
+
+\paraapp{Level 4 header}
+
+\subparaapp{Level 5 header}
+
+\app{Measurement schedules}
+
+
+This first appendix includes all of the R chunks of code that were hidden throughout the document (using the `include = FALSE` chunk tag) to help with readibility and/or setup.
+
+
