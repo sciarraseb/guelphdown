@@ -1,170 +1,1054 @@
-```{r include_packages_2, include = FALSE}
-# This chunk ensures that the thesisdown package is
-# installed and loaded. This thesisdown package includes
-# the template files for the thesis and also two functions
-# used for labeling and referencing
-if (!require(remotes)) {
-  if (params$`Install needed packages for {thesisdown}`) {
-    install.packages("remotes", repos = "https://cran.rstudio.com")
-  } else {
-    stop(
-      paste(
-        'You need to run install.packages("remotes")',
-        "first in the Console."
-      )
-    )
-  }
-}
-if (!require(dplyr)) {
-  if (params$`Install needed packages for {thesisdown}`) {
-    install.packages("dplyr", repos = "https://cran.rstudio.com")
-  } else {
-    stop(
-      paste(
-        'You need to run install.packages("dplyr")',
-        "first in the Console."
-      )
-    )
-  }
-}
-if (!require(ggplot2)) {
-  if (params$`Install needed packages for {thesisdown}`) {
-    install.packages("ggplot2", repos = "https://cran.rstudio.com")
-  } else {
-    stop(
-      paste(
-        'You need to run install.packages("ggplot2")',
-        "first in the Console."
-      )
-    )
-  }
-}
-if (!require(bookdown)) {
-  if (params$`Install needed packages for {thesisdown}`) {
-    install.packages("bookdown", repos = "https://cran.rstudio.com")
-  } else {
-    stop(
-      paste(
-        'You need to run install.packages("bookdown")',
-        "first in the Console."
-      )
-    )
-  }
-}
-if (!require(thesisdown)) {
-  if (params$`Install needed packages for {thesisdown}`) {
-    remotes::install_github("ismayc/thesisdown")
-  } else {
-    stop(
-      paste(
-        "You need to run",
-        'remotes::install_github("ismayc/thesisdown")',
-        "first in the Console."
-      )
-    )
-  }
-}
-library(thesisdown)
-library(dplyr)
-library(ggplot2)
-library(knitr)
-flights <- read.csv("data/flights.csv", stringsAsFactors = FALSE)
+
+
+```{r package_loading_int_c3, include=F}
+#devtools::install_github(repo = 'sciarraseb/nonlinSimsAnalysis', force = T)
+library(easypackages)
+packages <- c('tidyverse', 'RColorBrewer', 'parallel', 'data.table', 'kableExtra', 'ggtext', 'egg', 'ggbrace', 'cowplot', 'nonlinSimsAnalysis', 'nonlinSims', 'ggpubr')
+libraries(packages)
+
+knitr::opts_chunk$set(message = F)
+```
+
+```{r knitting_setup_int_c3, echo=F, message = F, warning = F}
+#import raw data files (needed for computing variances)
+exp_1_raw <- nonlinSimsAnalysis:::convert_raw_var_to_sd(raw_data = read_csv('data/exp_1_data.csv')) %>%
+  mutate_at(.vars = c("number_measurements", "measurement_spacing", "midpoint"), factor)
+
+exp_2_raw <-nonlinSimsAnalysis:::convert_raw_var_to_sd(raw_data = read_csv('data/exp_2_data.csv')) %>%
+  mutate_at(.vars = c("number_measurements", "measurement_spacing", "sample_size"), factor)
+
+exp_3_raw <-nonlinSimsAnalysis:::convert_raw_var_to_sd(raw_data = read_csv('data/exp_3_data.csv')) %>%
+  mutate_at(.vars = c("number_measurements", "time_structuredness", "sample_size"), factor)
+
+#unfiltered data 
+param_summary_exp_1 <- readRDS(file = 'data/uf_param_summary_exp_1.RData')
+param_summary_exp_2 <- readRDS(file = 'data/uf_param_summary_exp_2.RData')
+param_summary_exp_3 <- readRDS(file = 'data/uf_param_summary_exp_3.RData')
+
+#create analytical versions of summary data + converts vars to sds
+exp_1_analytical <- generate_likert_days_data_sets(summary_data = param_summary_exp_1, exp_num = '1')
+exp_2_analytical <- generate_likert_days_data_sets(summary_data = param_summary_exp_2, exp_num = '2')
+exp_3_analytical <- generate_likert_days_data_sets(summary_data = param_summary_exp_3, exp_num = '3')
+
+combined_analytical_exp_1 <- rbind(exp_1_analytical$likert, exp_1_analytical$days)
+combined_analytical_exp_2 <- rbind(exp_2_analytical$likert, exp_2_analytical$days)
+combined_analytical_exp_3 <- rbind(exp_3_analytical$likert, exp_3_analytical$days)
+
+#create condition summary data sets 
+cond_summary_exp_1 <- compute_condition_summary(param_summary_data = combined_analytical_exp_1, facet_var = 'measurement_spacing', 
+                          ind_vars = c('number_measurements', 'measurement_spacing', 'midpoint'))
+cond_summary_exp_2 <- compute_condition_summary(param_summary_data = combined_analytical_exp_2, facet_var = 'measurement_spacing', 
+                  ind_vars = c('number_measurements', 'measurement_spacing', 'sample_size'))
+
+cond_summary_exp_3 <- compute_condition_summary(param_summary_data = combined_analytical_exp_3, facet_var = 'time_structuredness', 
+                          ind_vars = c('number_measurements', 'sample_size', 'time_structuredness'))
+```
+
+```{r pre_knitting_setup_unfiltered_int_c3, echo=F, eval=F, include=F}
+#code should be computed before knitting to decrease knitting time 
+#load data from experiments
+exp_1 <- read_csv(file = 'data/exp_1_data.csv') %>% filter(code == 0)
+exp_2 <- read_csv(file = 'data/exp_2_data.csv')
+exp_3 <- read_csv(file = 'data/exp_3_data.csv')
+
+#compute parameter summary statistics  
+exp_1_long <- exp_1 %>%
+    filter(code == 0) %>%
+    #place parameter estimates in one column
+    pivot_longer(cols = contains(c('theta', 'alpha', 'beta', 'gamma', 'epsilon')),
+                 names_to = 'parameter', values_to = 'estimate') %>%
+    filter(parameter == 'beta_fixed') %>%
+    mutate(pop_value = midpoint)
+
+exp_1_ordered <- order_param_spacing_levels(data = exp_1_long)
+
+exp_1_ordered %>%
+      #compute statistics for each parameter for each experimental variable
+      group_by(parameter, .dots = locate_ivs(exp_1_ordered)) %>%
+      summarize(
+       lower_ci = compute_middle_95_estimate(param_data = estimate)[1],
+       upper_ci = compute_middle_95_estimate(param_data = estimate)[2])
+
+compute_parameter_summary(data = exp_1, exp_num = '1')
+
+param_summary_exp_1 <- compute_parameter_summary(data = exp_1, exp_num = 1)
+param_summary_exp_2 <- compute_parameter_summary(data = exp_2, exp_num = 2)
+param_summary_exp_3 <- compute_parameter_summary(data = exp_3, exp_num = 3)
+
+#necessary factor conversions 
+param_summary_exp_1$number_measurements <- factor(param_summary_exp_1$number_measurements, levels = c(5, 7, 9,11))
+param_summary_exp_1$midpoint <- factor(param_summary_exp_1$midpoint, levels = c(80, 180,280))
+
+param_summary_exp_2$number_measurements <- factor(param_summary_exp_2$number_measurements, levels = c(5, 7, 9,11))
+param_summary_exp_2$sample_size <- factor(param_summary_exp_2$sample_size, levels = c(30, 50, 100, 200, 500, 1000))
+
+param_summary_exp_3$number_measurements <- factor(param_summary_exp_3$number_measurements, levels = c(5, 7, 9,11))
+param_summary_exp_3$sample_size <- factor(param_summary_exp_3$sample_size, levels = c(30, 50, 100, 200, 500, 1000))
+
+#write data sets 
+#save parameter summary files as RData files so that metadata are correctly stored (e.g., factor levels, variable types)
+saveRDS(object = param_summary_exp_1, file = 'data/uf_param_summary_exp_1.RData')
+saveRDS(object = param_summary_exp_2, file = 'data/uf_param_summary_exp_2.RData')
+saveRDS(object = param_summary_exp_3, file = 'data/uf_param_summary_exp_3.RData')
 ```
 
 
-# Graphics, References, and Labels {#ref-labels}
 
 
-## Figures
-
-If your thesis has a lot of figures, _R Markdown_ might behave better for you than that other word processor.  One perk is that it will automatically number the figures accordingly in each chapter.    You'll also be able to create a label for each figure, add a caption, and then reference the figure in a way similar to what we saw with tables earlier.  If you label your figures, you can move the figures around and _R Markdown_ will automatically adjust the numbering for you.  No need for you to remember!  So that you don't have to get too far into LaTeX to do this, a couple **R** functions have been created for you to assist.  You'll see their use below.
-
-<!--
-One thing that may be annoying is the way _R Markdown_ handles "floats" like tables and figures (it's really \LaTeX's fault). \LaTeX\ will try to find the best place to put your object based on the text around it and until you're really, truly done writing you should just leave it where it lies. There are some optional arguments specified in the options parameter of the `label` function.  If you need to shift your figure around, it might be good to look here on tweaking the options argument:  <https://en.wikibooks.org/wiki/LaTeX/Floats,_Figures_and_Captions>
-
-If you need a graphic or tabular material to be part of the text, you can just put it inline. If you need it to appear in the list of figures or tables, it should be placed in a code chunk.
--->
+# Experiment 3
 
 
-In the **R** chunk below, we will load in a picture stored as `reed.jpg` in our main directory.  We then give it the caption of "Reed logo", the label of "reedlogo", and specify that this is a figure.  Make note of the different **R** chunk options that are given in the R Markdown file (not shown in the knitted document).
+In Experiment 3, I investigated the measurement number-sample size pairings needed to achieve accurate modelling (i.e., low bias and high precision) under different levels of time structuredness. Before presenting the results of Experiment 3, I will present my design and and analysis goals. For the design, I conducted a 3(time structuredness: time-structured data, time-unstructured data [fast response rate], time-unstructured data [slow response rate]) x 4(number of measurements: 5, 7, 9, 11) x 6(sample size: 30, 50, 100, 200, 500, 1000) study. For the analysis, I was primarily interested in determining, for each level of time structuredness, what measurement number-sample size pairings achieved accurate modelling (i.e., low bias and high precision). 
 
-```{r reedlogo, fig.cap="Reed logo", out.width="0.2\\linewidth", fig.align="center"}
-include_graphics(path = "figure/reed.jpg")
-```
 
-<!-- Note the use of `out.width` as a chunk option here. The resulting
-image is 20% of what the linewidth is in LaTeX. You can also center
-the image using `fig.align="center"` as shown.-->
+## Methods
+### Variables Used in Simulation Experiment 
 
-Here is a reference to the Reed logo: Figure \@ref(fig:reedlogo).  Note the use of the `fig:` code here.  By naming the **R** chunk that contains the figure, we can then reference that figure later as done in the first sentence here.  We can also specify the caption for the figure via the R chunk option `fig.cap`.
+#### Independent Variables
 
-\clearpage
+##### Number of Measurements
 
-<!-- clearpage ends the page, and also dumps out all floats.
-  Floats are things like tables and figures. -->
+For the number of measurements, I used the same values as in Experiment 1 of  5, 7, 9, and 11 measurements (see [number of measurements](#number-measurements) for more discussion)). 
+
+##### Sample Size
+
+For sample size, I used the same values as in Experiment 2 of 30, 50, 100, 200, 500, and 1000 (see [sample size](#sample-size) for more discussion). 
+
+##### Time Structuredness{time-structuredness}
+
+*Time structuredness* describes the extent to which, at each time point, data are obtained at the exact same time point. The manipulation of time structuredness was adopted from the manipulation used in @coulombe2016 with a slight modification. In  @coulombe2016, time-unstructured data were generated according to an exponential pattern such that most data were obtained at the beginning of the response window, with a smaller amount of data being obtained towards the end of the response window. Importantly, @coulombe2016 employed a non-continuous function for generating time-unstructured data: A binning method was employed such that 80% of the data were obtained within a time period equivalent to 12% (fast response rate) or 30% (slow response rate) of the entire response window. Using a response window length of 10 days with a fast response rate, the procedure employed by @coulombe2016 for generating time-unstructured data would have generated the following percentages of data in each of the four bins (note that, using the data generation procedure for @coulombe2016, the effective response window length was 4 days instead of 10 days):\footnote{The data generation procedure in (ref:coulombe2016) for a fast response rate assumed that all of the data were collected within the initial 40\% length of the nominal response window length (i.e., 4 days in the current example).}
+
+1) Bin 1: 60% of the data would be generated in the initial 10% length of the response window (0–0.4 day).
+2) Bin 2: 20% of the data would be generated in the next 20% length of the response response window (0.4–1.2 days).
+3) Bin 3: 10% of the data would be generated in the next 30% length of the response window (1.2–2.4 days).
+4) Bin 4: the remaining 10% of the data would be generated in the remaining 40% length of the response window (2.4–4 days).
+
+\noindent Note that, summing the data percentages and time durations from the first two bins yields an 80% cumulative response rate that is obtained in the initial 12% length of the full-length response window of 10 days (i.e., $(\frac{1.2}{10})100\% = 12\%$). Also note that, in @coulombe2016, a data point in each bin was randomly assigned a measurement time within the bin’s time range. In the current example where the full-length response window had a length of 10 days, a data point obtained in the first bin would be randomly assigned a measurement time between 0–0.4.
+
+Although @coulombe2016 generated time-unstructured data to resemble data collection conditions—--response rates have been shown to follow an exponential pattern (@dillman2014; @pan2010)—--the use of a pseudo-continuous binning function for generating time-unstructured data lacked ecological validity. Therefore, the simulations here used a continuous function to create more realistic versions of time-unstructured data. Specifically, the exponential function shown below in Equation \ref{eq:exp-function} was used:
+
+\begin{align}
+y = M(1 - e^{-ax}),
+(\#eq:exp-function) 
+\end{align}
+
+\noindent where $x$ stores the time delay for a measurement at a particular time point, $y$ represents the cumulative response percentage achieved at a given $x$ time delay, $a$ sets the rate of growth of the cumulative response percentage over time, and $M$ sets the range of possible y values. Two important points need to be made with respect to the $M$ parameter (range of possible $y$ values) and the response window length used in the current simulations. First, because the range of possible values for the cumulative response percentage ($y$) is 0–1 (data can be collected from a 0% to a maximum of 100% of respondents; $\{y : 0 \le y \le 1\}$), the M parameter had a value of 1 (M = 1). Second, the response window length in the current simulations was 36 days, and so the range of possible time delay values was between 0–36 ($\{x:0\le x \le36\}$).\footnote{A value of 36 days was used because the generation of time-unstructured data had to remain independent of the manipulation of measurement number (i.e., the response window lengths used in generating time-unstructured data could not vary with the number of measurements). To ensure the manipulations of measurement number and time structuredness remained independent, the reponse window length had to remain constant for all measurement number conditions with equal spacing. Looking at Table \ref{tab:measurementDays}, the longest possible response window that fit within all measurement number conditions with equal spacing was the interval length of the 11-measurement condition (i.e., 36 days).}
+
+To replicate the time structuredness manipulation in  @coulombe2016 using the continuous exponential function of Equation \ref{eq:exp-function}, the growth rate parameter ($a$) had to be calibrated to achieve a cumulative response rate of 80% after either 12% or 30% of the response window length of 36 days. The derivation below solves for $a$, with Equation \ref{eq:growth-rate} showing the equation for computing $a$.
+
+\begin{align}
+y  &= M(1 - e^{-ax}) \nonumber \\
+y &= M - Me^{-ax} \nonumber \\
+y &= 1 -e^{-ax} \nonumber \\
+e^{-ax} &= 1-y \nonumber \\
+-ax\log(e) &= \log(1 - y) \nonumber \\
+a &= \frac{\log(1 - y)}{-x}
+(\#eq:growth-rate)
+\end{align}
+
+\noindent Because the target response rate was 80%, y took on a value of .80 (y = .80). Given that the response window length in the current simulations was 36 days, x took on a value of 4.32 (12% of 36) when time-unstructured data were defined by a fast response rate and 10.80 (30% of 36) when time-unstructured data were defined by a slow response rate. Using Equation \ref{eq:growth-rate} yielded the following growth rate parameter values for fast and slow response rates ($a_{fast}$, $a_{slow}$):
+
+\begin{align}
+a_{fast} &= \frac{\log(1 - .80)}{-4.32} = 0.37 \nonumber \\
+a_{slow} &= \frac{\log(1 - .80)}{-10.80} = 0.15 \nonumber
+\end{align}
+
+\noindent Therefore, to obtain 80% of the data with a fast response rate (i.e., in 4.32 days), the growth parameter ($a$) needed to have a value of 0.37 ($a_{fast}$ = 0.37) and, to obtain 80% of the data with a slow response rate (i.e., in 10.80 days), the growth parameter ($a$) needed to have a value of 0.15 ($a_{slow}$ = 0.15). Using the above growth rate values derived for the fast and slow response growth rate parameters ($a_{fast}$, $a_{slow}$), the following functions were generated for fast and slow response rates:
+
+\begin{align}
+f_{fast}(x) = M(1 - e^{a_{fast}x}) = M(1 - e^{-0.37x}) \text{ and} \label{eq:cdf-fast}\\
+f_{slow}(x) = M(1 - e^{a_{slow}x}) = M(1 - e^{-0.15x}).\label{eq:cdf-slow}
+\end{align}
+
+\noindent Using Equations \ref{eq:cdf-fast}--\ref{eq:cdf-slow}, Figure 10 shows the resulting cumulative distribution functions (CDF) for time-unstructured data that show the cumulative response percentage as a function of time. Panel A shows the cumulative distribution function for a fast response rate (Equation \ref{eq:cdf-fast}), where an 80% response rate was obtained in 4.32 days. Panel B shows the cumulative distribution function for a slow response rate (Equation \ref{eq:cdf-slow}), where an 80% response rate was obtained in 10.80 days.
+
+```{r cdf-fast-slow, eval=F, include=F}
+#1) Generate CDFs
+day <- seq(from = 0, to = 36, by = 0.01)
+M <- 1
+satiation_value <- 0.8
+satiation_point_fast <- 4.32
+satiation_point_slow <- 10.80
+
+a_fast <- log(1 - satiation_value)/-satiation_point_fast
+a_slow <- log(1 - satiation_value)/-satiation_point_slow
+
+#y data (response rate)
+y_fast <- M*(1 - exp(-a_fast*day))
+y_slow <- M*(1 - exp(-a_slow*day))
+
+cdf_data <- data.frame('dist_type' = factor(c(rep('bold(A:~CDF~(Fast~Response~Rate))', times = length(y_fast)), 
+                                           rep('bold(B:~CDF~(Slow~Response~Rate))', times = length(y_slow)))), 
+                       'day' = rep(day, times = 2), 
+                       'CDF' = c(y_fast, y_slow)) 
+
+#lines showing 80% mark    
+v_line_data <- data.frame(
+  dist_type =c("bold(A:~CDF~(Fast~Response~Rate))", "bold(B:~CDF~(Slow~Response~Rate))"), 
+  x = c(4.32, 10.80), 
+  x_end = c(4.32, 10.80), 
+  y = c(0.8, 0.8), 
+  y_end = c(0, 0))
+
+h_line_data <- data.frame(
+  dist_type =c("bold(A:~CDF~(Fast~Response~Rate))", "bold(B:~CDF~(Slow~Response~Rate))"), 
+  x = c(0, 0), 
+  x_end = c(4.32, 10.80), 
+  y = c(0.8, 0.8), 
+  y_end = c(0.8, 0.8))
+
+
+cdf_plot <- ggplot(cdf_data, aes(x = day, y = CDF)) + 
+  geom_line(size = 2.5) + 
+  scale_y_continuous(name = 'Cumulative Response Percentage', breaks = c(0.00, 0.25, 0.50, 0.80, 1.00)) +
+  theme_classic(base_family = 'Helvetica') + 
   
-Below we will investigate how to save the output of an **R** plot and label it in a way similar to that done above.  Recall the `flights` dataset from Chapter \@ref(rmd-basics).  (Note that we've shown a different way to reference a section or chapter here.)  We will next explore a bar graph with the mean flight departure delays by airline from Portland for 2014.
 
-```{r delaysboxplot, warnings=FALSE, messages=FALSE, fig.cap="Mean Delays by Airline", fig.width=6, fig.height=5}
-mean_delay_by_carrier <- flights %>%
-  group_by(carrier) %>%
-  summarize(mean_dep_delay = mean(dep_delay))
-ggplot(mean_delay_by_carrier, aes(x = carrier, y = mean_dep_delay)) +
-  geom_bar(position = "identity", stat = "identity", fill = "red")
+    #vertical lines 
+   geom_segment(data = v_line_data, mapping = aes(x = x, y = y, xend = x_end, yend = y_end), linetype = 2, size = 2) + 
+   geom_segment(data = h_line_data, mapping = aes(x = x, y = y, xend = x_end, yend = y_end), linetype = 2, size = 2)  + 
+ 
+
+  nonlinSimsAnalysis:::facet_wrap_custom( ~ dist_type, scales = "free", ncol = 2, nrow = 1 ,
+                     labeller = label_parsed,  
+
+                            scale_overrides = list(
+                              nonlinSimsAnalysis:::scale_override(1,
+                              scale_x_continuous(
+                                breaks = c(0, 4.32, 18, 24, 36),
+                                limits = c(0, 36))), 
+                          
+                               nonlinSimsAnalysis:::scale_override(which = 2,
+                              scale_x_continuous(breaks = c(0, 10.80, 18, 24, 36),
+                                limits = c(0, 36))))) + 
+                            
+
+
+  labs( x = 'Response Window Day') +
+  
+  theme(strip.text.x = element_text(face = 'bold', hjust = 0, size = 50, margin = unit(c(t = 0, r = 0, b = 1, l = 0), "cm")),
+        strip.background = element_rect(fill = "white", color = "white"), 
+
+        #axis details
+        axis.text = element_text(size = 40, color = 'black'),
+        axis.title = element_text(size = 50),
+        axis.line = element_line(size = 1),
+        axis.ticks.length.x = unit(x = 0.5, units = 'cm'), 
+        axis.title.x = element_text(margin = unit(c(1, 0, 0, 0), "cm")),
+        axis.ticks = element_line(size = 1, colour = 'black'),
+        
+        axis.text.y = element_text(margin = margin(t = 0, r = 0, b = 0, l = 20)), 
+
+      panel.spacing.y = unit(x = 3, units = 'cm'))
+
+set_panel_size(p = cdf_plot, height = unit(x = 28, 
+        units = "cm"), width = unit(x = 33, units = "cm"), file = 'Figures/cdf_plot.pdf')
+       
 ```
 
-Here is a reference to this image: Figure \@ref(fig:delaysboxplot).
 
-A table linking these carrier codes to airline names is available at <https://github.com/ismayc/pnwflights14/blob/master/data/airlines.csv>.
 
-\clearpage
-
-Next, we will explore the use of the `out.extra` chunk option, which can be used to shrink or expand an image loaded from a file by specifying `"scale= "`. Here we use the mathematical graph stored in the "subdivision.pdf" file.
-
-```{r subd, results="asis", echo=FALSE, fig.cap="Subdiv. graph", out.extra="scale=0.75"}
-include_graphics("figure/subdivision.pdf")
+```{=tex}
+\begin{apaFigure}
+[portrait]
+[samepage]
+[0cm]
+{Cumulative Distribution Functions (CDF) With Fast and Slow Response Rates}
+{Figures/cdf_plot}
+{.20}
+{Figures/cdf_plot}
+{Panel A: Cumulative distribution function for a fast response rate (Equation \ref{eq:cdf-fast}), where an 80\% response rate is obtained in 4.32 days. Panel B: Cumulative distribution function for a slow response rate (Equation \ref{eq:cdf-slow}), where an 80\% response rate is obtained in 10.80 days.}
+\end{apaFigure}
 ```
 
-Here is a reference to this image: Figure \@ref(fig:subd).  Note that `echo=FALSE` is specified so that the **R** code is hidden in the document.
 
-**More Figure Stuff**
+#### Constants 
 
-Lastly, we will explore how to rotate and enlarge figures using the `out.extra` chunk option.  (Currently this only works in the PDF version of the book.)
+Because the nature of change not manipulated in Experiment 3, I set it to have a constant value across all cells. To keep the nature of change constant across all cells, I set the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$) to have a value of 180. Another variable set to a constant value across the cells was measurement spacing (equal spacing was used). 
 
-```{r subd2, results="asis", echo=FALSE, out.extra="angle=180, scale=1.1", fig.cap="A Larger Figure, Flipped Upside Down"}
-include_graphics("figure/subdivision.pdf")
+#### Dependent Variables
+
+##### Convergence Success Rate
+
+The proportion of iterations in a cell where models converged defined
+the **convergence success rate**.\footnote{Specifically, convergence was obtained if the convergence code returned by OpenMx was 0.} Equation \@ref(eq:convergence) below shows the calculation used to compute the convergence success rate:
+
+```{=tex}
+\begin{align}
+  \text{Convergence success rate} =  \frac{\text{Number of models that successfully converged in a cell}}{n},
+  (\#eq:convergence) 
+\end{align}
+```
+\noindent where *n* represents the total number of models run in a cell.
+
+##### Bias
+
+Bias was calculated to evaluate the accuracy with which each logistic
+function parameter was estimated. As shown below in Equation
+\@ref(eq:bias), *bias* was obtained by calculating the difference
+between the population value set for a parameter and the average
+estimated value in each cell.
+
+```{=tex}
+\begin{align}
+  \text{Bias} =  \text{Population value for parameter} - \text{Average estimated value}
+  (\#eq:bias) 
+\end{align}
 ```
 
-As another example, here is a reference: Figure \@ref(fig:subd2).  
+\noindent Bias was calculated for the fixed- and random-effect parameters of the baseline ($\uptheta_{fixed}$, $\uptheta_{random}$), maximal elevation ($\upalpha_{fixed}$, $\upalpha_{random}$), days-to-halfway elevation ($\upbeta_{fixed}$, $\upbeta_{random}$), and the halfway-triquarter delta parameters ($\upgamma_{fixed}$, $\upgamma_{random}$). 
 
-## Footnotes and Endnotes
+##### Precision
 
-You might want to footnote something. ^[footnote text] The footnote will be in a smaller font and placed appropriately. Endnotes work in much the same way. More information can be found about both on the CUS site or feel free to reach out to <data@reed.edu>.
+In addition to computing bias, precision was calculated to evaluate the confidence with which each parameter was estimated in a given cell. *Precision* was obtained by computing the range of values covered by the middle 95% of values estimated for a logistic parameter in each cell. By using the middle 95% of estimated values, a plausible range of population estimates was obtained.   
 
-## Bibliographies
+### Overview of Data Generation
 
-Of course you will need to cite things, and you will probably accumulate an armful of sources. There are a variety of tools available for creating a bibliography database (stored with the .bib extension).  In addition to BibTeX suggested below, you may want to consider using the free and easy-to-use tool called Zotero.  The Reed librarians have created Zotero documentation at <https://libguides.reed.edu/citation/zotero>.  In addition, a tutorial is available from Middlebury College at <https://sites.middlebury.edu/zoteromiddlebury/>.
+Data generation was computed the same way as in Experiment 1 (see [data generation](#data-generation)) with one addition to the procedure needed for time structuredness. The section that follows details how time structuredness was simulated. 
 
-_R Markdown_ uses _pandoc_ (<https://pandoc.org/>) to build its bibliographies.  One nice caveat of this is that you won't have to do a second compile to load in references as standard LaTeX requires. To cite references in your thesis (after creating your bibliography database), place the reference name inside square brackets and precede it by the "at" symbol.  For example, here's a reference to a book about worrying:  [@Molina1994].  This `Molina1994` entry appears in a file called `thesis.bib` in the `bib` folder.  This bibliography database file was created by a program called BibTeX.  You can call this file something else if you like (look at the YAML header in the main .Rmd file) and, by default, is to placed in the `bib` folder.  
+##### Simulation Procedure for Time Structuredness
 
-For more information about BibTeX and bibliographies, see our CUS site (<https://web.reed.edu/cis/help/latex/index.html>)^[@reedweb2007]. There are three pages on this topic:  _bibtex_ (which talks about using BibTeX, at <https://web.reed.edu/cis/help/latex/bibtex.html>), _bibtexstyles_ (about how to find and use the bibliography style that best suits your needs, at <https://web.reed.edu/cis/help/latex/bibtexstyles.html>) and _bibman_ (which covers how to make and maintain a bibliography by hand, without BibTeX, at <https://web.reed.edu/cis/help/latex/bibman.html>). The last page will not be useful unless you have only a few sources.
+To simulate time-unstructured data, response rates at each collection
+point followed an exponential pattern described by either a fast or slow
+response rate (for a review, see [time structuredness](#time-structuredness)). Importantly, data generated
+for each person at each time point had to be sampled according to a
+probability density function defined by either the fast or slow response
+rate cumulative distribution function. In the current context, a
+*probability density function* describes the probability of sampling
+any given time delay value $x$ where the range of time delay values is
+0--36 ($\{x : 0 \le x \le  36 \}$). To obtain the probability density functions
+for fast and slow response rates, the response rate function shown in
+Equation \@ref(eq:exponential) was differentiated with respect to $x$ to
+obtain the function shown below in Equation \ref{eq:pdf-function}\footnote{Euler's notation for differentiation is used to represent derivatives. In words, $\frac{\partial f(x)}{\partial x}$ means that the derivative of the function $f(x)$ is taken with respect to $x$.}:
 
-If you look at the YAML header at the top of the main .Rmd file you can see that we can specify the style of the bibliography by referencing the appropriate csl file.  You can download a variety of different style files at <https://www.zotero.org/styles>.  Make sure to download the file into the csl folder.  
+```{=tex}
+\begin{align}
+f^\prime = \frac{\partial f(x)}{\partial x} &= \frac{\partial}{\partial x}M(1 - e^{-ax}). \nonumber \\
+&= M (e^{-ax}a)
+(\#eq:pdf-function)
+\end {align}
+```
 
-<!-- Fill the rest of the page with the content below for the PDF version. -->
+\noindent To compute the probability density function for the fast
+response rate cumulative distribution function, the growth rate
+parameter $a$ was set to 0.37 in Equation \ref{eq:pdf-function} to
+obtain the following function in Equation \ref{eq:fast-pdf-function}:
 
-\vfill
+```{=tex}
+\begin{align}
+f^\prime_{fast}(x) = M (e^{-a_{fast}x}a_{fast}) = M (e^{-0.37x}0.37). 
+(\#eq:fast-pdf-function)
+\end {align}
+```
 
-**Tips for Bibliographies**
+\noindent To compute the probability density function for the slow
+response rate cumulative distribution function, the growth rate
+parameter $a$ was set to 0.15 in Equation \ref{eq:pdf-function} to
+obtain the following function in Equation \ref{eq:slow-pdf-function}:
 
-- Like with thesis formatting, the sooner you start compiling your bibliography for something as large as thesis, the better. Typing in source after source is mind-numbing enough; do you really want to do it for hours on end in late April? Think of it as procrastination.
-- The cite key (a citation's label) needs to be unique from the other entries.
-- When you have more than one author or editor, you need to separate each author's name by the word "and" e.g. `Author = {Noble, Sam and Youngberg, Jessica},`.
-- Bibliographies made using BibTeX (whether manually or using a manager) accept LaTeX markup, so you can italicize and add symbols as necessary.
-- To force capitalization in an article title or where all lowercase is generally used, bracket the capital letter in curly braces.
-- You can add a Reed Thesis citation^[@noble2002] option. The best way to do this is to use the phdthesis type of citation, and use the optional "type" field to enter "Reed thesis" or "Undergraduate thesis." 
+```{=tex}
+\begin{align}
+f^\prime_{slow}(x) = M (e^{-0.15}a_{slow}) = M (e^{-0.15}0.15). 
+(\#eq:slow-pdf-function)
+\end {align}
+```
 
-## Anything else?
+Figure \ref{fig:cdf-pdf-plots} shows the fast and slow response
+cumulative distribution functions (CDF) and their corresponding
+probability density functions (PDF). Panel A shows the cumulative
+distribution function for the fast response rate (with a growth
+parameter value $a$ set to 0.37; see Equation \ref{eq:cdf-fast}) and
+Panel B shows the probability density function that results from
+computing the derivative of the fast response rate cumulative
+distribution function with respect to $x$ (see Equation
+\ref{eq:fast-pdf-function}). Panel C shows the cumulative distribution
+function for the slow response rate (with a growth parameter value $a$
+set to 0.15; see Equation \ref{eq:cdf-slow})) and Panel D shows the
+probability density function that results from computing the derivative
+of the slow response rate cumulative distribution function with respect
+to $x$ (see Equation \ref{eq:slow-pdf-function} and section on [time
+structuredness](#sec:time-structuredness) for more discussion). For the
+fast response rate functions, an 80% response rate is obtained after
+4.32 days or, equivalently, 80% of the area underneath the probability
+density function is obtained at 4.32 days
+($\int^{4.32}_{0} f_{fast}^\prime (x) = 0.80$; the integral from 0 to 4.32 of the probability density function for a fast response rate $f^\prime(x)_{fast}$ is 0.80). For the slow response
+rate functions, an 80% response rate is obtained after 10.80 days or,
+equivalently, 80% of the area underneath the probability density
+function is obtained at 10.80 days
+($\int^{10.80}_{0} f_{slow}^\prime (x) = 0.80$; the integral from 0 to 10.80 of the probability density function for a slow response rate $f^\prime(x)_{slow}$ is 0.80).
 
-If you'd like to see examples of other things in this template, please contact the Data @ Reed team (email <data@reed.edu>) with your suggestions. We love to see people using _R Markdown_ for their theses, and are happy to help.
+```{r pdf-time-structuredness, eval=F, include=F}
+#1) Generate CDFs
+day <- seq(from = 0, to = 36, by = 0.01)
+M <- 1
+satiation_value <- 0.8
+satiation_point_fast <- 4.32
+satiation_point_slow <- 10.80
+
+a_fast <- log(1 - satiation_value)/-satiation_point_fast
+a_slow <- log(1 - satiation_value)/-satiation_point_slow
+
+#y data
+y_fast <- M*(1 - exp(-a_fast*day))
+y_slow <- M*(1 - exp(-a_slow*day))
+
+#probability values
+cdf_fast <- expression(M*(1 - exp(-a_fast*day)))
+cdf_slow <- expression(M*(1 - exp(-a_slow*day)))
+
+pdf_fast <- D(expr = cdf_fast, 'day')
+pdf_slow <- D(expr = cdf_slow, 'day')
+
+probability_values_fast<- eval(pdf_fast)
+probability_values_slow <- eval(pdf_slow)
+
+
+cdf_pdf_data <- data.frame('response_rate' = factor(c(rep('fast', times = length(y_fast)), 
+                                           rep('slow', times = length(y_slow)))), 
+                       'day' = rep(day, times = 2), 
+                       'CDF' = c(y_fast, y_slow), 
+                       'PDF' = c(probability_values_fast, probability_values_slow))
+
+cdf_pdf_data_long <- cdf_pdf_data %>%
+  pivot_longer(cols = c(CDF, PDF), names_to = 'prob_dist',
+  names_ptypes = factor(levels = c('CDF', 'PDF'))) %>% 
+  unite('dist_type', c('response_rate', 'prob_dist')) %>%
+  mutate(dist_type = factor(dist_type, levels = c('fast_CDF', 'slow_CDF','fast_PDF', 
+                                                   'slow_PDF')))
+
+cdf_pdf_data_long$dist_type <- recode_factor(cdf_pdf_data_long$dist_type,   
+                                             fast_CDF = 'bold(A:~CDF~(Fast~Response~Rate))', 
+                                             slow_CDF = 'bold(C:~CDF~(Slow~Response~Rate))', 
+                                             fast_PDF = 'bold(B:~PDF~(Fast~Response~Rate))', 
+                                             slow_PDF = 'bold(D:~PDF~(Slow~Response~Rate))')
+                
+#lines showing 80% mark    
+v_line_data <- data.frame(
+  dist_type =c("bold(A:~CDF~(Fast~Response~Rate))", "bold(C:~CDF~(Slow~Response~Rate))"), 
+  x = c(4.32, 10.80), 
+  x_end = c(4.32, 10.80), 
+  y = c(0.8, 0.8), 
+  y_end = c(0, 0))
+
+h_line_data <- data.frame(
+  dist_type = c("bold(A:~CDF~(Fast~Response~Rate))", "bold(C:~CDF~(Slow~Response~Rate))"), 
+  x = c(0, 0), 
+  x_end = c(4.32, 10.80), 
+  y = c(0.8, 0.8), 
+  y_end = c(0.8, 0.8))
+
+#needed for shading
+pdf_shading_data <- cdf_pdf_data_long %>% 
+  filter(str_detect(dist_type, pattern = 'bold\\(B') & day <= 4.32 | 
+         str_detect(dist_type, pattern = 'bold\\(D') & day <= 10.80)
+
+#needed for points 
+point_data <- data.frame(
+  dist_type =c(rep("bold(A:~CDF~(Fast~Response~Rate))", times = 1), 
+               rep("bold(C:~CDF~(Slow~Response~Rate))", times = 1)),
+  x = c(4.32, 10.80), 
+  y = c(0.8, 0.8))
+
+#arrows 
+arrow_data <- data.frame(
+  dist_type =c(rep("bold(A:~CDF~(Fast~Response~Rate))", times = 1), 
+               rep("bold(C:~CDF~(Slow~Response~Rate))", times = 1)),
+  xmin = c(4.32, 10.80), 
+  xmax = c(10, 17), 
+  ymin = c(0.8, 0.8), 
+  ymax = c(0.25, 0.25))
+
+
+#equations 
+equation_data <- data.frame(
+  dist_type =c(rep("bold(A:~CDF~(Fast~Response~Rate))", times = 4), 
+               rep("bold(C:~CDF~(Slow~Response~Rate))", times = 4), 
+               rep("bold(B:~PDF~(Fast~Response~Rate))", times = 3), 
+               rep("bold(D:~PDF~(Slow~Response~Rate))", times = 3)),
+  
+  label = c("f[fast](x) == M(1 - e^{-a[fast]~x})", "a[fast] == 0.37", "M ==1", "0.80 == 1(1-e^{-0.37(4.32)})", 
+            "f[slow](x) == M(1 - e^{-a[slow]~x})", "a[slow] == 0.15", "M == 1", "0.80 == 1(1-e^{-0.15(10.80)})",
+            
+            "f[fast]^{phantom() * minute }(x) * {phantom() == phantom()} * frac(partialdiff *f[fast](x),  partialdiff *x) * {phantom() == phantom()} * M(e^{a[fast]*x} * a[fast])",
+            "integral(f[fast]^{phantom() * minute}, 0, 4.32)*(x) == f[fast](4.32) - f[fast](0)", "phantom() == 0.80", 
+            
+            "f[slow]^{phantom() * minute }(x) * {phantom() == phantom()} * frac(partialdiff *f[slow](x),  partialdiff *x) * {phantom() == phantom()} * M(e^{a[slow]*x} * a[slow])",
+            "integral(f[slow]^{phantom() * minute}, 0, 10.80)*(x) == f[slow](10.80) - f[slow](0)", "phantom() == 0.80"), 
+  x = c(18, 17, 18, 18, 
+        24, 25, 24, 24, 
+        22, 22, 20.5, 
+        22, 22, 20.5),
+  y = c(rep(c(0.8, 0.65, 0.50, 0.2), times = 2), 
+        0.35, 0.15, 0.10, 
+        0.35, 0.15, 0.10))
+
+
+cdf_pdf_plot <- ggplot(cdf_pdf_data_long, aes(x = day, y = value)) + 
+  geom_line(size = 1.5) + 
+  scale_y_continuous(breaks = c(0, 0.25, 0.50, 0.80, 1.00)) +
+  theme_classic(base_family = 'Helvetica') + 
+  
+  geom_area(data = pdf_shading_data, mapping = aes(x = day, y = value), 
+                show.legend = 'bin',  fill="grey", alpha = 1, color = 'black', size = 1.5) +
+  geom_text(data = equation_data, inherit.aes = F, mapping = aes(x = x, y = y, label = label), parse = T, size = 9) + 
+  geom_point(data = point_data, inherit.aes = F, mapping = aes(x = x , y = y), size = 4) + 
+  
+  #arrows
+  geom_segment(data = arrow_data, inherit.aes = F, mapping = aes(x = xmin, xend = xmax, y = ymin, yend = ymax), 
+               arrow = arrow(length = unit(0.3, 'cm')), size = 1)  + 
+  
+    #vertical lines 
+  geom_segment(data = v_line_data, mapping = aes(x = x, y = y, xend = x_end, yend = y_end), linetype = 2, size = 1) + 
+  geom_segment(data = h_line_data, mapping = aes(x = x, y = y, xend = x_end, yend = y_end), linetype = 2, size = 1)  + 
+
+
+
+  nonlinSimsAnalysis:::facet_wrap_custom( ~ dist_type, scales = "free", ncol = 2, nrow = 2 , dir = 'v',
+                     labeller = label_parsed,  
+
+                            scale_overrides = list(
+                            nonlinSimsAnalysis:::scale_override(1,
+                              scale_x_continuous(
+                                breaks = c(0, 4.32, 18, 24, 36),
+                                limits = c(0, 36))), 
+                          
+                            nonlinSimsAnalysis:::scale_override(which = 2,
+                              scale_y_continuous(breaks = c(0, 0.1, 0.2, 0.3, 0.4),
+                                limits = c(0, 0.4))),
+                            
+                             nonlinSimsAnalysis:::scale_override(which = 2,
+                              scale_x_continuous(breaks = c(0, 4.32, 18, 24, 36),
+                                limits = c(0, 36))),
+                            
+                            nonlinSimsAnalysis:::scale_override(which = 3,
+                               scale_x_continuous(
+                                breaks = c(0, 10.80, 18, 24, 36),
+                                limits = c(0, 36))), 
+                         
+                            nonlinSimsAnalysis:::scale_override(4,
+                              scale_x_continuous(
+                                breaks = c(0, 10.80, 18, 24, 36),
+                                limits = c(0, 36))), 
+                            
+                            nonlinSimsAnalysis:::scale_override(which = 4,
+                                scale_y_continuous(breaks = c(0, 0.1, 0.2, 0.3, 0.4),
+                                limits = c(0, 0.4))))) +  
+
+
+  labs( x = 'Response Window Day') + 
+  
+  theme(strip.text.x = element_text(face = 'bold', hjust = 0, size = 30, margin = unit(c(t = 0, r = 0, b = 1, l = 0), "cm")),
+        strip.background = element_rect(fill = "white", color = "white"), 
+
+        #axis details
+        axis.text = element_text(size = 22, color = 'black'),
+        axis.title = element_text(size = 28),
+        axis.line = element_line(size = 1),
+        axis.ticks.length.x = unit(x = 0.5, units = 'cm'), 
+        axis.title.x = element_text(margin = unit(c(1, 0, 0, 0), "cm")),
+        axis.ticks = element_line(size = 1, colour = 'black'),
+
+      panel.spacing.y = unit(x = 2, units = 'cm'),
+      panel.spacing.x = unit(x = 2, units = 'cm'))
+       
+
+g <- ggplotGrob(cdf_pdf_plot)
+
+#customize y-axis label 
+g$grobs[[28]]$children$GRID.text.4670$label <- paste("Density (Probability, f'(x))", str_pad('', width = 13), "Response Percentage (f(x))")
+g$grobs[[28]]$children$GRID.text.4670$y <- grid::unit(0.52,"npc")
+g$grobs[[28]]$children$GRID.text.4670$x <- grid::unit(-0.2,"npc")
+
+plot_converted <- as_ggplot(g)
+
+#create PDF of faceted plot
+set_panel_size(p = plot_converted, height = unit(x = 32, units = 'cm'),
+                 width = unit(x = 40, units = 'cm'),
+                 file =  'Figures/cdf_pdf_plots.pdf')
+```
+
+```{=tex}
+\begin{apaFigure}
+[portrait]
+[samepage]
+[0cm]
+{Cumulative Distribution Functions (CDF) and Probability Density Functions (PDF) for Fast and Slow Response Rates}
+{cdf-pdf-plots}
+{.38}
+{Figures/cdf_pdf_plots}
+{Panel A: Cumulative distribution function for the fast response rate (with a growth parameter value $a$ set to 0.37; see Equation \ref{eq:cdf-fast}). Panel B: Probability density function that results from computing the derivative of the fast response rate cumulative distribution function with respect to $x$ (see Equation \ref{eq:fast-pdf-function}). Panel C: Cumulative distribution function for the slow response rate (with a growth parameter value $a$ set to 0.15; see Equation \ref{eq:cdf-slow}). Panel D: Probability density function that results from computing the derivative of the slow response rate cumulative distribution function with respect to $x$ (see Equation \ref{eq:slow-pdf-function} and \nameref{time-structuredness} for more discussion on time structuredness). For the fast response rate functions, an 80\% response rate is obtained after 4.32 days or, equivalently, 80\% of the area underneath the probability density function is obtained at 4.32 days ($\int^{4.32}_{0} f_{fast}^\prime (x) = 0.80$). For the slow response rate functions, an 80\% response rate is obtained after 10.80 days or, equivalently, 80\% of the area underneath the probability density function is obtained at 10.80 days ($\int^{10.80}_{0} f_{slow}^\prime (x) = 0.80$).}
+\end{apaFigure}
+```
+
+Having computed probability density functions for fast and slow response rates, time delays could be generated to create time-unstructured data. To generate time-unstructured data for a person at a given time point, a time delay was first
+generated by sampling values according to the probability density function defined by either a fast or slow response rate (Equations \ref{eq:fast-pdf-function}--\ref{eq:slow-pdf-function}). The sampled time delay was then added to the value of the current measurement day, with the combined measurement day then being plugged into the logistic function (Equation \ref{eq:logFunction-generation}) along with a set of person-specific parameter values to generate an observed score at a given time point for a given person. 
+
+### Modelling of Each Generated Data Set {#data-modelling-exp3}
+
+Each generated data set was modelled using the structured latent growth curves outlined in Experiment 1 (see [data modelling](#data-modelling). For a detailed explanation of how the logistic function was fit into the structural equation modelling framework, see [Technical Appendix B](#structured-latent).
+
+### Analysis of Data Modelling Output and Accompanying Visualizations
+
+Analysis and visualization was conducted as outlined in Experiment 1 (see [analysis and visualization](#analysis-visualization)). 
+
+
+## Results and Discussion
+
+
+In the sections that follow, I organize the results by presenting them for each spacing schedule (equal, time-interval increasing, time-interval decreasing, middle-and-extreme). Importantly, only the results for the day-unit parameters will be presented (i.e., fixed- and random-effect days-to-halfway elevation and halfway-triquarter delta parameters [$\upbeta_{fixed}$, $\upbeta_{random}$, $\upgamma_{fixed}$, $\upgamma_{random}$, respectively]). The results for the likert-unit parameters (i.e., fixed- and random-effect baseline and maximal elevation parameters [$\uptheta_{fixed}$, $\uptheta_{random}$, $\upalpha_{fixed}$, $\upalpha_{random}$, respectively]) were largely trivial and so are presented in [Appendix C](#appendix-c)). 
+
+
+For each level of time structuredness, I first provide a concise summary of the results and then provide a detailed report of the estimation accuracy of each day-unit parameter of the logistic function. Because the lengths of the detailed reports are considerable, I provide concise summaries before the detailed reports to establish a framework to interpret the detailed reports. The detailed report of each measurement spacing schedule will summarize the results of each day-unit's parameter estimation plot, report partial $\upomega^2$ values, and then provide a qualitative summary.
+
+### Pre-Processing of Data and Model Convergence
+
+After collecting the output from the simulations, non-converged models
+(and their corresponding parameter estimates) were removed from
+subsequent analyses. Table \ref{tab:conv-exp-3} in [Appendix B](#appendix-a-convergence-rates) provides the convergence
+success rates for each cell in Experiment 3. Model convergence was almost always above 90% and convergence rates
+rates below 90% only occurred in two cells with five measurements. 
+
+### Time-Structured Data {#concise-example-exp3}
+
+For time-structured data, Table \ref{tab:summary-table-time-struc-exp3} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp2_plot_equal} for the corresponding parameter estimation plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-time-struc-exp3} and provide elaboration when necessary. 
+
+Before presenting the results for equal spacing, I provide a brief description of the concise summary table created for each spacing schedule and shown for equal spacing in Table \ref{tab:summary-table-time-struc-exp3}. ext in the 'Unbiased' and 'Precise' columns indicates the measurement number-sample size pairings that, respectively, result in unbiased and precise estimation. Emboldened text in the 'Unbiased' and 'Qualitative Description' columns indicates the measurement number-sample size pairing needed to, respectively, obtain unbiased estimates and the greatest improvements in bias and precision across all day-unit parameters (acceptable precision not achieved in the estimation of all day-unit parameters with equal spacing). The 'Error Bar Length' column indicates the error bar length that results from using the lower-bounding measurement number-sample size pairing listed in the 'Qualitative Description' column.
+
+```{r summary-table-time-struc-exp3, echo=F}
+
+errorbar_lengths_nm5_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3_analytical$days, iv_level = 'Time structured', num_measurements = 5, sample_size = 30)
+
+errorbar_lengths_nm9_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3_analytical$days, iv_level = 'Time structured', num_measurements = 9, sample_size = 30)
+errorbar_lengths_nm7_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3_analytical$days, iv_level = 'Time structured', num_measurements = 7, sample_size = 30)
+
+
+errorbar_lengths <- c(paste(errorbar_lengths_nm5_s30$errorbar_length[1]),
+                      paste(errorbar_lengths_nm9_s30$errorbar_length[2]),
+                      paste(errorbar_lengths_nm7_s30$errorbar_length[3]), 
+                      paste(errorbar_lengths_nm9_s30$errorbar_length[4]))
+                  
+
+
+summary_table <- data.frame('Parameter' = c('\\thead[lt]{$\\upbeta_{fixed}$ \\\\ (Figure \\ref{fig:exp3_plot_days_time_struc}A)}',
+                                            '\\thead[lt]{$\\gamma_{fixed}$ \\\\ (Figure \\ref{fig:exp3_plot_days_time_struc}B)}', 
+                                            '\\thead[lt]{$\\upbeta_{random}$ \\\\ (Figure \\ref{fig:exp3_plot_days_time_struc}C)}', 
+                                            '\\thead[lt]{$\\upgamma_{random}$ \\\\ (Figure \\ref{fig:exp3_plot_days_time_struc}D)}'), 
+                            
+                            'Unbiased' =  c('All cells', 
+                                           'All cells', 
+                                           'All cells', 
+                                           '\\thead[lt]{\\textbf{NM $\\boldsymbol{\\ge}$ 9 with \\textit{N} $\\ge$ 200}}'),
+                            
+                            'Precise' = c('All cells', 
+                                           'NM $\\ge$ 9 with \\textit{N} = 500', 
+                                           'No cells',
+                                           'No cells'), 
+                            
+                            'Qualitative Description' = c('Unbiased and precise estimation in all cells', 
+
+                                                      '\\thead[lt]{Largest improvements in precision \\\\ 
+                                                      using \\textbf{NM = 7 with \\textit{N} $\\ge$ 200} or \\\\
+                                                      \\textbf{NM = 9 with \\textit{N} $\\le$ 100}}', 
+                                                     
+                                                      'Largest improvements in precision with NM = 7',
+                                                     
+                                                      '\\thead[lt]{Largest improvements in bias and \\\\
+                                                      precision using NM = 7 with \\textit{N} $\\ge$ 200 or \\\\
+                                                      NM = 9 with \\textit{N} $\\le$ 100}'),
+                            
+                            'Error Bar Length' = errorbar_lengths,
+                            
+                            check.names = F)
+
+kbl(x = summary_table, format = 'latex',
+       longtable = T, booktabs = T, centering = T, escape = F,
+       align = c('l', rep('l', times = ncol(summary_table) - 1)), 
+    caption = 'Concise Summary of Results for Time-Structured Data in Experiment 3') %>%
+  #header
+     column_spec(column = 1, width = '3cm') %>%
+  column_spec(column = 2, width = '5cm') %>%
+  column_spec(column = 3, width = '5cm') %>%
+  column_spec(column = 4, width = '6.5cm') %>%
+  column_spec(column = 5, width = '3cm') %>%
+  add_header_above(header = c(' ' = 3, 'Description' = 2)) %>%
+  footnote(escape = F, threeparttable = T, general_title = '',
+           general = "\\\\textit{Note. }Text in the `Unbiased' and `Precise' columns indicates the measurement number-sample size pairings that, respectively, result in unbiased and precise estimation. Emboldened text in the `Unbiased' and `Qualitative Description' columns indicates the number of measurements needed to, respectively, obtain unbiased estimates and the greatest improvements in bias and precision across all day-unit parameters (acceptable precision not achieved in the estimation of all day-unit parameters with equal spacing). `Error Bar Length' column indicates the maximum error bar length that results from using the measurement number-sample size recommendation listed in the `Qualitative Description' column. Parameter names and population values are as follows: $\\\\upbeta_{fixed}$ = fixed-effect days-to-halfway elevation parameter = 180; $\\\\upgamma_{fixed}$ = fixed-effect halfway-triquarter delta parameter = 20; $\\\\upbeta_{random}$ = random-effect days-to-halfway elevation parameter = 10; $\\\\upgamma_{random}$ = random-effect halfway-triquarter delta parameter = 4. NM = number of measurements.") %>% 
+  kable_styling(position = 'left') %>%
+  landscape(margin = '2.54cm')
+```
+
+##### Bias {#bias-time-struc-exp3}
+
+Before presenting the results for bias, I provide a description of the set of parameter estimation plots shown in Figure \ref{fig:exp3_plot_days_time_struc} and in the results sections for the other spacing schedules in Experiment 2. Figure \ref{fig:exp3_plot_days_time_struc} shows the parameter estimation plots for each day-unit parameter and Table \ref{tab:omega-exp2-equal} provides the partial $\upomega^2$ values for each independent variable of each day-unit parameter. In Figure \ref{fig:exp3_plot_days_time_struc}, blue horizontal lines indicate the population values for each parameter (with population values of $\upbeta_{fixed}$ = 180.00, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, and $\upgamma_{random}$ = 4.00). Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin. Error bars represent the middle 95% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Panels A--B show the parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters ($\upbeta_{fixed}$ and $\upbeta_{random}$, respectively). Panels C--D show the parameter estimation plots for the fixed- and random-effect triquarter-halfway delta parameters ($\upgamma_{fixed}$ and $\upgamma_{random}$, respectively). Note that random-effect parameter units are in standard deviation units.
+
+With respect to bias for time-structured data, estimates are biased (i.e., above the acceptable 10% cutoff) for each day-unit parameter in the following cells:
+
+* fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp3_plot_days_time_struc}A): no cells. 
+* fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp3_plot_days_time_struc}B): no cells.
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp3_plot_days_time_struc}C): no cells. 
+* random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$; Figure \ref{fig:exp3_plot_days_time_struc}D): five and seven measurements across all sample sizes and nine and 11 measurements with $N \le 100$.
+
+In summary, with time-structured data, estimation of all the day-unit parameters across all manipulated nature-of-change values is unbiased using at least nine measurements with $N \ge 200$, which is indicated by the emboldened text in the 'Unbiased' column of Table \ref{tab:summary-table-time-struc-exp3}. 
+
+```{r figure-time-struc-exp3, include=F, eval=F}
+generate_day_likert_facet_plot(analytical_data = exp_3_analytical, 
+                               target_col = 'time_structuredness', target_value = 'Time structured',
+                                                              x_axis_name = expression("Sample Size ("*italic(N)*")"), 
+
+                               x_axis_var = 'sample_size', exp_num = 'exp3_', beta_lower = 160, beta_upper = 210,
+                                beta_ticks = 5)
+```
+
+```{=tex}
+\begin{apaFigure}
+[portrait]
+[samepage]
+[-0.2cm]
+{Parameter Estimation Plots for Day-Unit Parameters With Time-Structured Data in Experiment 3}
+{exp3_plot_days_time_struc}
+{0.165}
+{Figures/exp3_plot_days_time structured}
+{Panel A: Parameter estimation plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Parameter estimation plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Parameter estimation plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Parameter estimation plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed}$ = 180.00, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3} for specific values estimated for each parameter and Table \ref{tab:omega-exp3-time-struc} for $\upomega^2$ effect size values.}
+\end{apaFigure}
+```
+
+```{r omega-exp3-time-struc, echo=F}
+print_bias_var_omega_table(exp_data = exp_3_raw, target_col = 'time_structuredness', target_value = 'time_structured', 
+ind_vars = c('number_measurements', 'sample_size'), 
+ind_var_acronyms = c('NM', 'S', 'NM x S'), 
+caption = 'Partial $\\upomega^2$ Values for Manipulated Variables With Time-Structured Data in Experiment 3',
+footnote = 'NM = number of measurements (5, 7, 9, 11), S = sample size (30, 50, 100, 200, 500, 100), NM x S = interaction between number of measurements and sample size.', 
+parameter_labels = c('$\\upbeta_{fixed}$ (Figure \\ref{fig:exp3_plot_days_time_struc}A)',
+                     '$\\upbeta_{random}$ (Figure \\ref{fig:exp3_plot_days_time_struc}B)',
+                     '$\\upgamma_{fixed}$ (Figure \\ref{fig:exp3_plot_days_time_struc}C)',
+                     '$\\upgamma_{random}$ (Figure \\ref{fig:exp3_plot_days_time_struc}D)'))
+
+```
+
+##### Precision {#precision-time-struc-exp3}
+
+With respect to precision for time-structured data, estimates are imprecise (i.e., error bar length with at least one whisker length exceeding 10% of a parameter's population value) in the following cells for each day-unit parameter: 
+
+* fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp3_plot_days_time_struc}A): no cells. 
+* fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp3_plot_days_time_struc}B): five and seven measurements across all sample sizes and nine and 11 measurements with $N \le 200$.
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp3_plot_days_time_struc}C): all cells. 
+* random-effect halfway-triquarter delta parameter [$\upgamma_{random}$] in Figure \ref{fig:exp3_plot_days_time_struc}D): all cells. 
+
+In summary, with time-structured data, precise estimation can be obtained for the fixed-effect day-unit parameters using at least nine measurements with $N \ge 500$, but no manipulated measurement number-sample size pairing results in precise estimation of the random-effect day-unit parameters (see the 'Precise' column of Table \ref{tab:summary-table-time-struc-exp3}). 
+
+
+##### Qualitative Description {#qualitative-time-struc-exp3}
+
+For time-structured data in Figure \ref{fig:exp3_plot_days_time_struc},  although no manipulated measurement number results in precise estimation of all the day-unit parameters, the largest improvements in precision (and bias) result from using moderate measurement number-sample size pairings. With respect to bias under time-structured data, the largest improvements in bias result with the following measurement number-sample size pairings for the random-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): 
+
+* random-effect triquarter-halfway delta parameter ($\upgamma_{random}$): seven measurements with $N \ge 100$ or nine measurements with $N \le 50$. 
+
+\noindent With respect to precision under time-structured data, the largest improvements in precision for the estimation of all the day-unit parameters (except the fixed-effect days-to-halfway elevation parameter [$\upbeta_{fixed}$]) result from using the following measurement number-sample size pairings:
+
+* fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths[2]` days. 
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): seven measurements across all manipulated sample sizes, which which results in a error bar length of `r errorbar_lengths[3]` days.
+* random-effect triquarter-halfway delta parameter ($\upgamma_{random}$):  seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths[4]` days.
+
+For an applied researcher, one plausible question might be what measurement number-sample size pairing(s) results in the greatest improvements in bias and precision in the estimation of all day-unit parameters with time-structured data. In looking across the measurement number-sample size pairings in the above lists, it becomes apparent that greatest improvements in bias and precision in the estimation of all day-unit parameters result with the following measurement number-sample size pairing(s): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$ (see the emboldened text in the 'Qualitative Description' column of Table \ref{tab:summary-table-time-struc-exp3}).
+
+#### Summary of Results
+
+In summarizing the results for time-structured data, estimation of all day-unit parameters is unbiased using least nine measurements with $N \ge 200$ (see [bias](#bias-time-struc-exp3)). Precise estimation is never obtained in the estimation of all day-unit parameters with any manipulated measurement number-sample size pairing (see [precision](#precision-time-struc-exp3)). Although it may be discouraging that no manipulated measurement number-sample size pairing under equal spacing results in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters are obtained with moderate measurement number-sample size pairings. With time-structured data, the largest improvements in bias and precision in the estimation of all day-unit parameters are obtained using seven measurements with $N \ge 200$ or nine measurements with $N \le 100$ (see [qualitiative description](#qualitative-time-struc-exp3)). 
+
+
+### Time-Unstructured Data Characterized by a Fast Response Rate
+
+For time-unstructured data characterized by a fast response rate, Table \ref{tab:summary-table-fast-exp3} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp3_plot_days_fast} for the corresponding parameter estimation plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-fast-exp3} and provide elaboration when necessary (for a description of Table \ref{tab:summary-table-fast-exp3}, see [concise summary](#concise-example-exp3)). 
+
+
+```{r summary-table-fast-exp3, echo=F}
+
+errorbar_lengths_nm5_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3_analytical$days, iv_level = 'fast response', num_measurements = 5, sample_size = 30)
+
+errorbar_lengths_nm9_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3_analytical$days, iv_level = 'fast response', num_measurements = 9, sample_size = 30)
+errorbar_lengths_nm7_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3_analytical$days, iv_level = 'fast response', num_measurements = 7, sample_size = 30)
+
+
+errorbar_lengths <- c(paste(errorbar_lengths_nm5_s30$errorbar_length[1]), 
+                      paste(errorbar_lengths_nm9_s30$errorbar_length[2]), 
+                      paste(errorbar_lengths_nm7_s30$errorbar_length[3]), 
+                      paste(errorbar_lengths_nm9_s30$errorbar_length[4]))
+                    
+summary_table <- data.frame('Parameter' = c('\\thead[lt]{$\\upbeta_{fixed}$ \\\\ (Figure \\ref{fig:exp3_plot_days_fast}A)}',
+                                            '\\thead[lt]{$\\gamma_{fixed}$ \\\\  (Figure \\ref{fig:exp3_plot_days_fast}B)}', 
+                                            '\\thead[lt]{$\\upbeta_{random}$ \\\\ (Figure \\ref{fig:exp3_plot_days_fast}C)}', 
+                                            '\\thead[lt]{$\\upgamma_{random}$ \\\\ (Figure \\ref{fig:exp3_plot_days_fast}D)}'), 
+                            
+                            'Unbiased' = c('All cells', 
+                                           'All cells', 
+                                           'All cells', 
+                                          '\\thead[lt]{
+                                            \\textbf{NM $\\ge$ 7 with \\textit{N} = 1000} or \\\\
+                                            \\textbf{NM $\\ge$ 9 with \\textit{N} $\\ge$ 200} or \\\\
+                                            \\textbf{NM = 11 with \\textit{N} = 100}}'),
+
+                            'Precise' = c('All cells', 
+                                          'NM $\\ge$ 9 with \\textit{N} $\\ge$ 500',
+                                          'No cells',
+                                          'No cells'), 
+                            
+                            'Qualitative Description' = c('Unbiased and precise estimation in all cells', 
+
+                                                      '\\thead[lt]{Largest improvements in precision \\\\ 
+                                                      using \\textbf{NM = 7 with \\textit{N} $\\ge$ 200} or \\\\
+                                                      \\textbf{NM = 9 with \\textit{N} $\\le$ 100}}', 
+                                                     
+                                                      'Largest improvements in precision with NM = 7',
+                                                     
+                                                      '\\thead[lt]{Largest improvements in bias and \\\\
+                                                      precision using NM = 7 with \\textit{N} $\\ge$ 200 \\\\
+                                                      or NM = 9 with \\textit{N} $\\le$ 100}'),
+                            
+                            'Error Bar Length' = errorbar_lengths,
+                            
+                          
+                            check.names = F)
+
+kbl(x = summary_table, format = 'latex',
+       longtable = T, booktabs = T, centering = T, escape = F,
+       align = c('l', rep('l', times = ncol(summary_table) - 1)), 
+    caption = 'Concise Summary of Results for Time-Unstructured Data (Fast Response Rate) in Experiment 3') %>%
+ #header
+     column_spec(column = 1, width = '3cm') %>%
+  column_spec(column = 2, width = '5cm') %>%
+  column_spec(column = 3, width = '5cm') %>%
+  column_spec(column = 4, width = '6.5cm') %>%
+  column_spec(column = 5, width = '3cm') %>%
+  add_header_above(header = c(' ' = 3, 'Description' = 2)) %>%
+  footnote(escape = F, threeparttable = T, general_title = '',
+           general = "\\\\textit{Note. }Text in the `Unbiased' and `Precise' columns indicates the measurement number-sample size pairings that, respectively, result in unbiased and precise estimation. Emboldened text in the `Unbiased' and `Qualitative Description' columns indicates the number of measurements needed to, respectively, obtain unbiased estimates and the greatest improvements in bias and precision across all day-unit parameters (acceptable precision not achieved in the estimation of all day-unit parameters with equal spacing). `Error Bar Length' column indicates the maximum error bar length that results from using the measurement number-sample size recommendation listed in the `Qualitative Description' column. Parameter names and population values are as follows: $\\\\upbeta_{fixed}$ = fixed-effect days-to-halfway elevation parameter = 180; $\\\\upgamma_{fixed}$ = fixed-effect halfway-triquarter delta parameter = 20; $\\\\upbeta_{random}$ = random-effect days-to-halfway elevation parameter = 10; $\\\\upgamma_{random}$ = random-effect halfway-triquarter delta parameter = 4. NM = number of measurements.") %>% 
+  kable_styling(position = 'left') %>%
+  landscape(margin = '2.54cm')
+
+```
+
+
+##### Bias {#bias-fast-exp3}
+
+With respect to bias for time-unstructured data characterized by a fast response rate, estimates are biased (i.e., above the acceptable 10% cutoff) for each day-unit parameter in the following cells:
+
+* fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp3_plot_days_fast}A): no cells. 
+* fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp3_plot_days_fast}B): no cells.
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp3_plot_days_fast}C): no cells. 
+* random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$; Figure \ref{fig:exp3_plot_days_fast}D): five measurements across all sample sizes, seven measurements with $N \le 500$, nine measurements with $N \ge 100$, and 11 measurements with $N \le 50$.
+
+In summary, with time-unstructured data characterized by a fast response rate, estimation of all the day-unit parameters across all manipulated nature-of-change values is unbiased using at least seven measurements with $N = 1000$, nine measurements with $N \ge 200$, or 11 measurements with $N \ge 100$, which is indicated by the emboldened text in the 'Unbiased' column of Table \ref{tab:summary-table-fast-exp3}. 
+
+```{r plots-fast-response-exp3, include=F, eval=F}
+generate_day_likert_facet_plot(analytical_data = exp_3_analytical, 
+                               target_col = 'time_structuredness', target_value = 'Time unstructured (fast response)',
+                              x_axis_name = expression("Sample Size ("*italic(N)*")"), 
+                               x_axis_var = 'sample_size', exp_num = 'exp3_', beta_lower = 160, beta_upper = 210,
+                                 beta_ticks = 5)
+```
+
+```{=tex}
+\begin{apaFigure}
+[portrait]
+[samepage]
+[-0.2cm]
+{Parameter Estimation Plots for Day-Unit Parameters With Time-Unstructured Data Characterized by a Fast Response Rate in Experiment 3}
+{exp3_plot_days_fast}
+{0.165}
+{Figures/exp3_plot_days_time unstructured (fast response)}
+{Panel A: Parameter estimation plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Parameter estimation plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Parameter estimation plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Parameter estimation plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed}$ = 180.00, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3} for specific values estimated for each parameter and Table \ref{tab:omega-exp3-fast} for $\upomega^2$ effect size values.}
+\end{apaFigure}
+```
+
+```{r omega-exp3-fast, echo=F}
+print_bias_var_omega_table(exp_data = exp_3_raw, target_col = 'time_structuredness', target_value = 'fast_response', 
+ind_vars = c('number_measurements', 'sample_size'), 
+ind_var_acronyms = c('NM', 'S', 'NM x S'), 
+caption = 'Partial $\\upomega^2$ Values for Manipulated Variables With Time-Structured Data in Experiment 3',
+footnote = 'NM = number of measurements (5, 7, 9, 11), S = sample size (30, 50, 100, 200, 500, 100), NM x S = interaction between number of measurements and sample size.', 
+parameter_labels = c('$\\upbeta_{fixed}$ (Figure \\ref{fig:exp3_plot_days_fast}A)',
+                     '$\\upbeta_{random}$ (Figure \\ref{fig:exp3_plot_days_fast}B)',
+                     '$\\upgamma_{fixed}$ (Figure \\ref{fig:exp3_plot_days_fast}C)',
+                     '$\\upgamma_{random}$ (Figure \\ref{fig:exp3_plot_days_fast}D)'))
+
+```
+
+##### Precision {#precision-fast-exp3}
+
+With respect to precision for time-unstructured data characterized by a fast response rate, estimates are imprecise (i.e., error bar length with at least one whisker length exceeding 10% of a parameter's population value) in the following cells for each day-unit parameter: 
+
+* fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp3_plot_days_fast}A): no cells. 
+* fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp3_plot_days_fast}B): five and seven measurements across all sample sizes and nine and 11 measurements with $N \le 200$.
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp3_plot_days_fast}C): all cells. 
+* random-effect halfway-triquarter delta parameter [$\upgamma_{random}$] in Figure \ref{fig:exp3_plot_days_fast}D): all cells. 
+
+In summary, with time-unstructured data characterized by a fast response rate, precise estimation can be obtained for the fixed-effect day-unit parameters using at least nine measurements with $N \ge 500$, but no manipulated measurement number-sample size pairing results in precise estimation of the random-effect day-unit parameters (see the 'Precise' column of Table \ref{tab:summary-table-fast-exp3}). 
+ 
+
+##### Qualitative Description {#qualitative-fast-exp3}
+
+For time-unstructured data characterized by a fast response rate (see Figure \ref{fig:exp3_plot_days_fast}), although no manipulated measurement number results in precise estimation of all the day-unit parameters, the largest improvements in precision (and bias) result from using moderate measurement number-sample size pairings. With respect to bias under time-unstructured data characterized by a fast response rate, the largest improvements in bias result with the following measurement number-sample size pairings for the random-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): 
+
+* random-effect triquarter-halfway delta parameter ($\upgamma_{random}$): seven measurements with $N \ge 100$ or nine measurements with $N \le 50$. 
+
+\noindent With respect to precision under time-unstructured data characterized by a fast response rate, the largest improvements in precision for the estimation of all the day-unit parameters (except the fixed-effect days-to-halfway elevation parameter [$\upbeta_{fixed}$]) result from using the following measurement number-sample size pairings:
+
+* fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths[2]` days. 
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): seven measurements across all manipulated sample sizes, which which results in a error bar length of `r errorbar_lengths[3]` days.
+* random-effect triquarter-halfway delta parameter ($\upgamma_{random}$):  seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths[4]` days.
+
+For an applied researcher, one plausible question might be what measurement number-sample size pairing(s) results in the greatest improvements in bias and precision in the estimation of all day-unit parameters with time-unstructured data characterized by a fast response rate. In looking across the measurement number-sample size pairings in the above lists, it becomes apparent that greatest improvements in bias and precision in the estimation of all day-unit parameters result with the following measurement number-sample size pairing(s): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$ (see the emboldened text in the 'Qualitative Description' column of Table \ref{tab:summary-table-fast-exp3}).
+
+#### Summary of Results
+
+In summarizing the results for time-unstructured data characterized by a fast response rate, estimation of all day-unit parameters is unbiased using least seven measurements with $N = 1000$, nine measurements with $N \ge 200$, or 11 measurements with $N \ge 100$ (see [bias](#bias-fast-exp3)). Precise estimation is never obtained in the estimation of all day-unit parameters with any manipulated measurement number-sample size pairing (see [precision](#precision-fast-exp3)). Although it may be discouraging that no manipulated measurement number-sample size pairing under time-unstructured data characterized by a fast response rate results in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters are obtained with moderate measurement number-sample size pairings. With time-unstructured data characterized by a fast response rate, the largest improvements in bias and precision in the estimation of all day-unit parameters are obtained using seven measurements with $N \ge 200$ or nine measurements with $N \le 100$ (see [qualitiative description](#qualitative-fast-exp3)). 
+
+
+### Time-Unstructured Data Characterized by a Slow Response Rate
+
+For time-unstructured data characterized by a slow response rate, Table \ref{tab:summary-table-slow-exp3} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp3_plot_days_slow} for the corresponding parameter estimation plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-slow-exp3} and provide elaboration when necessary (for a description of Table \ref{tab:summary-table-slow-exp3}, see [concise summary](#concise-example-exp3)). 
+
+```{r summary-table-slow-exp3, echo=F}
+errorbar_lengths_nm5_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3_analytical$days, iv_level = 'slow response', num_measurements = 5, sample_size = 30)
+
+errorbar_lengths_nm9_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3_analytical$days, iv_level = 'slow response', num_measurements = 9, sample_size = 30)
+errorbar_lengths_nm7_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3_analytical$days, iv_level = 'slow response', num_measurements = 7, sample_size = 30)
+
+
+errorbar_lengths <- c(paste(errorbar_lengths_nm5_s30$errorbar_length[1]), 
+                      paste(errorbar_lengths_nm9_s30$errorbar_length[2]), 
+                      paste(errorbar_lengths_nm7_s30$errorbar_length[3]), 
+                      paste(errorbar_lengths_nm9_s30$errorbar_length[4]))
+
+summary_table <- data.frame('Parameter' = c('\\thead[lt]{$\\upbeta_{fixed}$ \\\\ (Figure \\ref{fig:exp3_plot_days_slow}A)}',
+                                            '\\thead[lt]{$\\gamma_{fixed}$ \\\\ (Figure \\ref{fig:exp3_plot_days_slow}B)}', 
+                                            '\\thead[lt]{$\\upbeta_{random}$ \\\\ (Figure \\ref{fig:exp3_plot_days_slow}C)}', 
+                                            '\\thead[lt]{$\\upgamma_{random}$ \\\\ (Figure \\ref{fig:exp3_plot_days_slow}D)}'), 
+                            
+                            'Unbiased' = c('All cells', 
+                                           'All cells except NM = 5 with \\textit{N} = 50', 
+                                           'No cells except NM = 5 with \\textit{N} = 30 and NM = 11 with \\textit{N} $\\le$ 50', 
+                                           'No cells'),
+                            
+                            'Precise' = c('All cells', 
+                                            '\\thead[lt]{NM = 7 with \\textit{N} = 200 or \\\\ 
+                                            NM = 9 with \\textit{N} $\\le$ 500}', 
+                                            'No cells',
+                                            'No cells'), 
+                            
+                            'Qualitative Summary' = c('Low bias and high precision in all cells', 
+
+                                                      '\\thead[lt]{Largest improvements in precision \\\\ 
+                                                      using \\textbf{NM = 7 with \\textit{N} $\\ge$ 200} or \\\\
+                                                      \\textbf{NM = 9 with \\textit{N} $\\le$ 100}}', 
+                                                     
+                                                      'Largest improvements in precision with NM = 7',
+                                                     
+                                                      '\\thead[lt]{Largest improvements in bias and \\\\
+                                                      precision using NM = 7 with \\textit{N} $\\boldsymbol{\\ge}$ 200 or \\\\
+                                                      M = 9 with \\textit{N} $\\boldsymbol{\\le}$ 100}'),
+                            
+                            'Error Bar Length' = errorbar_lengths,
+                            
+                            check.names = F)
+
+kbl(x = summary_table, format = 'latex',
+       longtable = T, booktabs = T, centering = T, escape = F,
+       align = c('l', rep('l', times = ncol(summary_table) - 1)),
+    caption = 'Concise Summary of Results for Time-Unstructured Data (Slow Response Rate) in Experiment 3') %>%
+   #header
+   column_spec(column = 1, width = '2cm') %>%
+  column_spec(column = 2, width = '5cm') %>%
+  column_spec(column = 3, width = '4cm') %>%
+  column_spec(column = 4, width = '6.5cm') %>%
+  column_spec(column = 5, width = '2.5cm') %>%
+add_header_above(header = c(' ' = 3, 'Summary' = 2)) %>%
+   footnote(escape = F, threeparttable = T, general_title = '\\\\textit{Note.}\\\\hspace{-1.1pc}',
+           general = "Bolded text in the `Low Bias' and `Qualitative Summary' columns indicates the measurement number-sample size pairing needed to, respectively, achieve low bias and the greatest improvements in bias and precision across all day-unit parameters (high precision not achieved in the estimation of all day-unit parameters with time-unstructured data characterized by a slow response rate). `Error Bar Length' indicates the longest error bar length that results from using the measurement number-sample size pairings in the `Qualitative Summary` column. Parameter names and population values are as follows: $\\\\upbeta_{fixed}$ = fixed-effect days-to-halfway elevation parameter = 180; $\\\\upgamma_{fixed}$ = fixed-effect halfway-\\\\newline triquarter delta parameter = 20; $\\\\upbeta_{random}$ = random-effect days-to-halfway elevation parameter = 10; $\\\\upgamma_{random}$ = random-effect halfway-triquarter delta parameter = 4.") %>%
+  kable_styling(position = 'left') %>%
+  kable_styling(position = 'left') %>%
+  landscape(margin = '2.54cm')
+```
+
+
+##### Bias {#bias-slow-exp3}
+
+With respect to bias for time-unstructured data characterized by a slow response rate, estimates are biased (i.e., above the acceptable 10% cutoff) for each day-unit parameter in the following cells:
+
+* fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp3_plot_days_slow}A): no cells. 
+* fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp3_plot_days_slow}B): no cells.
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp3_plot_days_slow}C): no cells. 
+* random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$; Figure \ref{fig:exp3_plot_days_slow}D): five measurements across all sample sizes, seven measurements with $N \le 500$, nine measurements with $N \ge 100$, and 11 measurements with $N \le 50$.
+
+In summary, with time-unstructured data characterized by a slow response rate, estimation of all the day-unit parameters across all manipulated nature-of-change values is unbiased using at least seven measurements with $N = 1000$, nine measurements with $N \ge 200$, or 11 measurements with $N \ge 100$, which is indicated by the emboldened text in the 'Unbiased' column of Table \ref{tab:summary-table-slow-exp3}. 
+
+```{r plots-slow-response-exp3, include=F, eval=F}
+generate_day_likert_facet_plot(analytical_data = exp_3_analytical, 
+                               target_col = 'time_structuredness', target_value = 'Time unstructured (slow response)',
+                              x_axis_name = expression("Sample Size ("*italic(N)*")"), 
+                               x_axis_var = 'sample_size', exp_num = 'exp3_', beta_lower = 160, beta_upper = 210,
+                                 beta_ticks = 5)
+```
+
+```{=tex}
+\begin{apaFigure}
+[portrait]
+[samepage]
+[-0.2cm]
+{Parameter Estimation Plots for Day-Unit Parameters With Time-Unstructured Data Characterized by a Slow Response Rate in Experiment 3}
+{exp3_plot_days_slow}
+{0.165}
+{Figures/exp3_plot_days_time unstructured (slow response)}
+{Panel A: Parameter estimation plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Parameter estimation plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Parameter estimation plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Parameter estimation plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed}$ = 180.00, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3} for specific values estimated for each parameter and Table \ref{tab:omega-exp3-slow} for $\upomega^2$ effect size values.}
+\end{apaFigure}
+```
+
+```{r omega-exp3-slow, echo=F}
+print_bias_var_omega_table(exp_data = exp_3_raw, target_col = 'time_structuredness', target_value = 'fast_response', 
+ind_vars = c('number_measurements', 'sample_size'), 
+ind_var_acronyms = c('NM', 'S', 'NM x S'), 
+caption = 'Partial $\\upomega^2$ Values for Manipulated Variables With Time-Unstructured Data Characterized by a Slow Response Rate in Experiment 3',
+footnote = 'NM = number of measurements (5, 7, 9, 11), S = sample size (30, 50, 100, 200, 500, 100), NM x S = interaction between number of measurements and sample size.', 
+parameter_labels = c('$\\upbeta_{fixed}$ (Figure \\ref{fig:exp3_plot_days_slow}A)',
+                     '$\\upbeta_{random}$ (Figure \\ref{fig:exp3_plot_days_slow}B)',
+                     '$\\upgamma_{fixed}$ (Figure \\ref{fig:exp3_plot_days_slow}C)',
+                     '$\\upgamma_{random}$ (Figure \\ref{fig:exp3_plot_days_slow}D)'))
+
+```
+
+##### Precision {#precision-slow-exp3}
+
+With respect to precision for time-unstructured data characterized by a slow response rate, estimates are imprecise (i.e., error bar length with at least one whisker length exceeding 10% of a parameter's population value) in the following cells for each day-unit parameter: 
+
+* fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp3_plot_days_slow}A): no cells. 
+* fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp3_plot_days_slow}B): five and seven measurements across all sample sizes and nine and 11 measurements with $N \le 200$.
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp3_plot_days_slow}C): all cells. 
+* random-effect halfway-triquarter delta parameter [$\upgamma_{random}$] in Figure \ref{fig:exp3_plot_days_slow}D): all cells. 
+
+In summary, with time-unstructured data characterized by a slow response rate, precise estimation can be obtained for the fixed-effect day-unit parameters using at least nine measurements with $N \ge 500$, but no manipulated measurement number-sample size pairing results in precise estimation of the random-effect day-unit parameters (see the 'Precise' column of Table \ref{tab:summary-table-slow-exp3}). 
+
+
+##### Qualitative Description {#qualitative-slow-exp3}
+
+For time-unstructured data characterized by a slow response rate (see Figure \ref{fig:exp3_plot_days_slow}), although no manipulated measurement number results in precise estimation of all the day-unit parameters, the largest improvements in precision (and bias) result from using moderate measurement number-sample size pairings. With respect to bias under time-unstructured data characterized by a slow response rate, the largest improvements in bias result with the following measurement number-sample size pairings for the random-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): 
+
+* random-effect triquarter-halfway delta parameter ($\upgamma_{random}$): seven measurements with $N \ge 100$ or nine measurements with $N \le 50$. 
+
+\noindent With respect to precision under time-unstructured data characterized by a slow response rate, the largest improvements in precision for the estimation of all the day-unit parameters (except the fixed-effect days-to-halfway elevation parameter [$\upbeta_{fixed}$]) result from using the following measurement number-sample size pairings:
+
+* fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths[2]` days. 
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): seven measurements across all manipulated sample sizes, which which results in a error bar length of `r errorbar_lengths[3]` days.
+* random-effect triquarter-halfway delta parameter ($\upgamma_{random}$): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths[4]` days.
+
+For an applied researcher, one plausible question might be what measurement number-sample size pairing(s) results in the greatest improvements in bias and precision in the estimation of all day-unit parameters with time-unstructured data characterized by a fast response rate. In looking across the measurement number-sample size pairings in the above lists, it becomes apparent that greatest improvements in bias and precision in the estimation of all day-unit parameters result with the following measurement number-sample size pairing(s): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$ (see the emboldened text in the 'Qualitative Description' column of Table \ref{tab:summary-table-slow-exp3}).
+
+#### Summary of Results
+
+In summarizing the results for time-unstructured data characterized by a slow response rate, estimation of all day-unit parameters is least seven measurements with $N = 1000$, nine measurements with $N \ge 200$, or 11 measurements with $N \ge 100$ (see [bias](#bias-slow-exp3)). Precise estimation is never obtained in the estimation of all day-unit parameters with any manipulated measurement number-sample size pairing (see [precision](#precision-slow-exp3)). Although it may be discouraging that no manipulated measurement number-sample size pairing under time-unstructured data characterized by a slow response rate results in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters are obtained with moderate measurement number-sample size pairings. With time-unstructured data characterized by a slow response rate, the largest improvements in bias and precision in the estimation of all day-unit parameters are obtained using seven measurements with $N \ge 200$ or nine measurements with $N \le 100$ (see [qualitiative description](#qualitative-slow-exp3)). 
+
+
+### How Does Time Structuredness Affect Modelling Accuracy?
+
+## Summary 
+
 

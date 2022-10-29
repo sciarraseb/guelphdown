@@ -1,6 +1,0 @@
-\contentsline {chapter}{\titlecap {abstract}}{ii}{Doc-Start}%
-\contentsline {chapter}{\titlecap {dedication}}{iii}{Doc-Start}%
-\contentsline {chapter}{\titlecap {acknowledgements}}{iv}{Doc-Start}%
-\contentsline {chapter}{Table of Contents}{v}{section*.1}%
-\contentsline {chapter}{List of Tables}{vi}{section*.2}%
-\contentsline {chapter}{List of Figures}{vii}{section*.3}%

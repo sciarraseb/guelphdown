@@ -20,7 +20,7 @@
 %% Preamble
 \documentclass[
 $fontsize$, % The default document font size, options: 10pt, 11pt, 12pt
-oneside,
+twoside,
 english]{guelphthesis}
 
 %----------------------------------------------------------------------------------------
@@ -72,35 +72,19 @@ $endif$
 $if(field)$
 \field{$field$}
 $endif$
-
-
 \department{$department$}
 
-% Added by CII
-%%% Copied from knitr
-%% maxwidth is the original width if it's less than linewidth
-%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
-\makeatletter
-\def\maxwidth{ %
-  \ifdim\Gin@nat@width>\linewidth
-    \linewidth
-  \else
-    \Gin@nat@width
-  \fi
-}
-\makeatother
 
 % From {rticles}
 $if(csl-refs)$
-\newlength{\csllabelwidth}
-\setlength{\csllabelwidth}{3em}
 \newlength{\cslhangindent}
-\setlength{\cslhangindent}{1.5em}
+\setlength{\cslhangindent}{1cm} %indentation of hanging lines
 % for Pandoc 2.8 to 2.10.1
 \newenvironment{cslreferences}%
   {$if(csl-hanging-indent)$\setlength{\parindent}{0pt}%
   \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces$endif$}%
   {\par}
+
 % For Pandoc 2.11+
 % As noted by @mirh [2] is needed instead of [3] for 2.12
 \newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
@@ -110,24 +94,47 @@ $if(csl-refs)$
   \ifodd #1 \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces\fi
   % set entry spacing
   \ifnum #2 > 0
-  \setlength{\parskip}{#2\baselineskip}
+  \setlength{\parskip}{\linespacing{$linespacing$}}
   \fi
  }%
  {}
-\usepackage{calc} % for calculating minipage widths
-\newcommand{\CSLBlock}[1]{#1\hfill\break}
-\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
-\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}}
-\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+$endif$
+
+
+
+\urlstyle{rm}
+$if(ArialFont)$
+  \urlstyle{sf}
 $endif$
 
 %----------------------------------------------------------------------------------------
 % CUSTOM COMMANDS
 %----------------------------------------------------------------------------------------
+%numbers lines before equations
+%taken from https://tex.stackexchange.com/questions/43648/why-doesnt-lineno-number-a-paragraph-when-it-is-followed-by-an-align-equation
+\newcommand*\patchAmsMathEnvironmentForLineno[1]{%
+  \expandafter\let\csname old#1\expandafter\endcsname\csname #1\endcsname
+  \expandafter\let\csname oldend#1\expandafter\endcsname\csname end#1\endcsname
+  \renewenvironment{#1}%
+     {\linenomath\csname old#1\endcsname}%
+     {\csname oldend#1\endcsname\endlinenomath}}%
+\newcommand*\patchBothAmsMathEnvironmentsForLineno[1]{%
+  \patchAmsMathEnvironmentForLineno{#1}%
+  \patchAmsMathEnvironmentForLineno{#1*}}%
+\AtBeginDocument{%
+\patchBothAmsMathEnvironmentsForLineno{equation}%
+\patchBothAmsMathEnvironmentsForLineno{align}%
+\patchBothAmsMathEnvironmentsForLineno{flalign}%
+\patchBothAmsMathEnvironmentsForLineno{alignat}%
+\patchBothAmsMathEnvironmentsForLineno{gather}%
+\patchBothAmsMathEnvironmentsForLineno{multline}%
+}
+
+
 %nest all the \frontmatter functions in \oldfrontmatter, which allows us to redefine \frontmatter as everything it was with one modification to the
 %draft watermark
 \let\oldfrontmatter\frontmatter
-%set page numbering to bottom center for \mainmatter
+%set page numbering to bottom center for \frontmatter
 \fancypagestyle{frontmatter}{%
  \fancyhf{}% clear all header and footer fields
   \renewcommand{\headrulewidth}{0pt}
@@ -159,9 +166,22 @@ $endif$
   \renewcommand{\headrulewidth}{0pt}
   \fancyfoot[C]{\arabic{page}}% Roman page number in footer centre
 
+  \hypersetup{pdfpagemode={UseOutlines},
+    bookmarksopen=true,
+    hypertexnames=true,
+    colorlinks = true,
+    citecolor = blue,
+    linkcolor = $linkcolor$,
+    urlcolor= blue,
+    anchorcolor = blue,
+    pdfstartview={FitV},
+    breaklinks=true}
+
   $if(ArialFont)$
    \fancyfoot[C]{\sffamily\arabic{page}}
   $endif$
+
+
 }
 
 %nest all the \mainmatter functions in \oldmainmatter, which allows us to redefine \mainmatter as everything it was with one modification to the
@@ -186,8 +206,18 @@ $endif$
     \linenumbers
   $endif$
 
-
   \pagestyle{mainmatter} % add this to center page numbers
+
+}
+
+%code below is important for linespacing to remain unaffected when kableExtra::landscape() is used andthe margin is specifically defined. Otherwise,
+%linespacing for entire document goes to singlespacing for the text that follows the table.
+\let\oldRestoreGeometry\restoregeometry
+\renewcommand{\restoregeometry}{
+  \oldRestoreGeometry
+
+  %change line spacing if specified in YAML header
+  \setMainMatterLinespacing
 }
 
 %change footnote and page number font to arial if desired
@@ -328,10 +358,9 @@ $endif$
 %----------------------------------------------------------------------------------------
 % LIST OF APPENDICES
 %----------------------------------------------------------------------------------------
-
 \newcommand{\listappname}{List of Appendices}
 \newlistof[chapter]{app}{loa}{\listappname} %creates a new appendix counter that will be reset at the start of each \chapter
-\setcounter{loadepth}{2} %loa will only go to depth of level 2
+\setcounter{loadepth}{5} %loa will  go to depth of level 5
 \setlength{\cftbeforeloatitleskip}{0cm} %remove vertical space above loa
 \setlength{\cftafterloatitleskip}{0.5cm} %space between title for loa and list entries
 \renewcommand{\cftmarkloa}{} %remove header titles
@@ -347,20 +376,24 @@ $endif$
 \renewcommand{\cftappfont}{\mdseries} %set font for level 0 entry in loa
 \renewcommand{\cftapppagefont}{\mdseries} %set front for page numbers
 
-
 \renewcommand{\cftapppresnum}{Appendix\space}
 \renewcommand{\cftappaftersnum}{:\space}
+\settowidth{\cftappnumwidth}{\cftapppresnum\theapp\cftappaftersnum\space}
 
 \setlength{\cftbeforeappskip}{0cm} %removes vertical spacing before each chapter element
 \renewcommand{\cftappafterpnum}{\vskip6pt}
 
 %updates appendix counter, modifies chapter title such so that it is Appendix _letter_: #1
 \newcommand{\app}[1]{%
-  \refstepcounter{app}%
+  \refstepcounter{app}\pdfbookmark[-1]{\cftapppresnum\theapp\cftappaftersnum#1}{#1\theapp}%
   \chapter*{\fontsize{16}{16}\selectfont\bfseries\cftapppresnum\theapp\cftappaftersnum #1} %formats entry in document
   \addcontentsline{loa}{app}{{\cftapppresnum\theapp\cftappaftersnum}#1}%
   \par
 }
+
+% figure and table counting in appendix
+\usepackage{chngcntr}
+
 
 %leading dots for appendix (end immediately before page number)
 \renewcommand{\cftappfillnum}[1]{%
@@ -374,16 +407,17 @@ $endif$
 \renewcommand{\cftsecapppagefont}{\mdseries} %set front for page numbers
 
 \renewcommand{\cftsecapppresnum}{} %remove word 'Appendix'
-\renewcommand{\cftsecappaftersnum}{\hspace{1.55em}}  %replicate toc format for sub-level-0 headers \thesubappendix (i.e., A.1   title )
+\renewcommand{\cftsecappaftersnum}{\hspace{0.5cm}}  %replicate toc format for sub-level-0 headers \thesubappendix (i.e., A.1   title )
 
 \setlength{\cftbeforesecappskip}{0cm} %removes vertical spacing before each chapter element
 \renewcommand{\cftsecappafterpnum}{\vskip6pt}
 \setlength{\cftsecappindent}{1.55em} %indentation in loa
+\settowidth{\cftsecappnumwidth}{\cftsecapppresnum\thesecapp\cftsecappaftersnum\hspace{0.3cm}}
 
 %updates appendix counter, modifies chapter title such so that it is Appendix _letter_: #1
 \newcommand{\secapp}[1]{%
-  \refstepcounter{secapp}%
-  \section*{\fontsize{14}{14}\selectfont\bfseries\thesecapp\hspace{0.3cm} #1}%
+  \refstepcounter{secapp}\pdfbookmark[0]{#1}{#1\thesubapp}%
+  \section*{\thesecapp\hspace{0.3cm} #1} %spacing between section number and title in text
   \addcontentsline{loa}{secapp}{{\thesecapp\cftsecappaftersnum}#1}%
   \par
 }
@@ -393,6 +427,7 @@ $endif$
  {\cftsecappleader}\nobreak{\cftsecapppagefont #1}\par\cftsecappafterpnum
 }
 
+
 %SUBAPPENDIX (level 2; format A.1.1 : title)
 \newlistentry[app]{subapp}{loa}{1}
 \renewcommand{\thesubapp}{\thesecapp.\arabic{subapp}}
@@ -400,15 +435,17 @@ $endif$
 \renewcommand{\cftsubapppagefont}{\mdseries} %set front for page numbers
 
 \renewcommand{\cftsubapppresnum}{} %remove word 'Appendix'
-\renewcommand{\cftsubappaftersnum}{\hspace{1.55em}}  %replicate toc format for sub-level-0 headers \thesubappendix (i.e., A.1   title )
+\renewcommand{\cftsubappaftersnum}{\hspace{0.5cm}}  %replicate toc format for sub-level-0 headers \thesubappendix (i.e., A.1   title )
 
 \setlength{\cftbeforesubappskip}{0cm} %removes vertical spacing before each chapter element
 \renewcommand{\cftsubappafterpnum}{\vskip6pt}
 \setlength{\cftsubappindent}{3.10em} %indentation in loa
+%\renewcommand{\cftsubappnumwidth}{1.47cm}
+\settowidth{\cftsubappnumwidth}{\thesubapp\cftsubappaftersnum\hspace{0.3cm}}
 
 %updates appendix counter, modifies chapter title such so that it is Appendix _letter_: #1
 \newcommand{\subapp}[1]{%
-  \refstepcounter{subapp}%
+  \refstepcounter{subapp}\pdfbookmark[1]{#1}{#1\thesubapp}%
   \subsection*{\thesubapp\hspace{0.3cm} #1}%
   \addcontentsline{loa}{subapp}{{\thesubapp\cftsubappaftersnum}#1}%
   \par
@@ -428,15 +465,16 @@ $endif$
 
 
 \renewcommand{\cftsubsubapppresnum}{} %remove word 'Appendix'
-\renewcommand{\cftsubsubappaftersnum}{\hspace{1.55em}} %space after subsubapp title
+\renewcommand{\cftsubsubappaftersnum}{\hspace{0.5cm}}  %space after subsubapp title
 
 \setlength{\cftbeforesubsubappskip}{0cm} %removes vertical spacing before each chapter element
 \renewcommand{\cftsubsubappafterpnum}{\vskip6pt}
 \setlength{\cftsubsubappindent}{4.65em} %indentation in loa (1.55 *2)
+\settowidth{\cftsubsubappnumwidth}{\thesubsubapp\cftsubsubappaftersnum\hspace{0.3cm}}
 
 %updates appendix counter, modifies chapter title such so that it is Appendix _letter_: #1
 \newcommand{\subsubapp}[1]{%
-  \refstepcounter{subsubapp}%
+  \refstepcounter{subsubapp}\pdfbookmark[2]{#1}{#1\thesubsubapp}%
   \subsubsection*{\thesubsubapp\hspace{0.3cm} #1}%
   \addcontentsline{loa}{subsubapp}{{\thesubsubapp\cftsubsubappaftersnum}#1}%
   \par
@@ -454,15 +492,16 @@ $endif$
 \renewcommand{\cftparaapppagefont}{\mdseries} %set front for page numbers
 
 \renewcommand{\cftparaapppresnum}{} %remove word 'Appendix'
-\renewcommand{\cftparaappaftersnum}{\hspace{1.55em}} %space after paraapp title
+\renewcommand{\cftparaappaftersnum}{\hspace{0.5cm}}  %space after paraapp title
 
 \setlength{\cftbeforeparaappskip}{0cm} %removes vertical spacing before each chapter element
 \renewcommand{\cftparaappafterpnum}{\vskip6pt}
 \setlength{\cftparaappindent}{6.2em} %indentation in loa (1.55 *2)
+\settowidth{\cftparaappnumwidth}{\theparaapp\cftparaappaftersnum\hspace{0.3cm}}
 
 %updates appendix counter, modifies chapter title such so that it is Appendix _letter_: #1
 \newcommand{\paraapp}[1]{%
-  \refstepcounter{paraapp}%
+  \refstepcounter{paraapp}\pdfbookmark[3]{#1}{#1\theparaapp}%
   \paragraph*{\theparaapp\hspace{0.3cm} #1}%
   \addcontentsline{loa}{paraapp}{{\theparaapp\cftparaappaftersnum}#1}%
   \par
@@ -480,43 +519,46 @@ $endif$
 \renewcommand{\cftsubparaapppagefont}{\mdseries} %set front for page numbers
 
 \renewcommand{\cftsubparaapppresnum}{} %remove word 'Appendix'
-\renewcommand{\cftsubparaappaftersnum}{\hspace{1.55em}} %space after subparaapp title
+\renewcommand{\cftsubparaappaftersnum}{\hspace{0.5cm}}  %space after subparaapp title
 
 \setlength{\cftbeforesubparaappskip}{0cm} %removes vertical spacing before each chapter element
 \renewcommand{\cftsubparaappafterpnum}{\vskip6pt}
 \setlength{\cftsubparaappindent}{7.75em} %indentation in loa (1.55 *2)
+\settowidth{\cftsubparaappnumwidth}{\thesubparaapp\cftsubparaappaftersnum\hspace{0.3cm}}
 
 %updates appendix counter, modifies chapter title such so that it is Appendix _letter_: #1
 \newcommand{\subparaapp}[1]{%
-  \refstepcounter{subparaapp}%
+  \refstepcounter{subparaapp}\pdfbookmark[4]{#1}{#1\thesubparaapp}%
   \paragraph*{\thesubparaapp\hspace{0.3cm} #1} %paragraph is used because subparagraph has weird numbering problem
   \addcontentsline{loa}{subparaapp}{{\thesubparaapp\cftsubparaappaftersnum}#1}%
   \par
 }
 
-% SUBPARA (level 6; format A.1.1.1.1.1  title)
+%SUBSUBPARA (level 6; format A.1.1.1.1.1  title)
 \newlistentry[app]{subsubparaapp}{loa}{1}
 \renewcommand{\thesubsubparaapp}{\thesubparaapp.\arabic{subsubparaapp}}
 
 \renewcommand{\cftsubsubparaapppresnum}{} %remove word 'Appendix'
-\renewcommand{\cftsubsubparaappaftersnum}{\hspace{1.55em}} %space after subparaapp title
+\renewcommand{\cftsubsubparaappaftersnum}{\hspace{0.5cm}}  %space after subparaapp title
 
 \setlength{\cftbeforesubsubparaappskip}{0cm} %removes vertical spacing before each chapter element
 \renewcommand{\cftsubsubparaappafterpnum}{\vskip6pt}
-\setlength{\cftsubsubparaappindent}{7.75em} %indentation in loa (1.55 *2)
+\setlength{\cftsubsubparaappindent}{9.3em} %indentation in loa (1.55 *2)
+\settowidth{\cftsubsubparaappnumwidth}{\thesubsubparaapp\cftsubsubparaappaftersnum\hspace{0.3cm}}
 
 %updates appendix counter, modifies chapter title such so that it is Appendix _letter_: #1
 \newcommand{\subsubparaapp}[1]{%
-  \refstepcounter{subparaapp}%
-  \paragraph*{\thesubparaapp\hspace{0.3cm} #1} %paragraph is used because subparagraph has weird numbering problem
-  \addcontentsline{loa}{subparaapp}{{\thesubparaapp\cftsubparaappaftersnum}#1}%
+  \refstepcounter{subsubparaapp}\pdfbookmark[5]{#1}{#1\thesubsubparaapp}%
+  \subparagraph*{\thesubsubparaapp\hspace{0.3cm} #1} %paragraph is used because subparagraph has weird numbering problem
+  \addcontentsline{loa}{subsubparaapp}{{\thesubsubparaapp\cftsubsubparaappaftersnum}#1}%
   \par
 }
 
 %leading dots for appendix (end immediately before page number)
-\renewcommand{\cftsubparaappfillnum}[1]{%
- {\cftsubparaappleader}\nobreak{\cftsubparaapppagefont #1}\par\cftsubparaappafterpnum
+\renewcommand{\cftsubsubparaappfillnum}[1]{%
+ {\cftsubsubparaappleader}\nobreak{\cftsubsubparaapppagefont #1}\par\cftsubsubparaappafterpnum
 }
+
 
 
 
@@ -528,8 +570,6 @@ $endfor$
 
 % BEGIN DOCUMENT
 \begin{document}
-
-
 \frontmatter %pages will be numbered with roman numerals
 
 $if(title)$
@@ -548,12 +588,12 @@ $endif$
 
 % notice how yaml variables are indexed with dollar signs and then passed into second argument of preambleItem environments
 $if(dedication)$
-  \begin{preambleItem}{$linespacing$}{dedication}{$dedication$}
+  \begin{preambleItem}{$linespacing$}{Dedication}{$dedication$}
   \end{preambleItem}
 $endif$
 
 $if(acknowledgements)$
-   \begin{preambleItem}{$linespacing$}{acknowledgements}{$acknowledgements$}
+   \begin{preambleItem}{$linespacing$}{Acknowledgements}{$acknowledgements$}
   \end{preambleItem}
 $endif$
 
@@ -593,16 +633,13 @@ $endif$
 
 %list of appendices
 $if(loa)$
+  \addcontentsline{toc}{chapter}{\listappname}
   \listofapp
   \newpage
 $endif$
 
-
 \mainmatter % here the regular arabic numbering starts
 
-
 $body$
-
-
 
 \end{document}

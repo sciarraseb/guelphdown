@@ -8,11 +8,6 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%----------------------------------------------------------------------------------------
-%	REQUIRED PACKAGES
-%----------------------------------------------------------------------------------------
-
-
 
 %----------------------------------------------------------------------------------------
 %	CLASS DEFINITION AND PARAMETERS
@@ -31,14 +26,53 @@
 \ProcessOptions\relax
 \LoadClass{\baseclass}
 
+%----------------------------------------------------------------------------------------
+%	REQUIRED PACKAGES
+%----------------------------------------------------------------------------------------
 \usepackage{titlecaps} %capitalizes first letter of words (needed to toc entries when using \addcontentsline)
 \usepackage{titlesec}
-\usepackage{fancyhdr}
+\usepackage{fancyhdr} %needed for header and footer formatting
 \usepackage{etoolbox}
 \usepackage{multicol} %needed for multicolumn layout in abstract papge
-\usepackage[hyperfootnotes=false]{hyperref} %turn off footnote hyperlinking (doesn't work well and also not necessary)
+\usepackage[hyperfootnotes = false]{hyperref} %turn off footnote hyperlinking (doesn't work well and also not necessary)
 \usepackage[multiple, hang,flushmargin]{footmisc}  %removes indentation in footnotes
-%\renewcommand{\footnotesize}{\mdseries\fontsize{10pt}{10pt}\selectfont}%footnotesize
+\usepackage[labelfont = {bf, up}]{caption}
+\usepackage[flushleft]{threeparttable}
+\usepackage{anyfontsize} %needed for tables to take on Helvetica font
+\usepackage{textcomp} %for copyright symbol on title page
+\usepackage{longtable}
+\usepackage{makecell}
+\usepackage[section]{placeins}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage[normalem]{ulem}
+\usepackage{amsthm}
+\usepackage{amsmath} %needed for argmax
+\usepackage{bm}  %thicker bold in math
+\usepackage{upgreek}  %required for non-italic greek letters
+\usepackage{longtable,booktabs,setspace}
+\usepackage{xargs} %needed to create environments with multiple optional arguments (e.g., apaFigure)
+\usepackage{enumitem} %needed to remove spacing between list items
+\usepackage[style=authoryear]{biblatex}
+
+ % Required for customising links and the PDF
+\hypersetup{pdfpagemode={UseOutlines},
+bookmarksopen=true, %allows bookmarks in pdf
+hypertexnames=true, %enables counting when referencing to sections
+colorlinks = true, % Set to true to enable coloring links, a nice option, false to turn them off
+citecolor = blue, % The color of citations
+linkcolor = red, % The color of references to document elements (sections, figures, etc)
+urlcolor= blue,
+anchorcolor = blue, % The color of hyperlinks (URLs)
+pdfstartview={FitV},
+breaklinks=true
+}
+
+\setlist{nolistsep} %remove spacings between list items
 
 %place footnoterule definition into  new command, then modify spacing between footnoterule and footnotetext with \vskip10pt
 \let\newfootnoterule\footnoterule
@@ -75,7 +109,6 @@
 \newif\if@field
 \@fieldfalse
 
-
 \renewcommand{\title}[1]{\def\@title{#1}}
 \newcommand{\linespacing}[1]{\def \@linespacing{#1}}
 \newcommand{\Abstract}[1]{\def\@Abstract{#1}}
@@ -83,19 +116,16 @@
 \newcommand{\Dedication}[1]{\def\@Dedication{#1}}
 \newcommand{\Preface}[1]{\def\@Preface{#1}}
 
-
-
 %----------------------------------------------------------------------------------------
 %	GLOBAL SETTINGS
 %----------------------------------------------------------------------------------------
 
 \AtBeginDocument{%
-
-
-  \setlength{\parindent}{1cm} %indentation of first line of paragraphs (important to load indentfirst for first-paragraph indentation)
+  \setlength{\parindent}{1cm} %indentation of first line of paragraphs (important to load indentfirst for first-paragraph indentation
 }
 
-%necessar to define tighlist
+
+%necessary to define tighlist
 %\providecommand{\tightlist}{%
 %  \setlength{\itemsep}{0pt}
 %  \setlength{\parskip}{0pt}
@@ -179,7 +209,6 @@
  {\fontsize{12pt}{14.6pt}\selectfont}%styling; note space between number and title is a bit too large (can't figure out how to decrease it).
 }
 
-
 %----------------------------------------------------------------------------------------
 %	MARGINS
 %----------------------------------------------------------------------------------------
@@ -189,8 +218,8 @@
 \newcommand{\setGeometry}{
 \geometry{
 	paper=a4paper, % Default paper size, change to "letterpaper" for US Letter (you'll need to adjust margins after)
-	inner=2.54cm,
-	outer=2.54cm,
+	inner=2.54cm, %left
+	outer=2.54cm, %right
 	top=2.54cm,
 	bottom=3.54cm,
 	headheight=0cm, % Header height
@@ -201,8 +230,7 @@
 }
 }
 
-\setGeometry{}
-
+\setGeometry{} %set geometry in here (in preamble) so that it can be restored in document when needed
 
 
 %----------------------------------------------------------------------------------------
@@ -270,7 +298,7 @@
 %----------------------------------------------------------------------------------------
 
 \newenvironment{abstract}[2]{%
- \addcontentsline{toc}{chapter}{\titlecap{abstract}}  %adds abstract to toc
+ \addcontentsline{toc}{chapter}{\titlecap{Abstract}}  %adds abstract to toc
   \begin{center}
 
   {\fontsize{14}{14}\textbf{\selectfont ABSTRACT}}
@@ -309,7 +337,6 @@
 %----------------------------------------------------------------------------------------
 %	ACKNOWLEDGEMENTS & DEDICATION
 %----------------------------------------------------------------------------------------
-
 \newenvironment{preambleItem}[3]{  %{linespacing}{title}{contents}
 
   \setFrontmatterLinespacing{#1}
@@ -325,26 +352,111 @@
  #3
 }
 
-
 %newpages after end of each preamble entry
 \AfterEndEnvironment{preambleItem}{\newpage}
 \AfterEndEnvironment{abstract}{\newpage}
 
-
+%----------------------------------------------------------------------------------------
+%	TABLE & FIGURE FORMATTING
 %----------------------------------------------------------------------------------------
 
- % Required for customising links and the PDF
-\hypersetup{pdfpagemode={UseOutlines},
-bookmarksopen=true, %allows bookmarks in pdf
-bookmarksopenlevel=0,
-hypertexnames=true, %enables counting when referencing to sections
-colorlinks=true, % Set to true to enable coloring links, a nice option, false to turn them off
-citecolor=green, % The color of citations
-linkcolor=blue, % The color of references to document elements (sections, figures, etc)
-urlcolor=magenta, % The color of hyperlinks (URLs)
-pdfstartview={FitV},
-unicode,
-breaklinks=true
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareCaptionFont{CaptionFont}{\fontfamily{phv}} %sets caption font to sans serif font of Helvetica (used in Tables and Figures)
+\DeclareCaptionFont{titleSize}{\fontsize{11pt}{13.2pt}\fontfamily{phv}\selectfont}
+\DeclareCaptionLabelSeparator{captionSep}{\newline} %separates figure label and figure title with newlin
+\captionsetup[table]{labelfont={CaptionFont, titleSize, bf}, textfont = {it, CaptionFont, titleSize}, labelsep = captionSep, justification= raggedright, singlelinecheck=off, skip = 0pt}
+
+\AtBeginEnvironment{ThreePartTable}{\vspace{0.4cm}\par\setstretch{1.5}\fontfamily{phv}\fontsize{10.5pt}{12pt}\selectfont\relax}
+\AtBeginEnvironment{TableNotes}{\setstretch{1.5}\fontfamily{phv}\fontsize{10pt}{12pt}\selectfont}
+
+%set table line widths
+\setlength\cmidrulewidth{1pt} %line thickness of lines within table and in multi-row headers
+\setlength\lightrulewidth{1pt} %line thickness of bottom line in header
+
+
+%Figure settings
+\captionsetup[figure]{labelfont={CaptionFont, titleSize, bf}, textfont = {it, CaptionFont, titleSize},  justification= raggedright, singlelinecheck=off, labelsep = captionSep, skip = 10pt}
+\newcommand{\figurefootnote}{\raggedright\linespread{1.5}\fontfamily{phv}\fontsize{9.5pt}{11.4pt}\selectfont \textit{Note. }}
+\newcommand{\emptyfootnote}{}
+
+\raggedbottom
+
+%format figures according to apa7
+\usepackage{xparse}
+\NewDocumentEnvironment{apaFigure}{O{portrait} O{samepage} O{-0.4cm} m m m m m  O{track}} {
+
+  \vspace{1cm}
+  \def\pagelayout{#1}
+  \def\ls{landscape}
+
+  %print figure on new page if desired
+  \def\np{#2}
+  \def\npTarget{np}
+
+  \ifx\np\npTarget
+  \newpage
+  \fi
+
+  %footnote modification
+  \def\ft{#8}
+  \def\ftTarget{}
+
+   %footnote modification
+  \def\track{#9}
+  \def\cpTarget{track}
+
+  %%set distance between footnote text and bottom of figure
+  \setlength{\intextsep}{#3}
+
+  \ifx\pagelayout\ls
+
+  \begin{landscape}
+  \begin{figure}[H]
+   \ifx\track\cpTarget
+    \caption{#4}
+  \else
+   \caption[]{#4}
+  \fi
+  \label{fig:#5}
+  \includegraphics[scale = #6]{#7}
+  \end{figure}
+
+  %no footnote if empty
+  \ifx\ft\ftTarget
+  \empty
+  \else
+  \figurefootnote{#8}
+  \fi
+
+  \end{landscape}
+
+  \else
+
+  \begin{figure}[H]
+
+  \ifx\track\cpTarget
+    \caption{#4}
+  \else
+   \caption[]{#4}
+  \fi
+
+  \label{fig:#5}
+  \includegraphics[scale = #6]{#7}
+  \end{figure}
+
+  \ifx\ft\ftTarget
+  \empty
+  \else
+  \figurefootnote{#8}
+  \fi
+
+  \vspace{0.4cm}
+
+  \fi
 }
+
+
+
+
 
 

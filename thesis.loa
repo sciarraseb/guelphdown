@@ -1,7 +1,28 @@
-\contentsline {app}{{Appendix A: }Overview of Structured Latent Growth Curve}{3}{section*.5}%
-\contentsline {secapp}{{A.1\hspace {1.55em}}Level 1 header}{3}{section*.6}%
-\contentsline {subapp}{{A.1.1\hspace {1.55em}}Level 2 header}{3}{section*.7}%
-\contentsline {subsubapp}{{A.1.1.1\hspace {1.55em}}Level 3 header}{3}{section*.8}%
-\contentsline {paraapp}{{A.1.1.1.1\hspace {1.55em}}Level 4 header}{3}{section*.9}%
-\contentsline {subparaapp}{{A.1.1.1.1.1\hspace {1.55em}}Level 5 header}{3}{section*.10}%
-\contentsline {app}{{Appendix B: }Measurement schedules}{3}{section*.11}%
+\contentsline {app}{{Appendix A: }Technical Appendix A: Ergodicity and the Need to Conduct Longitudinal Research}{194}{section*.27}%
+\contentsline {app}{{Appendix B: }Technical Appendix B: Using Nonlinear Function in the Structural Equation Modelling Framework}{198}{section*.28}%
+\contentsline {secapp}{{B.1\hspace {0.5cm}}Nonlinear Latent Growth Curve Model Used to Analyze Each Generated Data Set}{198}{section*.29}%
+\contentsline {subapp}{{B.1.1\hspace {0.5cm}}Brief Review of the Latent Growth Curve Model Framework}{199}{section*.30}%
+\contentsline {subapp}{{B.1.2\hspace {0.5cm}}Fitting a Nonlinear Function in the Structural Equation Modelling Framework}{200}{section*.31}%
+\contentsline {subsubapp}{{B.1.2.1\hspace {0.5cm}}Taylor Series Approximations}{201}{section*.32}%
+\contentsline {subsubapp}{{B.1.2.2\hspace {0.5cm}}Taylor Series Approximation of the Logistic Function}{206}{section*.34}%
+\contentsline {subsubapp}{{B.1.2.3\hspace {0.5cm}}Fitting the Logistic Taylor Series Approximation Into the Structual Equation Modelling Framework}{208}{section*.35}%
+\contentsline {subsubapp}{{B.1.2.4\hspace {0.5cm}}Estimating Parameters in the Structured Latent Curve Modelling Approach}{213}{section*.36}%
+\contentsline {app}{{Appendix C: }Procedure for Generating Measurement Schedules Measurement SchedulesMeasurement Schedules}{215}{section*.37}%
+\contentsline {secapp}{{C.1\hspace {0.5cm}}Procedure for Constructing Measurement Schedules With Equal Spacing}{216}{section*.38}%
+\contentsline {secapp}{{C.2\hspace {0.5cm}}Procedure for Constructing Measurement Schedules With Time-Interval Increasing Spacing}{218}{section*.40}%
+\contentsline {secapp}{{C.3\hspace {0.5cm}}Procedure for Constructing Measurement Schedules With Time-Interval Decreasing Spacing}{221}{section*.42}%
+\contentsline {secapp}{{C.4\hspace {0.5cm}}Procedure for Constructing Measurement Schedules With Middle-and-Extreme Spacing}{224}{section*.44}%
+\contentsline {app}{{Appendix D: }Convergence Success Rates}{224}{section*.45}%
+\contentsline {app}{{Appendix E: }Complete Versions of Parameter Estimation Plots (Day- and Likert-Unit Parameters)}{227}{section*.46}%
+\contentsline {secapp}{{E.1\hspace {0.5cm}}Experiment 1}{227}{section*.47}%
+\contentsline {subapp}{{E.1.1\hspace {0.5cm}}Equal Spacing}{227}{section*.48}%
+\contentsline {subapp}{{E.1.2\hspace {0.5cm}}Time-Interval Increasing Spacing}{230}{section*.51}%
+\contentsline {subapp}{{E.1.3\hspace {0.5cm}}Time-Interval Decreasing Spacing}{233}{section*.54}%
+\contentsline {subapp}{{E.1.4\hspace {0.5cm}}Middle-and-Extreme Spacing}{236}{section*.57}%
+\contentsline {secapp}{{E.2\hspace {0.5cm}}Experiment 1}{239}{section*.60}%
+\contentsline {subapp}{{E.2.5\hspace {0.5cm}}Equal Spacing}{239}{section*.61}%
+\contentsline {subapp}{{E.2.6\hspace {0.5cm}}Time-Interval Increasing Spacing}{242}{section*.64}%
+\contentsline {subapp}{{E.2.7\hspace {0.5cm}}Time-Interval Decreasing Spacing}{245}{section*.67}%
+\contentsline {subapp}{{E.2.8\hspace {0.5cm}}Middle-and-Extreme Spacing}{248}{section*.70}%
+\contentsline {app}{{Appendix F: }Parameter Estimate Tables}{250}{section*.73}%
+\contentsline {secapp}{{F.1\hspace {0.5cm}}Experiment 1}{250}{section*.74}%
