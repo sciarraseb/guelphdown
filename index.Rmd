@@ -60,8 +60,6 @@ ArialFont: false #Times New Roman set as default if false
 fontsize: '12pt' #options: 10pt, 11pt, or 12pt (does not have to be wrapped in quotation marks)
 linespacing: 2
 linkcolor: blue
-nocite: | 
-  @timmons2015
 ---
 
 <!--
@@ -173,10 +171,7 @@ saveRDS(object = param_summary_exp_3, file = 'data/uf_param_summary_exp_3.RData'
 
 "Neither the behavior of human beings nor the activities of organizations can be defined without reference to time, and temporal aspects are critical for understanding them" [@navarro2015, p.136].
 
-The topic of time has received a considerable amount of
-attention in organizational psychology over the past 20 years. Examples
-of well-received articles published around the beginning of the 21^st^
-century discuss how investigating time is important for
+The topic of time has received considerable attention in organizational psychology over the past 20 years. Examples of well-received articles published around the beginning of the 21^st^ century discuss how investigating time is important for
 understanding patterns of change and boundary conditions of theory
 [@zaheer1999], how longitudinal research is necessary for disentangling
 different types of causality [@mitchell2001], and explicate a pattern
@@ -184,21 +179,21 @@ of organizational change [or institutionalization\; @lawrence2001].
 Since then, articles have emphasized the need to address time in
 specific areas such as performance [@fisher2008; @dalal2014], teams [@roe2012], and goal setting [@fried2004] and, more generally, throughout organizational research [@george2000; @roe2008; @ployhart2010; @sonnentag2012; @navarro2015; @shipp2015; @kunisch2017; @vantilborgh2018; @aguinis2021]. 
 
-The importance of time has also been recognized in organizational theory. In defining a theoretical contribution, @whetten1989 discussed that time must be discussed in regard to setting boundary conditions (i.e., under what circumstances does the theory apply) and in specifying relations between variables over time [see also @mitchell2001; @george2000]. Even if a considerable number of organizational theories do not adhere to the definition of @whetten1989, theoretical models in organizational psychology consist of path diagrams that delineate the causal underpinnings of a process. Given that temporal precedence is a necessary condition for establishing causality [@mill2011], time has a role, whether implicitly or explicitly, in organizational theory. 
+The importance of time has also been recognized in organizational theory. In defining a theoretical contribution, @whetten1989 discussed that time must be discussed in regard to setting boundary conditions (i.e., under what circumstances does the theory apply) and in specifying relations between variables over time [@mitchell2001; @george2000]. Even if a considerable number of organizational theories do not adhere to the definition of @whetten1989, theoretical models in organizational psychology consist of path diagrams that delineate the causal underpinnings of a process. Given that temporal precedence is a necessary condition for establishing causality [@mill2011], time has a role, whether implicitly or explicitly, in organizational theory. 
 
 (ref:maxwell2007) @maxwell2007
 (ref:roe2014) @roe2014
 (ref:mitchell2013) @mitchell2013
 
-Despite the considerable emphasis that has been placed on investigating processes over time and its ubiquity in organizational theory, the prevalence of longitudinal research has historically remained low. One study examined the prevalence of longitudinal research from 1970--2006 across five organizational psychology journals and found that 4% of articles used longitudinal designs (Roe, 2014). Another survey of two applied psychology journals in 2005 found that approximaely 10% (10 of 105 studies) of studies used longitudinal designs [@roe2008]. Similarly, two surveys of studies employing longitudinal designs with mediation analysis found that, across five journals, only about 10% (7 of 72 studies) did so in 2005 [@maxwell2007] and approximately 16% (15 of 92 studies) did so in 2006 [@mitchell2013].\footnote{Note that the definition of a longitudinal design in (ref:maxwell2007) and (ref:mitchell2013) required that measurements be taken over at least three time points so that measurements of the predictor, mediator, and outcome variables were separated over time.} Thus, the prevalence of longitudinal research has remained low. 
+Despite the considerable attention given towards investigating processes over time and its ubiquity in organizational theory, the prevalence of longitudinal research has historically remained low. One study examined the prevalence of longitudinal research from 1970--2006 across five organizational psychology journals and found that 4% of articles used longitudinal designs (Roe, 2014). Another survey of two applied psychology journals in 2005 found that approximaely 10% (10 of 105 studies) of studies used longitudinal designs [@roe2008]. Similarly, two surveys of studies employing longitudinal designs with mediation analysis found that, across five journals, only about 10% (7 of 72 studies) did so in 2005 [@maxwell2007] and approximately 16% (15 of 92 studies) did so in 2006 [@mitchell2013].\footnote{Note that the definition of a longitudinal design in (ref:maxwell2007) and (ref:mitchell2013) required that measurements be taken over at least three time points so that measurements of the predictor, mediator, and outcome variables were separated over time.} Thus, the prevalence of longitudinal research has remained low.
 
 In the six sections that follow, I will explain why longitudinal research is necessary and the factors that must be considered when conducting such research. In the first section, I will explain why conducting longitudinal research is essential for understanding the dynamics of psychological processes. In the second section, I will overview patterns of change that are likely to emerge over time. In the the third section, I will overview design and analytical issues involved in designing longitudinal studies. In the fourth section, I will explain how design and analytical issues encountered in conducting longitudinal research can be investigated. In the fifth section, I will provide a systematic review of the research that has investigated design and analytical issues involved in conducting longitudinal research. Finally, in the sixth section, I will briefly explain strategies for modelling nonlinear change. A summary of the three simulation experiments that I conducted in my dissertation will then be provided. 
 
 ## The Need to Conduct Longitudinal Research
 
-Longitudinal research provides substantial advantages over cross-sectional research. Unfortunately, researchers commonly discuss the results of cross-sectional analyses as if they have been obtained with a longitudinal design. However, cross-sectional and longitudinal analyses often produce different results. Oneexample of the assumption that cross-sectional findings are equivalent to longitudinal findings comes from the large number of studies employing mediation analysis. Given that mediation is used to understand chains of causality in psychological processes [@baron1986], it would thus make sense to pair mediation analysis with a longitudinal design because understanding causality, after all, requires temporal precedence. Unfortunately, the majority of studies that have used mediation analysis have done so using cross-sectional designs---with estimates of approximately 90% [@maxwell2007] and 84% [@mitchell2013]---and have often discussed the results as if they were longitudinal. Investigations into whether mediation results remain equivalent across cross-sectional and longitudinal designs have repeatedly concluded that using mediation analysis on cross-sectional data can return different, and sometimes completely opposite, results from using it on longitudinal data [@cole2003; @maxwell2007; @maxwell2011; @mitchell2013; @olaughlin2018]. Therefore, mediation analyses based on cross-sectional analyses may be misleading. 
+Longitudinal research provides substantial advantages over cross-sectional research. Unfortunately, researchers commonly discuss the results of cross-sectional analyses as if they have been obtained with a longitudinal design. However, cross-sectional and longitudinal analyses often produce different results. One example of the assumption that cross-sectional findings are equivalent to longitudinal findings comes from the large number of studies employing mediation analysis. Given that mediation is used to understand chains of causality in psychological processes [@baron1986], it would thus make sense to pair mediation analysis with a longitudinal design because understanding causality, after all, requires temporal precedence. Unfortunately, the majority of studies that have used mediation analysis have done so using cross-sectional designs---with estimates of approximately 90% [@maxwell2007] and 84% [@mitchell2013]---and have often discussed the results as if they were longitudinal. Investigations into whether mediation results remain equivalent across cross-sectional and longitudinal designs have repeatedly concluded that using mediation analysis on cross-sectional data can return different, and sometimes completely opposite, results from using it on longitudinal data [@cole2003; @maxwell2007; @maxwell2011; @mitchell2013; @olaughlin2018]. Therefore, mediation analyses based on cross-sectional analyses may be misleading. 
 
-The non-equivalence of cross-sectional and longitudinal results that occurs with mediation analysis is, unfortunately, not due to a specific set of circumstances that only arise with mediation analysis, but a consequence of a broader systematic cause that affects the results of almost every analysis. The concept of ergodicity explains why cross-sectional and longitudinal analyses seldom yield similar results. To understand ergodicity, it is first important to realize that variance is central to many statistical analyses---correlation, regression, factor analysis, and mediation are some examples. Thus, if variance remains unchanged across cross-sectional and longitudinal data sets, then analyses of either data set would return the same results. Importantly, variance only remains equal across cross-sectional and longitudinal data sets if two conditions put forth by ergodic theory are satisfied [homogeneity and stationarity\; @molenaar2004; @molenaar2009]. If these two conditions are met, then a process is said to be ergodic. Unfortunately, the two conditions required for ergodicity are highly unlikely to be satisfied and so cross-sectional findings will frequently deviate from longitudinal findings (see [Technical Appendix A][Technical Appendix A: Ergodicity and the Need to Conduct Longitudinal Research] for more information). 
+The non-equivalence of cross-sectional and longitudinal results that occurs with mediation analysis is, unfortunately, not due to a specific set of circumstances that only arise with mediation analysis, but a consequence of a broader systematic cause that affects the results of many analyses. The concept of ergodicity explains why cross-sectional and longitudinal analyses seldom yield similar results. To understand ergodicity, it is first important to realize that variance is central to many statistical analyses---correlation, regression, factor analysis, and mediation are some examples. Thus, if variance remains unchanged across cross-sectional and longitudinal data sets, then analyses of either data set would return the same results. Importantly, variance only remains equal across cross-sectional and longitudinal data sets if two conditions put forth by ergodic theory are satisfied [homogeneity and stationarity\; @molenaar2004; @molenaar2009]. If these two conditions are met, then a process is said to be ergodic. Unfortunately, the two conditions required for ergodicity are highly unlikely to be satisfied and so cross-sectional findings will frequently deviate from longitudinal findings (see [Technical Appendix A][Ergodicity and the Need to Conduct Longitudinal Research] for more information). 
 
 (ref:fisher2018) @fisher2018
 
@@ -253,9 +248,11 @@ In summary, researchers must contend with several issues when conducting longitu
 
 In the next section, I will present the results of the systematic review of the literature that has investigated the issues of measurement number, measurement spacing, and time structuredness. Before presenting the results of the systematic review, I will provide an overview of the Monte Carlo method used to investigate issues involved in conducting longitudinal research.  
 
-To understand how the effects of longitudinal issues on modelling accuracy can be investigated, the inferential method commonly employed in psychological research will first be reviewed with an emphasis on its shortcomings (see Figure \ref{fig:MonteCarlo-comparison}). Consider an example where a researcher wants to estimate a population mean ($\upmu$) and understand how sampling error affects the accuracy of the estimate. Using the inferential method, the researcher samples data and then estimates the population mean ($\upmu$) by computing the mean of the sampled data. Because collected samples are almost always contaminated by a variety of methodological and/or statistical deficiencies (such as sampling error, measurement error, assumption violations, etc.), the estimation of the population parameter is likely to be imperfect. Unfortunately, to estimate the effect of sampling error on the accuracy of the population mean estimate ($\upmu$), the researcher would need to know the value of the population mean; without knowing the value of the population mean, it is impossible to know how much error was incurred in estimating the population mean and, as as a result, impossible to know the extent to which sampling error contributed to this error. Therefore, a study following the inferential approach can only provide estimates of population parameters.
+To understand how the effects of longitudinal issues on modelling accuracy can be investigated, the inferential method commonly employed in psychological research will first be reviewed with an emphasis on its shortcomings (see Figure \ref{fig:MonteCarlo-comparison}). Consider an example where a researcher wants to understand how sampling error affects the accuracy with which a sample mean ($\bar{x}$) estimates a population mean ($\upmu$). Using the inferential method, the researcher samples data and then estimates the population mean ($\upmu$) by computing the mean of the sampled data ($\bar{x}_1$). Because collected samples are almost always contaminated by a variety of methodological and/or statistical deficiencies (such as sampling error, measurement error, assumption violations, etc.), the estimation of the population parameter is likely to be imperfect. Unfortunately, to estimate the effect of sampling error on the accuracy of the population mean estimate ($\bar{x}_1$), the researcher would need to know the value of the population mean; without knowing the value of the population mean, it is impossible to know how much error was incurred in estimating the population mean and,
+as as a result, impossible to know the extent to which sampling error contributed to this error. Therefore, a study following the inferential approach can only provide estimates of population parameters.
+ 
 
-The Monte Carlo method has a different goal. Whereas inferential methods focus on estimating parameters from sample data, the Monte Carlo method is used to understand the factors that influence the accuracy of the inferential approach. Figure \ref{fig:MonteCarlo-comparison} shows that the Monte Carlo method works in the opposite direction of the inferential approach: Instead of collecting a sample, the Monte Carlo method begins by assigning a value to at least one parameter to define a population. Many sample data sets are then generated from the defined population, with some methodological deficiency built in to each data set. In the current example, each data set is generated to have a specific amount of missing data. Each generated sample is then analyzed and the population estimates of each statistical model are averaged and compared to the pre-determined parameter value.\footnote{A statistical deficiency can also be introduced in the analysis of each generated data set.} The difference between the average of the estimates and the known population value constitutes bias in parameter estimation (i.e., parameter bias). In the current example, the missing data manipulation causes a systematic underestimation, on average, of the population parameter. By randomly generating data, the Monte Carlo method can determine how a variety of methodological and statistical factors affect the accuracy of a model [for a review, see @robert2010].
+The Monte Carlo method has a different goal. Whereas the inferential method focuses on estimating parameters from sample data, the Monte Carlo method is used to understand the factors that influence the accuracy of the inferential approach. Figure \ref{fig:MonteCarlo-comparison} shows that the Monte Carlo method works in the opposite direction of the inferential approach: Instead of collecting a sample, the Monte Carlo method begins by assigning a value to at least one parameter to define a population. Many sample data sets are then generated from the defined population ($s_1, s_2, ..., s_n$) and the data from each sample are then modelled by computing a sample mean ($\bar{x}_1, \bar{x}_2, ..., \bar{x}_n$). Importantly, manipulations can be for data sampling and/or modelling. In the current example,the population estimates of each statistical model are averaged ($\bar{\bar{x}}$) and compared to the pre-determined parameter value ($\upmu$). The difference between the average of the estimates and the known population value constitutes bias in parameter estimation (i.e., parameter bias). In the current example, the manipulation causes a systematic underestimation, on average, of the population parameter. By randomly generating data, the Monte Carlo method can determine how a variety of methodological and statistical factors affect the accuracy of a model [for a review, see @robert2010].
 
 ```{=tex}
 \begin{apaFigure}
@@ -270,7 +267,7 @@ The Monte Carlo method has a different goal. Whereas inferential methods focus o
 \end{apaFigure}
 ```
 
-Monte Carlo simulations have been used to evaluate a variety of methodological and statistical deficiencies. Beginning with the simple bivariate correlation, Monte Carlo simulations have shown that realistic values of sample size and measurement accuracy produce considerable variability in estimated correlation values [@stanley2014]. Monte Carlo simulations have also provided valuable insights into more complicated statistical analyses. In investigating more complex statistical analyses, simulations have shown that mediation analyses are biased to produce results of complete mediation because the statistical power to detect direct effects falls well below the statistical power to detect indirect effects [@kenny2014]. Finally, as an example of the utility of Monte Carlo simulations for evaluating growth mixture models, Monte Carlo simulations have shown that class enumeration accuracy (the ability to identify the correct number of response groups) decreases with nonnormal data [@bauer2003]. Given the ability of the Monte Carlo method to evaluate statistical methods, the   experiments in my dissertation used it to evaluate the effects of measurement number, measurement spacing, and time structuredness on modelling accuracy.\footnote{My simulation experiments also investigated the effects of sample size and nature of change on modelling accuracy.} 
+Monte Carlo simulations have been used to evaluate the effects of a variety of methodological and statistical deficiencies for several decades. Beginning with an early use of the Monte Carlo method, @boneau1960 used it to evaluate the effects of assumption violations on the fidelity of *t*-value distributions. In more recent years, implementations of the the Monte Carlo method have shown that realistic values of sample size and measurement accuracy produce considerable variability in estimated correlation values [@stanley2014]. Monte Carlo simulations have also provided valuable insights into more complicated statistical analyses. In investigating more complex statistical analyses, simulations have shown that mediation analyses are biased to produce results of complete mediation because the statistical power to detect direct effects falls well below the statistical power to detect indirect effects [@kenny2014]. Given the ability of the Monte Carlo method to evaluate statistical methods, the experiments in my dissertation used it to evaluate the effects of measurement number, measurement spacing, and time structuredness on modelling accuracy.\footnote{My simulation experiments also investigated the effects of sample size and nature of change on modelling accuracy.} 
 
 
 ## Systematic Review of Simulation Literature
@@ -518,19 +515,31 @@ round_two_decimals <- function(number) {
 
 nonlin_data <- read_csv(file = 'data/nonlin_data.csv')
 
+#create nonlin data 
+theta <- 3.00
+alpha <- 3.32
+beta <- 180.00
+gamma <- 20.00 
+day <- seq(from = 1, to = 360, by = 0.1)
+
+scores <- theta + (alpha - theta)/(1 + exp((beta - day)/gamma))
+
+nonlin_data <- data.frame('measurement_day' = day, 
+                          'score' = scores)
+
 #regress outcome_value on time using the linear function
 polynomial_output <- data.frame(summary(nls(
-  formula = obs_score ~ a + b*measurement_day + c*measurement_day^2 + d*measurement_day^3, 
+  formula = score ~ a + b*measurement_day + c*measurement_day^2 + d*measurement_day^3, 
   data = nonlin_data,
   start = list(a = 1, b = 1, c = 1, d = 0.5)))$coefficients)
 
 polynomial_output$parameter <- rownames(polynomial_output)
 
 #extract coefficient values & AIC value
-a <- 3.09 #round(polynomial_output$Estimate[polynomial_output$parameter == 'a'], 2)
-b <- -0.0018 #round(polynomial_output$Estimate[polynomial_output$parameter == 'b'], 4)
-c <- 2.02e-05 #round(polynomial_output$Estimate[polynomial_output$parameter == 'c'], 5)
-d <- -3.54e-08 #round(polynomial_output$Estimate[polynomial_output$parameter == 'd'], 8)
+a <- round(polynomial_output$Estimate[1], 2)
+b <- -2.44e-3 #round(polynomial_output$Estimate[polynomial_output$parameter == 'b'], 4)
+c <- 2.58e-5  #round(polynomial_output$Estimate[polynomial_output$parameter == 'c'], 5)
+d <- -4.77e-8 #round(polynomial_output$Estimate[polynomial_output$parameter == 'd'], 8)
 
 #AIC_polynomial <- formatC(round(AIC(nls(
 #  formula = obs_score ~ a + b*measurement_day + c*measurement_day^2 + d*measurement_day^3, 
@@ -553,14 +562,14 @@ poly_pred_plot <- ggplot(poly_nonlin_pred_scores, aes(x = measurement_day, y = p
   theme_classic(base_family = 'Helvetica') +
   scale_y_continuous(limits = c(2.9, 3.5), breaks = seq(from = 3, to = 3.5, by = 0.25)) +
   scale_x_continuous(breaks = seq(from = 0, to = 360, by = 60), limits = c(0, 360)) +
-  labs(x = 'Day', y = 'Predicted value', size = 16) +
-  ggtitle(label = 'A: Response pattern predicted \n by polynomial (linear) function') +
+  labs(x = 'Day', y = 'Predicted Value', size = 16) +
+  ggtitle(label = 'A: Response Pattern Predicted \n by Polynomial (Linear) Function') +
   annotate(geom = 'text', x = 100, y = 3.45, label = 'y == italic(a) + italic(b)*x + italic(c)*x^2 + italic(d)*x^3',
            parse = T, family = 'Helvetica', size = font_size) +
   annotate(geom = 'text', x = 45, y = 3.35, label = paste('italic(a) == ', a), parse = T, family = 'Helvetica', size = font_size) +
-  annotate(geom = 'text', x = 55, y = 3.30, label = paste('italic(b) == ', b), parse = T, family = 'Helvetica', size = font_size) +
-  annotate(geom = 'text', x = 63, y = 3.25, label = paste('italic(c) == ', c), parse = T, family = 'Helvetica', size = font_size) +
-  annotate(geom = 'text', x = 70, y = 3.20, label = paste('italic(d) == ', d), parse = T, family = 'Helvetica', size = font_size) +
+  annotate(geom = 'text', x = 72, y = 3.30, label = paste('italic(b) == ', b), parse = T, family = 'Helvetica', size = font_size) +
+  annotate(geom = 'text', x = 72, y = 3.25, label = paste('italic(c) == ', c), parse = T, family = 'Helvetica', size = font_size) +
+  annotate(geom = 'text', x = 80, y = 3.20, label = paste('italic(d) == ', d), parse = T, family = 'Helvetica', size = font_size) +
   #annotate(geom = 'text', x = 10, y = 1.70, label = paste('AIC == ', AIC_lin), parse = T) +
   theme(plot.margin = unit(c(0, 1, 0.1, 0.1), units="cm"), 
         plot.title = element_text(face='bold', size = title_font,  hjust = 0), 
@@ -578,14 +587,14 @@ nonlin_function_plot <- ggplot(nonlin_pred, aes(x = measurement_day, y = pred_sc
   theme_classic(base_family = 'Helvetica') +
   scale_y_continuous(limits = c(2.90, 3.5), breaks = seq(from = 3, to = 3.5, by = .25)) +
   scale_x_continuous(breaks = seq(0, 360, by = 60), limits = c(0, 360)) +
-  labs(x = 'Day', y = 'Predicted value', size = 16, tag = 'B') +
-  ggtitle(label = 'B: Response pattern predicted \n by logistic (nonlinear) function') +
+  labs(x = 'Day', y = 'Predicted Value', size = 16, tag = 'B') +
+  ggtitle(label = 'B: Response Pattern Predicted \n by Logistic (Nonlinear) Function') +
   annotate(geom = 'text', x = 80, y = 3.45, label = 'y == theta + frac(alpha - theta, 1 + e^(frac(beta-time, gamma)))', parse = T, size = font_size) +
   #beta
-  annotate(geom = 'text', x = 40, y = 3.35, label = paste('theta == 3.00'), parse = T, size = font_size) +
-  annotate(geom = 'text', x = 55, y = 3.30, label = paste('alpha == ', alpha), parse = T, size = font_size) + 
-  annotate(geom = 'text', x = 55, y = 3.25, label = paste('beta == ', beta), parse = T, size = font_size) + 
-  annotate(geom = 'text', x = 50, y = 3.20, label = paste('gamma == ', gamma), parse = T, size = font_size) + 
+  annotate(geom = 'text', x = 40, y = 3.35, label = paste('theta == `3.00`'), parse = T, size = font_size) +
+  annotate(geom = 'text', x = 40, y = 3.30, label = paste('alpha == ', alpha), parse = T, size = font_size) + 
+  annotate(geom = 'text', x = 55, y = 3.25, label = paste('beta == `180.00`'), parse = T, size = font_size) + 
+  annotate(geom = 'text', x = 50, y = 3.20, label = paste('gamma == `20.00`'), parse = T, size = font_size) + 
   theme_classic(base_family = 'Helvetica', base_size = 13) +
   theme(plot.margin = unit(c(0, 1, 0.1, 0.1), units="cm"), 
         plot.title = element_text(face='bold', size = title_font,  hjust = 0), 
@@ -596,6 +605,7 @@ nonlin_function_plot <- ggplot(nonlin_pred, aes(x = measurement_day, y = pred_sc
 
 interpretation_plot <- ggarrange(poly_pred_plot, nonlin_function_plot, ncol = 2)
 ggsave(plot = interpretation_plot, filename = 'Figures/polynomial_vs_nonlinear_plot.pdf', width = 24, height = 12)
+
 ```
 
 Consider an example where an organization introduces a new incentive system with the goal of increasing the motivation of its employees. To assess the effectiveness of the incentive system, employees provide motivation ratings every month days over a period of 360 days. Over the 360-day period, the motivation levels of the employees increase following an s-shaped pattern of change over time. One analyst decides to model the observed change using a **polynomial function** shown below in Equation \ref{eq:polynomial}: 
@@ -623,7 +633,7 @@ Consider an example where an organization introduces a new incentive system with
 -   $\upbeta$ specifies the number of days required to reach the half the difference between the first and second plateau (i.e., the midway point) and so is called the *days-to-halfway-elevation* parameter (see Figure \ref{fig:combined_plot}C). 
 -   $\upgamma$ specifies the number of days needed to move from the midway point to approximately 73% of the difference between the starting and ending values (i.e., satiation point) nd so is called the *halfway-triquarter delta* parameter (see Figure \ref{fig:combined_plot}D).
 
-\noindent Applying the parameter meanings of the logistic function to the parameter values estimated by using the logistic function (Equation \ref{eq:logistic1}), the predicted response pattern begins at a value of `r theta` (baseline) and reaches a value of `r alpha` (maximal elevation) by the end of the 360-day period. The midway point of the curve is reached after `r beta` days (days-to-halfway elevation) and the satiation point is reached `r gamma`days later (halfway-triquarter delta; or `r beta + gamma` days after the beginning of the incentive system is introduced). When looking at the polynomial function, aside from the '$a$' parameter indicating the starting value, it is impossible to meaningfully interpret the values of any of the other parameter values. Therefore, using a nonlinear function such as the logistic function provides a meaningful way to interpret nonlinear change.
+\noindent Applying the parameter meanings of the logistic function to the parameter values estimated by using the logistic function (Equation \ref{eq:logistic1}), the predicted response pattern begins at a value of `r sprintf("%.2f", round(3, 3))` (baseline) and reaches a value of `r alpha` (maximal elevation) by the end of the 360-day period. The midway point of the curve is reached after `r sprintf("%.2f", round(180, 3))` days (days-to-halfway elevation) and the satiation point is reached `r sprintf("%.2f", round(20, 3))` days later (halfway-triquarter delta; or `r sprintf("%.2f", round(200, 3))` days after the beginning of the incentive system is introduced). When looking at the polynomial function, aside from the '$a$' parameter indicating the starting value, it is impossible to meaningfully interpret the values of any of the other parameter values. Therefore, using a nonlinear function such as the logistic function provides a meaningful way to interpret nonlinear change.
 
 
 ```{=tex}
@@ -655,7 +665,7 @@ To summarize the three simulation experiments, the independent variables of each
 ```{r logistic-interpretation-plot, eval=F, include=F}
 #setup variables for logistic curve 
 time <- seq(from = 1, to = 360, by = 1)
-theta <- baseline <- 3
+theta <- baseline <- 3.00
 alpha <- maximal_elevation <- 3.32
 beta <- 180
 gamma <- 20
@@ -824,7 +834,7 @@ set_panel_size(p = parameter_explanation_plot, height = unit(x = 32, units = 'cm
 {combined_plot}
 {0.18}
 {Figures/parameter_explanation_plot}
-{Panel A: The baseline parameter ($\uptheta$) sets the starting value of the of curve, which in the current example has a value of 3.00 ($\uptheta$ = 3.00). Panel B: The maximal elevation parameter ($\upalpha$) sets the ending value of the curve, which in the current example has a value of 3.32 ($\upalpha$ = 3.32). Panel C: The days-to-halfway elevation parameter ($\upbeta$) sets the number of days needed to reach 50\% of the difference between the baseline and maximal elevation. In the current example, the baseline-maximal elevation difference is 0.32 ($\upalpha - \uptheta$ = 3.32 - 3.00 = 0.32), and so the days-to-halfway elevation parameter defines the number of days needed to reach a value of 3.16. Given that the days-to-halfway elevation parameter is set to 180 in the current example ($\upbeta = 180$), then 180 days are neededto go from a value of 3.00 to a value of 3.16. Panel D: The halfway-triquarter delta parameter ($\upgamma$) sets the number of days needed to go from halfway elevation to approximately 73\% of the baseline-maximal elevation difference of 0.32 ($\upalpha - \uptheta$ = 3.32 - 3.00 = 0.32). Given that 73\% of the baseline-maximal elevation difference is 0.23 and the halfway-triquarter delta is set to 40 days ($\upgamma = 40$), then 40 days are needed to go from the halfway point of 3.16 to the triquarter point of approximately 3.23).}
+{Panel A: The baseline parameter ($\uptheta$) sets the starting value of the of curve, which in the current example has a value of 3.00 ($\uptheta$ = 3.00). Panel B: The maximal elevation parameter ($\upalpha$) sets the ending value of the curve, which in the current example has a value of 3.32 ($\upalpha$ = 3.32). Panel C: The days-to-halfway elevation parameter ($\upbeta$) sets the number of days needed to reach 50\% of the difference between the baseline and maximal elevation. In the current example, the baseline-maximal elevation difference is 0.32 ($\upalpha - \uptheta$ = 3.32 - 3.00 = 0.32), and so the days-to-halfway elevation parameter defines the number of days needed to reach a value of 3.16. Given that the days-to-halfway elevation parameter is set to 180 in the current example ($\upbeta = 180.00$), then 180 days are needed to go from a value of 3.00 to a value of 3.16. Panel D: The halfway-triquarter delta parameter ($\upgamma$) sets the number of days needed to go from halfway elevation to approximately 73\% of the baseline-maximal elevation difference of 0.32 ($\upalpha - \uptheta$ = 3.32 - 3.00 = 0.32). Given that 73\% of the baseline-maximal elevation difference is 0.23 and the halfway-triquarter delta is set to 20 days ($\upgamma = 20.00$), then 20 days are needed to go from the halfway point of 3.16 to the triquarter point of approximately 3.23).}
 \end{apaFigure}
 ```
 

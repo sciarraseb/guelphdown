@@ -1,3 +1,9 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+
+---
 
 ```{r package_loading_int_c2, include=F}
 #devtools::install_github(repo = 'sciarraseb/nonlinSimsAnalysis', force = T)
@@ -93,6 +99,8 @@ saveRDS(object = param_summary_exp_3, file = 'data/uf_param_summary_exp_3.RData'
 
 # Experiment 2
 
+
+
 In Experiment 2, I investigated the combinations of measurement number and sample size needed to achieve accurate modelling (i.e., unbiased and precise parameter estimation) under different spacing schedules. Before presenting the results of Experiment 2, I will present my design and and analysis goals. For the design, I conducted a 4 (spacing schedule: equal, time-interval increasing, time-interval decreasing, middle-and-extreme) x 4(number of measurements: 5, 7, 9, 11) x 6(sample size: 30, 50, 100, 200, 500, 1000) study. For the analysis, I was interested in determining, for each spacing schedule, the combinations of number of measurements and sample size that achieved accurate modelling (i.e., unbiased and precise parameter estimation). For parsimony, I present the sample size by number of measurements results for each level of spacing schedule.
 
 ## Methods
@@ -170,20 +178,23 @@ Each generated data set was modelled using the structured latent growth curves o
 
 Analysis and visualization was conducted as outlined in Experiment 1 (see [analysis and visualization](#analysis-visualization})). 
 
+
 ## Results and Discussion
 
 In the sections that follow, I organize the results by presenting them for each spacing schedule (equal, time-interval increasing, time-interval decreasing, middle-and-extreme). Importantly, only the results for the day-unit parameters will be presented (i.e., fixed- and random-effect days-to-halfway elevation and halfway-triquarter delta parameters [$\upbeta_{fixed}$, $\upbeta_{random}$, $\upgamma_{fixed}$, $\upgamma_{random}$, respectively]). The results for the likert-unit parameters (i.e., fixed- and random-effect baseline and maximal elevation parameters [$\uptheta_{fixed}$, $\uptheta_{random}$, $\upalpha_{fixed}$, $\upalpha_{random}$, respectively]) were largely trivial and so are presented in [Appendix C](#appendix-c)). 
 
 ### Framework for Interpreting Results
 
-Because Experiment 2 (like all other experiments) had many cells (i.e., 96 cells in Experiment 2), the number of dependent variables to track in the results section can become overwhelming. Therefore, I will provide a framework to help the reader efficiently navigate the results section. Figure \ref{fig:results-plot-primer-exp2} shows the entire set of results that will be presented for each spacing schedule. For each spacing schedule, a parameter estimation plot is created for each of the nine parameters estimated by the structured latent growth curve model used on each generated data set (for a review, see [modelling of each generated data set](#modelling-data-sets)). Parameter estimation plots with black outlines show the results for day-unit parameter and plots with gray outlines show the results for likert-unit parameters. Importantly, only the results for the day-unit parameters will be presented (i.e., fixed- and random-effect days-to-halfway elevation and halfway-triquarter delta parameters [$\upbeta_{fixed}$, $\upbeta_{random}$, $\upgamma_{fixed}$, $\upgamma_{random}$, respectively]). The results for the likert-unit parameters (i.e., fixed- and random-effect baseline and maximal elevation parameters [$\uptheta_{fixed}$, $\uptheta_{random}$, $\upalpha_{fixed}$, $\upalpha_{random}$, respectively]) were largely trivial and so are presented in [Appendix C](#appendix-c). 
+To conduct Experiment 2, the three variables of number of measurements (4 levels), spacing of measurements (4 levels), and sample size (9 levels) were manipulated, which yielded a total of 96 cells. Importantly, within each cell, bias and precision values were also computed for each of the nine parameters estimated by the structured latent growth curve models (for a review, see [modelling of each generated data set](#modelling-data-sets)). Thus, because the analysis of Experiment 2 computes values for many dependent variables, interpreting the results can become overwhelming. Therefore, I will provide a framework to help the reader efficiently navigate the results section. 
+
+Because I will present the results of Experiment 2 by each level of measurement spacing, the framework I will describe in Figure \ref{fig:results-plot-primer-exp2} shows a template for the bias/precision plots that I will present for each spacing schedule. The results of each spacing schedule contain a bias/precision plot for each of the nine estimated parameters. Each bias/precision plot shows the bias and precision for the estimation of one parameter across all measurement number and nature-of change levels. Within each bias/precision plot, dots indicate the average estimated value (which indicates bias bias) and error bars represent the middle 95% range of estimated values (which indicates precision). Bias/precision plots with black outlines show the results for day-unit parameters and plots with gray outlines show the results for Likert-unit parameters. Importantly, only the results for the day-unit parameters will be presented (i.e., fixed- and random-effect days-to-halfway elevation and halfway-triquarter delta parameters [$\upbeta_{fixed}$, $\upbeta_{random}$, $\upgamma_{fixed}$, $\upgamma_{random}$, respectively]). The results for the Likert-unit parameters (i.e., fixed- and random-effect baseline and maximal elevation parameters [$\uptheta_{fixed}$, $\uptheta_{random}$, $\upalpha_{fixed}$, $\upalpha_{random}$, respectively]) were largely trivial and so are presented in [Appendix B](#appendix-b). Therefore, the results of each spacing schedule will only present the bias/precision plots for four parameters (i.e., the day-unit parameters). 
 
 ```{=tex}
 \begin{apaFigure}
 [portrait]
 [samepage]
 [-0.2cm]
-{Set of Parameter Estimation Plots Constructed for Each Spacing Schedule in Experiment 2}
+{Set of Bias/Precision Plots Constructed for Each Spacing Schedule in Experiment 2}
 {results-plot-primer-exp2}
 {.77}
 {Figures/logistic_results_plot_exp2}
@@ -1016,6 +1027,8 @@ For an applied researcher, one plausible question might be what measurement numb
 
 In summarizing the results for middle-and-extreme spacing, estimation of all day-unit parameters is unbiased using five and nine measurements with $N \le 100$ and seven an 11 with $N \le 50$ (see [bias](#bias-mid-ext-exp2)). Precise estimation is never obtained in the estimation of all day-unit parameters with any manipulated measurement number-sample size pairing (see [precision](#precision-mid-ext-exp2)). Although it may be discouraging that no manipulated measurement number-sample size pairing under time-interval decreasing spacing results in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters are obtained with moderate measurement number-sample size pairings. With middle-and-extreme spacing, the largest improvements in bias and precision in the estimation of all day-unit parameters are obtained from using five measurements any sample size (see [qualitative description](#qualitative-mid-ext-exp2)). 
 
+
+
 ## What Measurement Number-Sample Size Pairings Should be Used With Each Spacing Schedule? 
 
 In Experiment 2, I was interested in determining the measurement number-sample size pairings that resulted in high modelling accuracy (unbiased and precise parameter estimation) for each spacing schedule. Table \ref{tab:summary-table-exp2} summarizes the results for each spacing schedule in Experiment 2. Text within the 'Unbiased' and 'Precise' columns indicates the measurement number-sample size pairing needed to, respectively, obtain unbiased an precise estimation of all the day-unit parameters. The 'Error Bar Length' column indicates longest error bar lengths that result in the estimation of each day-unit parameter from using the measurement number-sample size pairings liste in the 'Qualitative Description' column. Although no measurement number-sample size pairing resulted in high modelling accuracy for any spacing schedule, the greatest improvements in modelling accuracy were made with the following pairings for each spacing schedule (see Table \ref{tab:summary-table-exp2}): 
@@ -1025,7 +1038,8 @@ In Experiment 2, I was interested in determining the measurement number-sample s
 * time-interval decreasing: five measurements with *N* $\ge$ 500, seven measurements with *N* $\ge$ 200 or nine measurements with *N* $\le$ 200. 
 * middle-and-extreme: five measurements with any manipulated sample size. 
 
-\noindent Because each spacing schedule obtains comparable moelling accuracy as indicated by the similar error bar lengths,  two statements can be made. First, using either seven measurements with *N* $\ge$ 200 or nine measurements with *N* $\le$ 100 with any spacing schedule except middle-and-extreme spacing results in similar modelling accuracy. Second, middle-and-extreme spacing results in the highest modelling accuracy. 
+\noindent Because each spacing schedule obtains comparable modelling accuracy as indicated by the similar error bar lengths,  two statements can be made. First, using either seven measurements with *N* $\ge$ 200 or nine measurements with *N* $\le$ 100 with any spacing schedule except middle-and-extreme spacing results in similar modelling accuracy. Second, middle-and-extreme spacing results in the highest modelling accuracy. 
+
 
 ```{r summary-table-exp2, echo=F}
 
@@ -1132,7 +1146,6 @@ linesep = c('\\cmidrule{1-8}', '\\cmidrule{1-8}', '\\cmidrule{1-8}'),
 The results of Experiment 2 are the first (to my knowledge) to provide measurement number and sample size guidelines for researchers interested in using nonlinear functions to model nonlinear change. Although previous simulation studies have investigated how to accurately model nonlinear change, three characteristics limit these results. First, some studies investigated the issue with fixed-effects models [e.g., @finch2017]. Given that researchers often model effects as random, findings with fixed-effects effects models are limited in their application.  Second, some studies used linear functions to model nonlinear change [e.g., @fine2019; @liu2022]. Given that the parameters of linear functions become uninterpretable when modelling nonlinear change, these models are less useful to practitioners. Third, some studies implemented unrealistic model fitting procedures by dropping a random-effect parameter from the model each time convergence failed [@finch2017]. By dropping random-effect parameters when model convergence failed, estimation accuracy could not meaningfully evaluated for parameters because values could have been obtained with reduced models. 
 
 In summary, the results of Experiment 2 provide measurement number-sample size guidelines for researchers interested in modelling nonlinear change. Importantly, because no measurement number-sample pairing resulted in unbiased and precise estimation of all the day-unit parameters, the guidelines provided by this study are only suggestions to obtain the greatest improvements in bias and precision. Although researchers are encouraged to use larger measurement numbers and sample sizes than suggested in the current guidelines, the improvements in bias and accuracy are likely to be incommensurate with the measurement number and sample size increments. 
-
 
 
 

@@ -1,0 +1,3 @@
+---
+bibliography: bib/dissertation_references.bib
+---

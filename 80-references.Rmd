@@ -5,7 +5,7 @@ The bib chunk below must go last in this document according to how R Markdown re
 
 
 \newpage
-## References
+# References
 
 ```{=tex}
 \begingroup

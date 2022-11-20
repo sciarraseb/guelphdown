@@ -26,13 +26,14 @@ english]{guelphthesis}
 %----------------------------------------------------------------------------------------
 % PACKAGES
 %----------------------------------------------------------------------------------------
+\usepackage{hyperref}
 \usepackage{tocloft} %needed for table of contents, list of figures, list of tables, list of appendices
 \usepackage{graphicx,latexsym}
 \usepackage{amsmath}
 \usepackage{amssymb,amsthm}
 \usepackage{longtable,booktabs,setspace}
 
-\usepackage{hyperref}
+
 \usepackage{lmodern}
 \usepackage{float}
 \usepackage{etoolbox}
@@ -46,6 +47,7 @@ english]{guelphthesis}
 \usepackage{lineno} %allows option for line numbering
 \usepackage{draftwatermark} %for draft watermark
 \SetWatermarkText{} %ensures draft is not printed when draft:false
+\usepackage[backend=biber, style=authoryear]{biblatex}
 
 % Syntax highlighting #22
 $if(highlighting-macros)$
@@ -360,6 +362,7 @@ $endif$
 %----------------------------------------------------------------------------------------
 \newcommand{\listappname}{List of Appendices}
 \newlistof[chapter]{app}{loa}{\listappname} %creates a new appendix counter that will be reset at the start of each \chapter
+
 \setcounter{loadepth}{5} %loa will  go to depth of level 5
 \setlength{\cftbeforeloatitleskip}{0cm} %remove vertical space above loa
 \setlength{\cftafterloatitleskip}{0.5cm} %space between title for loa and list entries
@@ -633,8 +636,10 @@ $endif$
 
 %list of appendices
 $if(loa)$
+  \phantomsection
   \addcontentsline{toc}{chapter}{\listappname}
   \listofapp
+
   \newpage
 $endif$
 

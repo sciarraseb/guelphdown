@@ -1,4 +1,8 @@
-
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 
 ```{r package_loading_int_c3, include=F}
 #devtools::install_github(repo = 'sciarraseb/nonlinSimsAnalysis', force = T)
@@ -20,19 +24,29 @@ exp_2_raw <-nonlinSimsAnalysis:::convert_raw_var_to_sd(raw_data = read_csv('data
 exp_3_raw <-nonlinSimsAnalysis:::convert_raw_var_to_sd(raw_data = read_csv('data/exp_3_data.csv')) %>%
   mutate_at(.vars = c("number_measurements", "time_structuredness", "sample_size"), factor)
 
+exp_3_def_raw <-nonlinSimsAnalysis:::convert_raw_var_to_sd(raw_data = read_csv('data/exp_3_def.csv')) %>%
+  mutate_at(.vars = c("number_measurements", "time_structuredness", "sample_size"), factor)
+
+
 #unfiltered data 
 param_summary_exp_1 <- readRDS(file = 'data/uf_param_summary_exp_1.RData')
 param_summary_exp_2 <- readRDS(file = 'data/uf_param_summary_exp_2.RData')
 param_summary_exp_3 <- readRDS(file = 'data/uf_param_summary_exp_3.RData')
+param_summary_exp_3_def <- readRDS(file = 'data/uf_param_summary_exp_3_def.RData')
 
 #create analytical versions of summary data + converts vars to sds
 exp_1_analytical <- generate_likert_days_data_sets(summary_data = param_summary_exp_1, exp_num = '1')
 exp_2_analytical <- generate_likert_days_data_sets(summary_data = param_summary_exp_2, exp_num = '2')
 exp_3_analytical <- generate_likert_days_data_sets(summary_data = param_summary_exp_3, exp_num = '3')
+exp_3_def_analytical <- generate_likert_days_data_sets(summary_data = param_summary_exp_3_def, exp_num = '3')
+exp_3_def_analytical$days$time_structuredness <-  factor(x = 'slow_response',labels = 'Time unstructured (slow response)')
+exp_3_def_analytical$likert$time_structuredness <-  factor(x = 'slow_response',labels = 'Time unstructured (slow response)')
 
 combined_analytical_exp_1 <- rbind(exp_1_analytical$likert, exp_1_analytical$days)
 combined_analytical_exp_2 <- rbind(exp_2_analytical$likert, exp_2_analytical$days)
 combined_analytical_exp_3 <- rbind(exp_3_analytical$likert, exp_3_analytical$days)
+combined_analytical_exp_3_def <- rbind(exp_3_def_analytical$likert, exp_3_def_analytical$days)
+
 
 #create condition summary data sets 
 cond_summary_exp_1 <- compute_condition_summary(param_summary_data = combined_analytical_exp_1, facet_var = 'measurement_spacing', 
@@ -42,6 +56,11 @@ cond_summary_exp_2 <- compute_condition_summary(param_summary_data = combined_an
 
 cond_summary_exp_3 <- compute_condition_summary(param_summary_data = combined_analytical_exp_3, facet_var = 'time_structuredness', 
                           ind_vars = c('number_measurements', 'sample_size', 'time_structuredness'))
+
+#cond_summary_exp_3 <- compute_condition_summary(param_summary_data = combined_analytical_exp_3_def, facet_var = #'time_structuredness', 
+#                          ind_vars = c('number_measurements', 'sample_size', 'time_structuredness'))
+#
+
 ```
 
 ```{r pre_knitting_setup_unfiltered_int_c3, echo=F, eval=F, include=F}
@@ -50,6 +69,7 @@ cond_summary_exp_3 <- compute_condition_summary(param_summary_data = combined_an
 exp_1 <- read_csv(file = 'data/exp_1_data.csv') %>% filter(code == 0)
 exp_2 <- read_csv(file = 'data/exp_2_data.csv')
 exp_3 <- read_csv(file = 'data/exp_3_data.csv')
+exp_3_def <-  read_csv(file = 'data/exp_3_def.csv')
 
 #compute parameter summary statistics  
 exp_1_long <- exp_1 %>%
@@ -60,20 +80,13 @@ exp_1_long <- exp_1 %>%
     filter(parameter == 'beta_fixed') %>%
     mutate(pop_value = midpoint)
 
-exp_1_ordered <- order_param_spacing_levels(data = exp_1_long)
+exp_1_ordered <- nonlinSimsAnalysis:::order_param_spacing_levels(data = exp_1_long)
 
-exp_1_ordered %>%
-      #compute statistics for each parameter for each experimental variable
-      group_by(parameter, .dots = locate_ivs(exp_1_ordered)) %>%
-      summarize(
-       lower_ci = compute_middle_95_estimate(param_data = estimate)[1],
-       upper_ci = compute_middle_95_estimate(param_data = estimate)[2])
-
-compute_parameter_summary(data = exp_1, exp_num = '1')
 
 param_summary_exp_1 <- compute_parameter_summary(data = exp_1, exp_num = 1)
 param_summary_exp_2 <- compute_parameter_summary(data = exp_2, exp_num = 2)
 param_summary_exp_3 <- compute_parameter_summary(data = exp_3, exp_num = 3)
+param_summary_exp_3_def <- compute_parameter_summary(data = exp_3_def, exp_num = 2)
 
 #necessary factor conversions 
 param_summary_exp_1$number_measurements <- factor(param_summary_exp_1$number_measurements, levels = c(5, 7, 9,11))
@@ -85,11 +98,17 @@ param_summary_exp_2$sample_size <- factor(param_summary_exp_2$sample_size, level
 param_summary_exp_3$number_measurements <- factor(param_summary_exp_3$number_measurements, levels = c(5, 7, 9,11))
 param_summary_exp_3$sample_size <- factor(param_summary_exp_3$sample_size, levels = c(30, 50, 100, 200, 500, 1000))
 
+param_summary_exp_3_def$number_measurements <- factor(param_summary_exp_3_def$number_measurements, levels = c(5, 7, 9,11))
+param_summary_exp_3_def$sample_size <- factor(param_summary_exp_3_def$sample_size, levels = c(30, 50, 100, 200, 500, 1000))
+
+
 #write data sets 
 #save parameter summary files as RData files so that metadata are correctly stored (e.g., factor levels, variable types)
 saveRDS(object = param_summary_exp_1, file = 'data/uf_param_summary_exp_1.RData')
 saveRDS(object = param_summary_exp_2, file = 'data/uf_param_summary_exp_2.RData')
 saveRDS(object = param_summary_exp_3, file = 'data/uf_param_summary_exp_3.RData')
+saveRDS(object = param_summary_exp_3_def, file = 'data/uf_param_summary_exp_3_def.RData')
+
 ```
 
 
@@ -97,8 +116,7 @@ saveRDS(object = param_summary_exp_3, file = 'data/uf_param_summary_exp_3.RData'
 
 # Experiment 3
 
-
-In Experiment 3, I investigated the measurement number-sample size pairings needed to achieve accurate modelling (i.e., low bias and high precision) under different levels of time structuredness. Before presenting the results of Experiment 3, I will present my design and and analysis goals. For the design, I conducted a 3(time structuredness: time-structured data, time-unstructured data [fast response rate], time-unstructured data [slow response rate]) x 4(number of measurements: 5, 7, 9, 11) x 6(sample size: 30, 50, 100, 200, 500, 1000) study. For the analysis, I was primarily interested in determining, for each level of time structuredness, what measurement number-sample size pairings achieved accurate modelling (i.e., low bias and high precision). 
+In Experiment 3, I investigated how decreasing time structuredness affected modelling accuracy. Before presenting the results of Experiment 3, I will present my design and and analysis goals. For the design, I conducted a 3(time structuredness: time-structured data, time-unstructured data resulting from a fast response rate, time-unstructured data resulting from a slow response rate) x 4(number of measurements: 5, 7, 9, 11) x 6(sample size: 30, 50, 100, 200, 500, 1000) study. For the analysis, I examined whether the number of measurements and sample sizes needed to obtain high modelling accuracy (i.e., low bias, high precision) increased as time structuredness decreased.
 
 
 ## Methods
@@ -114,18 +132,17 @@ For the number of measurements, I used the same values as in Experiment 1 of  5,
 
 For sample size, I used the same values as in Experiment 2 of 30, 50, 100, 200, 500, and 1000 (see [sample size](#sample-size) for more discussion). 
 
-##### Time Structuredness{time-structuredness}
+##### Time Structuredness 
 
-*Time structuredness* describes the extent to which, at each time point, data are obtained at the exact same time point. The manipulation of time structuredness was adopted from the manipulation used in @coulombe2016 with a slight modification. In  @coulombe2016, time-unstructured data were generated according to an exponential pattern such that most data were obtained at the beginning of the response window, with a smaller amount of data being obtained towards the end of the response window. Importantly, @coulombe2016 employed a non-continuous function for generating time-unstructured data: A binning method was employed such that 80% of the data were obtained within a time period equivalent to 12% (fast response rate) or 30% (slow response rate) of the entire response window. Using a response window length of 10 days with a fast response rate, the procedure employed by @coulombe2016 for generating time-unstructured data would have generated the following percentages of data in each of the four bins (note that, using the data generation procedure for @coulombe2016, the effective response window length was 4 days instead of 10 days):\footnote{The data generation procedure in (ref:coulombe2016) for a fast response rate assumed that all of the data were collected within the initial 40\% length of the nominal response window length (i.e., 4 days in the current example).}
+*Time structuredness* describes the extent to which, at each time point, data are obtained at the exact same time point. The manipulation of time structuredness was adopted from the manipulation used in @coulombe2016 with a slight modification. In  @coulombe2016, time-unstructured data were generated according to an exponential pattern such that most data were obtained at the beginning of the response window, with a smaller amount of data being obtained towards the end of the response window. Importantly, @coulombe2016 employed a non-continuous function for generating time-unstructured data: A binning method was employed such that 80% of the data were obtained within a time period equivalent to 12% (fast response rate) or 30% (slow response rate) of the entire response window. Using a response window length of 10 days with a fast response rate, the procedure employed by @coulombe2016 for generating time-unstructured data would have generated the following percentages of data in each of the four bins (note that, using the data generation procedure for @coulombe2016, the effective response window length for a fast response rate would be 4 days in the current example instead of 10 days):\footnote{The data generation procedure in (ref:coulombe2016) for a fast response rate assumed that all of the data were collected within the initial 40\% length of the nominal response window length (i.e., 4 days in the current example).}
 
-1) Bin 1: 60% of the data would be generated in the initial 10% length of the response window (0–0.4 day).
-2) Bin 2: 20% of the data would be generated in the next 20% length of the response response window (0.4–1.2 days).
-3) Bin 3: 10% of the data would be generated in the next 30% length of the response window (1.2–2.4 days).
-4) Bin 4: the remaining 10% of the data would be generated in the remaining 40% length of the response window (2.4–4 days).
+1) Bin 1: 60% of the data would be generated in the initial 10% length of the response window (0–0.40 day).
+2) Bin 2: 20% of the data would be generated in the next 20% length of the response response window (0.40–1.20 days).
+3) Bin 3: 10% of the data would be generated in the next 30% length of the response window (1.20–2.40 days).
+4) Bin 4: the remaining 10% of the data would be generated in the remaining 40% length of the response window (2.40–4.00 days).
 
-\noindent Note that, summing the data percentages and time durations from the first two bins yields an 80% cumulative response rate that is obtained in the initial 12% length of the full-length response window of 10 days (i.e., $(\frac{1.2}{10})100\% = 12\%$). Also note that, in @coulombe2016, a data point in each bin was randomly assigned a measurement time within the bin’s time range. In the current example where the full-length response window had a length of 10 days, a data point obtained in the first bin would be randomly assigned a measurement time between 0–0.4.
-
-Although @coulombe2016 generated time-unstructured data to resemble data collection conditions—--response rates have been shown to follow an exponential pattern (@dillman2014; @pan2010)—--the use of a pseudo-continuous binning function for generating time-unstructured data lacked ecological validity. Therefore, the simulations here used a continuous function to create more realistic versions of time-unstructured data. Specifically, the exponential function shown below in Equation \ref{eq:exp-function} was used:
+\noindent Note that, summing the data percentages and time durations from the first two bins yields an 80% cumulative response rate that is obtained in the initial 12% length of the full-length response window of 10 days (i.e., $(\frac{1.2}{10})100\% = 12\%$). Also note that, in @coulombe2016, a data point in each bin was randomly assigned a measurement time within the bin’s time range. In the current example where the full-length response window had a length of 10 days, a data point obtained in the first bin would be randomly assigned a measurement time between 0–0.40. Although @coulombe2016 generated time-unstructured data to resemble data collection conditions—--response rates have been shown to follow an exponential pattern (@dillman2014; @pan2010)—--the use of a pseudo-continuous binning function for generating time-unstructured data lacked ecological validity because response patterns are more likely to follow a continuous function. 
+To improve on the time structuredness manipulation of @coulombe2016, I developed a more ecologically valid manipulation by using a continuous function. Specifically, I used the the exponential function shown below in Equation \ref{eq:exp-function} to generate time-unstructured data:
 
 \begin{align}
 y = M(1 - e^{-ax}),
@@ -595,10 +612,30 @@ Analysis and visualization was conducted as outlined in Experiment 1 (see [analy
 ## Results and Discussion
 
 
-In the sections that follow, I organize the results by presenting them for each spacing schedule (equal, time-interval increasing, time-interval decreasing, middle-and-extreme). Importantly, only the results for the day-unit parameters will be presented (i.e., fixed- and random-effect days-to-halfway elevation and halfway-triquarter delta parameters [$\upbeta_{fixed}$, $\upbeta_{random}$, $\upgamma_{fixed}$, $\upgamma_{random}$, respectively]). The results for the likert-unit parameters (i.e., fixed- and random-effect baseline and maximal elevation parameters [$\uptheta_{fixed}$, $\uptheta_{random}$, $\upalpha_{fixed}$, $\upalpha_{random}$, respectively]) were largely trivial and so are presented in [Appendix C](#appendix-c)). 
+In the sections that follow, I organize the results by presenting them for each level of time structuredness (time-structured data, time-unstructured data resulting from a fast response rate, time-unstructured data resulting from a slow response rate). Importantly, only the results for the day-unit parameters will be presented (i.e., fixed- and random-effect days-to-halfway elevation and halfway-triquarter delta parameters [$\upbeta_{fixed}$, $\upbeta_{random}$, $\upgamma_{fixed}$, $\upgamma_{random}$, respectively]). The results for the likert-unit parameters (i.e., fixed- and random-effect baseline and maximal elevation parameters [$\uptheta_{fixed}$, $\uptheta_{random}$, $\upalpha_{fixed}$, $\upalpha_{random}$, respectively]) were largely trivial and so are presented in [Appendix C](#appendix-c)). 
+
+For each level of time structuredness, I first provide a concise summary of the results and then provide a detailed report of the estimation accuracy of each day-unit parameter of the logistic function. Because the lengths of the detailed reports are considerable, I first provide concise summaries to establish a framework to interpret the detailed reports. The detailed report of each time structuredness level will summarize the results of each day-unit's bias/precision plot, report partial $\upomega^2$ values, and then provide a qualitative summary.
+
+### Framework for Interpreting Results
+
+To conduct Experiment 3, the three variables of number of measurements (4 levels), sample size (6 levels), and time structuredness (3 levels) were manipulated, which yielded a total of 72 cells. Importantly, within each cell, bias and precision values were also computed for each of the nine parameters estimated by the structured latent growth curve models (for a review, see [modelling of each generated data set](#modelling-data-sets)). Thus, because the analysis of Experiment 3 computes values for many dependent variables, interpreting the results can become overwhelming. Therefore, I will provide a framework to help the reader efficiently navigate the results section. 
+
+Because I will present the results of Experiment 3 by each level of time structuredness, the framework I will describe in Figure \ref{fig:results-plot-primer} shows a template for the bias/precision plots that I will present for each level of time structuredness. The results presented for each time structuredness level contain a bias/precision plot for each of the nine estimated parameters. Each bias/precision plot shows the bias and precision for the estimation of one parameter across all measurement number and nature-of change levels. Within each bias/precision plot, dots indicate the average estimated value (which indicates bias bias) and error bars represent the middle 95% range of estimated values (which indicates precision). Bias/precision plots with black outlines show the results for day-unit parameters and plots with gray outlines show the results for Likert-unit parameters. Importantly, only the results for the day-unit parameters will be presented (i.e., fixed- and random-effect days-to-halfway elevation and halfway-triquarter delta parameters [$\upbeta_{fixed}$, $\upbeta_{random}$, $\upgamma_{fixed}$, $\upgamma_{random}$, respectively]). The results for the Likert-unit parameters (i.e., fixed- and random-effect baseline and maximal elevation parameters [$\uptheta_{fixed}$, $\uptheta_{random}$, $\upalpha_{fixed}$, $\upalpha_{random}$, respectively]) were largely trivial and so are presented in [Appendix B](#appendix-b). Therefore, the results of time structuredness level will only present the bias/precision plots for four parameters (i.e., the day-unit parameters). 
+
+```{=tex}
+\begin{apaFigure}
+[portrait]
+[samepage]
+[-0.2cm]
+{Set of Bias/Precision Plots Constructed for Each Spacing Schedule in Experiment 2}
+{results-plot-primer-exp2}
+{.77}
+{Figures/logistic_results_plot_exp2}
+{A parameter estimation plot is constructed for each parameter of the logistic function (see Equation \ref{eq:logFunction-generation}). Note that each parameter of the logistic function is modelled as a fixed and random effect along with an error term ($\upepsilon$; for a review, see Figure \ref{fig:combined_plot}).}
+\end{apaFigure}
+```
 
 
-For each level of time structuredness, I first provide a concise summary of the results and then provide a detailed report of the estimation accuracy of each day-unit parameter of the logistic function. Because the lengths of the detailed reports are considerable, I provide concise summaries before the detailed reports to establish a framework to interpret the detailed reports. The detailed report of each measurement spacing schedule will summarize the results of each day-unit's parameter estimation plot, report partial $\upomega^2$ values, and then provide a qualitative summary.
 
 ### Pre-Processing of Data and Model Convergence
 
@@ -610,7 +647,7 @@ rates below 90% only occurred in two cells with five measurements.
 
 ### Time-Structured Data {#concise-example-exp3}
 
-For time-structured data, Table \ref{tab:summary-table-time-struc-exp3} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp2_plot_equal} for the corresponding parameter estimation plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-time-struc-exp3} and provide elaboration when necessary. 
+For time-structured data, Table \ref{tab:summary-table-time-struc-exp3} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp3_plot_days_time_struc} for the corresponding parameter estimation plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-time-struc-exp3} and provide elaboration when necessary. 
 
 Before presenting the results for equal spacing, I provide a brief description of the concise summary table created for each spacing schedule and shown for equal spacing in Table \ref{tab:summary-table-time-struc-exp3}. ext in the 'Unbiased' and 'Precise' columns indicates the measurement number-sample size pairings that, respectively, result in unbiased and precise estimation. Emboldened text in the 'Unbiased' and 'Qualitative Description' columns indicates the measurement number-sample size pairing needed to, respectively, obtain unbiased estimates and the greatest improvements in bias and precision across all day-unit parameters (acceptable precision not achieved in the estimation of all day-unit parameters with equal spacing). The 'Error Bar Length' column indicates the error bar length that results from using the lower-bounding measurement number-sample size pairing listed in the 'Qualitative Description' column.
 
@@ -622,7 +659,7 @@ errorbar_lengths_nm9_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3
 errorbar_lengths_nm7_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3_analytical$days, iv_level = 'Time structured', num_measurements = 7, sample_size = 30)
 
 
-errorbar_lengths <- c(paste(errorbar_lengths_nm5_s30$errorbar_length[1]),
+errorbar_lengths_ts <- c(paste(errorbar_lengths_nm5_s30$errorbar_length[1]),
                       paste(errorbar_lengths_nm9_s30$errorbar_length[2]),
                       paste(errorbar_lengths_nm7_s30$errorbar_length[3]), 
                       paste(errorbar_lengths_nm9_s30$errorbar_length[4]))
@@ -652,11 +689,11 @@ summary_table <- data.frame('Parameter' = c('\\thead[lt]{$\\upbeta_{fixed}$ \\\\
                                                      
                                                       'Largest improvements in precision with NM = 7',
                                                      
-                                                      '\\thead[lt]{Largest improvements in bias and \\\\
-                                                      precision using NM = 7 with \\textit{N} $\\ge$ 200 or \\\\
-                                                      NM = 9 with \\textit{N} $\\le$ 100}'),
+                                                      '\\thead[lt]{Largest improvements in precision \\\\ 
+                                                      using \\textbf{NM = 7 with \\textit{N} $\\ge$ 200} or \\\\
+                                                      \\textbf{NM = 9 with \\textit{N} $\\le$ 100}}'),
                             
-                            'Error Bar Length' = errorbar_lengths,
+                            'Error Bar Length' = errorbar_lengths_ts,
                             
                             check.names = F)
 
@@ -745,9 +782,9 @@ For time-structured data in Figure \ref{fig:exp3_plot_days_time_struc},  althoug
 
 \noindent With respect to precision under time-structured data, the largest improvements in precision for the estimation of all the day-unit parameters (except the fixed-effect days-to-halfway elevation parameter [$\upbeta_{fixed}$]) result from using the following measurement number-sample size pairings:
 
-* fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths[2]` days. 
-* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): seven measurements across all manipulated sample sizes, which which results in a error bar length of `r errorbar_lengths[3]` days.
-* random-effect triquarter-halfway delta parameter ($\upgamma_{random}$):  seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths[4]` days.
+* fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths_ts[2]` days. 
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): seven measurements across all manipulated sample sizes, which which results in a error bar length of `r errorbar_lengths_ts[3]` days.
+* random-effect triquarter-halfway delta parameter ($\upgamma_{random}$):  seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths_ts[4]` days.
 
 For an applied researcher, one plausible question might be what measurement number-sample size pairing(s) results in the greatest improvements in bias and precision in the estimation of all day-unit parameters with time-structured data. In looking across the measurement number-sample size pairings in the above lists, it becomes apparent that greatest improvements in bias and precision in the estimation of all day-unit parameters result with the following measurement number-sample size pairing(s): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$ (see the emboldened text in the 'Qualitative Description' column of Table \ref{tab:summary-table-time-struc-exp3}).
 
@@ -760,7 +797,6 @@ In summarizing the results for time-structured data, estimation of all day-unit 
 
 For time-unstructured data characterized by a fast response rate, Table \ref{tab:summary-table-fast-exp3} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp3_plot_days_fast} for the corresponding parameter estimation plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-fast-exp3} and provide elaboration when necessary (for a description of Table \ref{tab:summary-table-fast-exp3}, see [concise summary](#concise-example-exp3)). 
 
-
 ```{r summary-table-fast-exp3, echo=F}
 
 errorbar_lengths_nm5_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3_analytical$days, iv_level = 'fast response', num_measurements = 5, sample_size = 30)
@@ -769,7 +805,7 @@ errorbar_lengths_nm9_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3
 errorbar_lengths_nm7_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3_analytical$days, iv_level = 'fast response', num_measurements = 7, sample_size = 30)
 
 
-errorbar_lengths <- c(paste(errorbar_lengths_nm5_s30$errorbar_length[1]), 
+errorbar_lengths_fast <- c(paste(errorbar_lengths_nm5_s30$errorbar_length[1]), 
                       paste(errorbar_lengths_nm9_s30$errorbar_length[2]), 
                       paste(errorbar_lengths_nm7_s30$errorbar_length[3]), 
                       paste(errorbar_lengths_nm9_s30$errorbar_length[4]))
@@ -800,11 +836,11 @@ summary_table <- data.frame('Parameter' = c('\\thead[lt]{$\\upbeta_{fixed}$ \\\\
                                                      
                                                       'Largest improvements in precision with NM = 7',
                                                      
-                                                      '\\thead[lt]{Largest improvements in bias and \\\\
-                                                      precision using NM = 7 with \\textit{N} $\\ge$ 200 \\\\
-                                                      or NM = 9 with \\textit{N} $\\le$ 100}'),
+                                                      '\\thead[lt]{Largest improvements in precision \\\\ 
+                                                      using \\textbf{NM = 7 with \\textit{N} $\\ge$ 200} or \\\\
+                                                      \\textbf{NM = 9 with \\textit{N} $\\le$ 100}}'),
                             
-                            'Error Bar Length' = errorbar_lengths,
+                            'Error Bar Length' = errorbar_lengths_fast,
                             
                           
                             check.names = F)
@@ -834,8 +870,10 @@ With respect to bias for time-unstructured data characterized by a fast response
 
 * fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp3_plot_days_fast}A): no cells. 
 * fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp3_plot_days_fast}B): no cells.
-* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp3_plot_days_fast}C): no cells. 
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp3_plot_days_fast}C): no cells.
 * random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$; Figure \ref{fig:exp3_plot_days_fast}D): five measurements across all sample sizes, seven measurements with $N \le 500$, nine measurements with $N \ge 100$, and 11 measurements with $N \le 50$.
+
+\noindent Note that, for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$), although bias is still within the acceptable margin of error, bias appears to be constant across all manipulated measurement number-sample size pairings. 
 
 In summary, with time-unstructured data characterized by a fast response rate, estimation of all the day-unit parameters across all manipulated nature-of-change values is unbiased using at least seven measurements with $N = 1000$, nine measurements with $N \ge 200$, or 11 measurements with $N \ge 100$, which is indicated by the emboldened text in the 'Unbiased' column of Table \ref{tab:summary-table-fast-exp3}. 
 
@@ -893,15 +931,15 @@ For time-unstructured data characterized by a fast response rate (see Figure \re
 
 \noindent With respect to precision under time-unstructured data characterized by a fast response rate, the largest improvements in precision for the estimation of all the day-unit parameters (except the fixed-effect days-to-halfway elevation parameter [$\upbeta_{fixed}$]) result from using the following measurement number-sample size pairings:
 
-* fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths[2]` days. 
-* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): seven measurements across all manipulated sample sizes, which which results in a error bar length of `r errorbar_lengths[3]` days.
-* random-effect triquarter-halfway delta parameter ($\upgamma_{random}$):  seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths[4]` days.
+* fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths_fast[2]` days. 
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): seven measurements across all manipulated sample sizes, which which results in a error bar length of `r errorbar_lengths_fast[3]` days.
+* random-effect triquarter-halfway delta parameter ($\upgamma_{random}$):  seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths_fast[4]` days.
 
 For an applied researcher, one plausible question might be what measurement number-sample size pairing(s) results in the greatest improvements in bias and precision in the estimation of all day-unit parameters with time-unstructured data characterized by a fast response rate. In looking across the measurement number-sample size pairings in the above lists, it becomes apparent that greatest improvements in bias and precision in the estimation of all day-unit parameters result with the following measurement number-sample size pairing(s): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$ (see the emboldened text in the 'Qualitative Description' column of Table \ref{tab:summary-table-fast-exp3}).
 
 #### Summary of Results
 
-In summarizing the results for time-unstructured data characterized by a fast response rate, estimation of all day-unit parameters is unbiased using least seven measurements with $N = 1000$, nine measurements with $N \ge 200$, or 11 measurements with $N \ge 100$ (see [bias](#bias-fast-exp3)). Precise estimation is never obtained in the estimation of all day-unit parameters with any manipulated measurement number-sample size pairing (see [precision](#precision-fast-exp3)). Although it may be discouraging that no manipulated measurement number-sample size pairing under time-unstructured data characterized by a fast response rate results in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters are obtained with moderate measurement number-sample size pairings. With time-unstructured data characterized by a fast response rate, the largest improvements in bias and precision in the estimation of all day-unit parameters are obtained using seven measurements with $N \ge 200$ or nine measurements with $N \le 100$ (see [qualitiative description](#qualitative-fast-exp3)). 
+In summarizing the results for time-unstructured data characterized by a fast response rate, estimation of all day-unit parameters is unbiased using least seven measurements with $N = 1000$, nine measurements with $N \ge 200$, or 11 measurements with $N \ge 100$ (see [bias](#bias-fast-exp3)). Importantly, bias for some day-unit parameters is constant across manipulated measurement number-sample size pairings. Precise estimation is never obtained in the estimation of all day-unit parameters with any manipulated measurement number-sample size pairing (see [precision](#precision-fast-exp3)). Although it may be discouraging that no manipulated measurement number-sample size pairing under time-unstructured data characterized by a fast response rate results in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters are obtained with moderate measurement number-sample size pairings. With time-unstructured data characterized by a fast response rate, the largest improvements in bias and precision in the estimation of all day-unit parameters are obtained using seven measurements with $N \ge 200$ or nine measurements with $N \le 100$ (see [qualitiative description](#qualitative-fast-exp3)). 
 
 
 ### Time-Unstructured Data Characterized by a Slow Response Rate
@@ -915,7 +953,7 @@ errorbar_lengths_nm9_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3
 errorbar_lengths_nm7_s30 <- compute_errorbar_lengths(exp_analytical_days = exp_3_analytical$days, iv_level = 'slow response', num_measurements = 7, sample_size = 30)
 
 
-errorbar_lengths <- c(paste(errorbar_lengths_nm5_s30$errorbar_length[1]), 
+errorbar_lengths_slow <- c(paste(errorbar_lengths_nm5_s30$errorbar_length[1]), 
                       paste(errorbar_lengths_nm9_s30$errorbar_length[2]), 
                       paste(errorbar_lengths_nm7_s30$errorbar_length[3]), 
                       paste(errorbar_lengths_nm9_s30$errorbar_length[4]))
@@ -948,7 +986,7 @@ summary_table <- data.frame('Parameter' = c('\\thead[lt]{$\\upbeta_{fixed}$ \\\\
                                                       precision using NM = 7 with \\textit{N} $\\boldsymbol{\\ge}$ 200 or \\\\
                                                       M = 9 with \\textit{N} $\\boldsymbol{\\le}$ 100}'),
                             
-                            'Error Bar Length' = errorbar_lengths,
+                            'Error Bar Length' = errorbar_lengths_slow,
                             
                             check.names = F)
 
@@ -973,12 +1011,15 @@ add_header_above(header = c(' ' = 3, 'Summary' = 2)) %>%
 
 ##### Bias {#bias-slow-exp3}
 
-With respect to bias for time-unstructured data characterized by a slow response rate, estimates are biased (i.e., above the acceptable 10% cutoff) for each day-unit parameter in the following cells:
+With respect to bias for time-unstructured data characterized by a slow response rate, estimates are biased (i.e., above the acceptable 10% cutoff) for each day-unit parameter in the following cells: 
 
 * fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp3_plot_days_slow}A): no cells. 
 * fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp3_plot_days_slow}B): no cells.
 * random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp3_plot_days_slow}C): no cells. 
 * random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$; Figure \ref{fig:exp3_plot_days_slow}D): five measurements across all sample sizes, seven measurements with $N \le 500$, nine measurements with $N \ge 100$, and 11 measurements with $N \le 50$.
+
+\noindent Note that, for all parameters except the halfway-triquarter delta parameter ($\upgamma_{fixed}$), bias appears to be constant across all manipulated measurement number-sample size pairings @liu2022
+
 
 In summary, with time-unstructured data characterized by a slow response rate, estimation of all the day-unit parameters across all manipulated nature-of-change values is unbiased using at least seven measurements with $N = 1000$, nine measurements with $N \ge 200$, or 11 measurements with $N \ge 100$, which is indicated by the emboldened text in the 'Unbiased' column of Table \ref{tab:summary-table-slow-exp3}. 
 
@@ -988,6 +1029,13 @@ generate_day_likert_facet_plot(analytical_data = exp_3_analytical,
                               x_axis_name = expression("Sample Size ("*italic(N)*")"), 
                                x_axis_var = 'sample_size', exp_num = 'exp3_', beta_lower = 160, beta_upper = 210,
                                  beta_ticks = 5)
+
+generate_day_likert_facet_plot(analytical_data = exp_3_def_analytical, 
+                               target_col = 'time_structuredness', target_value = 'Time unstructured (slow response)',
+                              x_axis_name = expression("Sample Size ("*italic(N)*")"), 
+                               x_axis_var = 'sample_size', exp_num = 'exp3_def', beta_lower = 160, beta_upper = 210,
+                                 beta_ticks = 5)
+
 ```
 
 ```{=tex}
@@ -1036,18 +1084,391 @@ For time-unstructured data characterized by a slow response rate (see Figure \re
 
 \noindent With respect to precision under time-unstructured data characterized by a slow response rate, the largest improvements in precision for the estimation of all the day-unit parameters (except the fixed-effect days-to-halfway elevation parameter [$\upbeta_{fixed}$]) result from using the following measurement number-sample size pairings:
 
-* fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths[2]` days. 
-* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): seven measurements across all manipulated sample sizes, which which results in a error bar length of `r errorbar_lengths[3]` days.
-* random-effect triquarter-halfway delta parameter ($\upgamma_{random}$): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths[4]` days.
+* fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths_slow[2]` days. 
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): seven measurements across all manipulated sample sizes, which which results in a error bar length of `r errorbar_lengths_slow[3]` days.
+* random-effect triquarter-halfway delta parameter ($\upgamma_{random}$): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$, which results in a maximum error bar length of `r errorbar_lengths_slow[4]` days.
 
 For an applied researcher, one plausible question might be what measurement number-sample size pairing(s) results in the greatest improvements in bias and precision in the estimation of all day-unit parameters with time-unstructured data characterized by a fast response rate. In looking across the measurement number-sample size pairings in the above lists, it becomes apparent that greatest improvements in bias and precision in the estimation of all day-unit parameters result with the following measurement number-sample size pairing(s): seven measurements with $N \ge 200$ or nine measurements with $N \le 100$ (see the emboldened text in the 'Qualitative Description' column of Table \ref{tab:summary-table-slow-exp3}).
 
 #### Summary of Results
 
-In summarizing the results for time-unstructured data characterized by a slow response rate, estimation of all day-unit parameters is least seven measurements with $N = 1000$, nine measurements with $N \ge 200$, or 11 measurements with $N \ge 100$ (see [bias](#bias-slow-exp3)). Precise estimation is never obtained in the estimation of all day-unit parameters with any manipulated measurement number-sample size pairing (see [precision](#precision-slow-exp3)). Although it may be discouraging that no manipulated measurement number-sample size pairing under time-unstructured data characterized by a slow response rate results in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters are obtained with moderate measurement number-sample size pairings. With time-unstructured data characterized by a slow response rate, the largest improvements in bias and precision in the estimation of all day-unit parameters are obtained using seven measurements with $N \ge 200$ or nine measurements with $N \le 100$ (see [qualitiative description](#qualitative-slow-exp3)). 
+In summarizing the results for time-unstructured data characterized by a slow response rate, estimation of all day-unit parameters is least seven measurements with $N = 1000$, nine measurements with $N \ge 200$, or 11 measurements with $N \ge 100$ (see [bias](#bias-slow-exp3)). Importantly, bias for most day-unit parameters is constant across manipulated measurement number-sample size pairings. Precise estimation is never obtained in the estimation of all day-unit parameters with any manipulated measurement number-sample size pairing (see [precision](#precision-slow-exp3)). Although it may be discouraging that no manipulated measurement number-sample size pairing under time-unstructured data characterized by a slow response rate results in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters are obtained with moderate measurement number-sample size pairings. With time-unstructured data characterized by a slow response rate, the largest improvements in bias and precision in the estimation of all day-unit parameters are obtained using seven measurements with $N \ge 200$ or nine measurements with $N \le 100$ (see [qualitiative description](#qualitative-slow-exp3)). 
 
 
 ### How Does Time Structuredness Affect Modelling Accuracy?
+
+In Experiment 3, I was interested in how decreasing time structuredness affected modelling accuracy. Table \ref{tab:summary-table-exp3} summarizes the results for each spacing schedule in Experiment 3. Text within the 'Unbiased' and 'Precise' columns indicates the measurement number-sample size pairing needed to, respectively, obtain unbiased an precise estimation for all the day-unit parameters. The 'Error Bar Length' column indicates longest error bar lengths that result in the estimation of each day-unit parameter from using the measurement number-sample size pairings listed in the 'Qualitative Description' column. In looking at the 'Qualitative Description' column, the greatest improvements in bias and precision for all time structuredness levels result from using either seven measurements with $N \ge 200$ or nine measurements with $N \le 100$. 
+
+Although the same measurement number-sample size pairing can be used to obtain the greatest improvements in modelling accuracy under any time structuredness level, two results suggest that modelling accuracy decreases as the time structuredness decreases. First, the error bar lengths in Table \ref{tab:summary-table-ex3} increase as time structuredness decreases. As an example, the error bar length of the fixed-effect days-to-halfway elevation parameter is `r errorbar_lengths_ts[1]` days with time-structured data and increases to `r errorbar_lengths_slow[1]` days with time-unstructured data characterized by a slow response rate. Second, and more alarming, the bias incurred as time structuredness decreases is constant across all measurement number-sample size pairings (see Figure \ref{exp3_plot_days_slow}). That is, the increase in bias that results from time-unstructured data cannot be reduced by increasing the number of measurements or sample size. An an example, the fixed-effect days-to-halfway elevation parameter is underestimated by roughly 6 days across all measurement number-sample size pairings ($\upbeta_{fixed}$; see Figure \ref{exp3_plot_days_slow}A). 
+
+```{r summary-table-exp3, echo=F}
+#combine vectors into a list 
+errorbar_lengths_list <- list('ts' = errorbar_lengths_ts, 
+                              'fast' = errorbar_lengths_fast, 
+                              'slow' = errorbar_lengths_slow)
+
+beta_fixed_errorbar_lengths <- as.numeric(unlist(lapply(X = errorbar_lengths_list, FUN = function(x){return(x[1])})))
+gamma_fixed_errorbar_lengths <- as.numeric(unlist(lapply(X = errorbar_lengths_list, FUN = function(x){return(x[2])})))
+beta_rand_errorbar_lengths <- as.numeric(unlist(lapply(X = errorbar_lengths_list, FUN = function(x){return(x[3])})))
+gamma_rand_errorbar_lengths <- as.numeric(unlist(lapply(X = errorbar_lengths_list, FUN = function(x){return(x[4])})))
+
+
+summary_table <- data.frame('Time Structuredness' = c('\\thead[lt]{Time structured \\\\ (see Figure \\ref{fig:exp3_plot_days_time_struc} and Table \\ref{tab:summary-table-time-struc-exp3})}', 
+                                                   'Time unstructured (fast response rate; see Figure \\ref{fig:exp3_plot_days_fast} and Table \\ref{tab:summary-table-fast-exp3})', 
+                                                   
+                                                   'Time unstructured (slow response rate; see Figure \\ref{fig:exp3_plot_days_slow} and Table \\ref{tab:summary-table-slow-exp3})'), 
+                                                   
+                            'Unbiased' = c('\\thead[lt]{NM $\\ge$ 9 with \\textit{N} $\\ge$ 200}', 
+                                           
+                                           '\\thead[lt]{NM $\\ge$ 7 with \\textit{N} = 1000 or \\\\
+                                            NM $\\ge$ 9 with \\textit{N} $\\ge$ 200 or \\\\
+                                            NM = 11 with \\textit{N} = 100}', 
+                                           
+                                           'No cells'), 
+                            
+                            'Precise' = c('No cells', 
+                                          'No cells',
+                                          'No cells'),
+
+                            'Qualitative Description' = c('\\thead[lt]{Largest improvements in precision \\\\
+                                                          using \\textbf{NM = 7 with \\textit{N} $\\ge$ 200} or \\\\
+                                                          \\textbf{NM = 9 with \\textit{N} $\\le$ 100}}', 
+                                                      
+                                                     '\\thead[lt]{Largest improvements in precision \\\\ 
+                                                      using \\textbf{NM = 7 with \\textit{N} $\\ge$ 200} or \\\\
+                                                      \\textbf{NM = 9 with \\textit{N} $\\le$ 100}}', 
+                                                     
+                                                      '\\thead[lt]{Largest improvements in precision \\\\ 
+                                                      using \\textbf{NM = 7 with \\textit{N} $\\ge$ 200} or \\\\
+                                                      \\textbf{NM = 9 with \\textit{N} $\\le$ 100}}'),
+                                                     
+                            
+                            '$\\upbeta_{fixed}$' = beta_fixed_errorbar_lengths, 
+                            '$\\upgamma_{fixed}$' = gamma_fixed_errorbar_lengths, 
+                            '$\\upbeta_{random}$' = beta_rand_errorbar_lengths, 
+                            '$\\upgamma_{random}$' = gamma_rand_errorbar_lengths, 
+                            
+                            
+                            check.names = F)
+
+kbl(x = summary_table, format = 'latex',
+    linesep = c('\\cmidrule{1-8}', '\\cmidrule{1-8}'), #\\cmidrule(l{0.25cm}r{0.25cm}){1-8}
+       longtable = T, booktabs = T, centering = T, escape = F,
+    caption = 'Concise Summary of Results Across All Time Structuredness Levels in Experiment 3', 
+   align = c('l', 'l', 'l', 'l', rep('c', times = 4))) %>%
+     #header
+  column_spec(column = 1, width = '5cm') %>%
+  column_spec(column = 2, width = '4.5cm') %>%
+  column_spec(column = 3, width = '2cm') %>%
+  column_spec(column = 4, width = '5.5cm') %>%
+  column_spec(column = 5:8, width = '1cm') %>%
+  add_header_above(header = c(' ' = 4, 'Error Bar Summary' = 4)) %>%
+  
+   #footnotes
+  footnote(escape = F, threeparttable = T, general_title = '',
+           general = "\\\\textit{Note. }`Qualitative Description' column indicates the number of measurements that obtains the greatest improvements in bias and precision across all day-unit parameters. `Error Bar Summary' columns list the error bar lengths that result for each day-unit parameter using the measurement number listed in the `Qualitative Description' column. Parameter names and population values are as follows: $\\\\upbeta_{fixed}$ = fixed-effect days-to-halfway elevation parameter $\\\\in$ \\\\{80, 180, 280\\\\}; $\\\\upgamma_{fixed}$ = fixed-effect halfway-triquarter delta parameter = 20; $\\\\upbeta_{random}$ = random-effect days-to-halfway elevation parameter = 10; $\\\\upgamma_{random}$ = random-effect halfway-triquarter delta parameter = 4. NM = number of measurements.") %>%
+  kable_styling(position = 'left') %>%
+  landscape(margin = '2.54cm')
+``` 
+
+
+To understand why bias is constant as time structure decreases, it is important to first understand latent growth curve models more deeply. By default, latent growth curve models assume time-structured data. As a reminder, data are time structured when participants provide data at the exact same moment at each time point (e.g., if a study collects data on the first day of each month for a year, then time-structured data would only be obtained if participants all provide their data at the exact same moment each time data are collected). Consider a random-intercept-random-slope model shown in Figure \ref{fig:ex-latent-growth} that is used to model stress ratings collected on the first day of each month over the course of five months from $j$ people. Stress ratings at each $i$ time point for each $j$ person are predicted by person-specific intercepts ($b_{0j}$) and slopes ($b_{1j}$; in addition to a residual term [$\upepsilon_{ij}$]) as shown below in Equation \ref{eq:stressLevel1} (which is often called  Level-1 equation):
+
+\begin{align}
+  Stress_{ij} = b_{0j} + b_{1j}(Stress_{ij}) + \upepsilon_{ij}.
+  (\#eq:stressLevel1)
+\end{align}
+
+
+\noindent The person-specific intercepts and slopes are the sum of a fixed-effect parameter whose value is constant across all people ($\upgamma_{00}$ and $\upgamma_{10}$) and a random-effect parameter that represents the variance of the person-specific variables (i.e., $\upsigma_{00}$ and $\upsigma_{10}$). The fixed-effect intercept and slope, respectively, represent the mean starting stress value (i.e., average stress value at Time = 0) and the average slope value. Importantly, by estimating a random-effect parameter (in addition to the fixed-effect parameters), deviations from the mean intercept an slope values can be obtained for each $j$ person ($\upsigma_{0j}$ and $\upsigma_{1j}$) and these values then allow the person-specific intercepts and slopes to be computed as shown in Equations \ref{eq:intLevel2}--\ref{eq:slopeLevel2} (which are often called Level-2 equations):
+
+\begin{align}
+  b_{0j} = \hat{\upgamma_{00}} + \upsigma_{0j} \label{eq:intLevel2} \\
+  b_{1j} = \hat{\upgamma_{10}} + \upsigma_{1j} \label{eq:slopeLevel2}
+\end{align}
+
+
+\noindent Note that the fixed- and random-effect parameters in Figure \ref{fig:latent-growth} are superscribed with a caret ($\hat{\phantom{\beta}}$) to indicate that the values of these parameters are estimated by the latent growth curve model. Also note that, in Figure \ref{fig:latent-growth}, circles indicate latent variables, triangles indicate constants, and squares indicate observed (or manifest variables). 
+
+```{=tex}
+\begin{apaFigure}
+[portrait]
+[samepage]
+[-0.2cm]
+{Path Diagram for a Random-Intercept-Random-Slope Latent Growth Curve Model}
+{latent-growth}
+{0.65}
+{Figures/lgc_path_diagram}
+{Stress at each $i$ time point for each $j$ person is predicted by a person-specific slope ($b_{0j}$), person-specific intercept ($b_{1j}$), and residual ($\upepsilon_{ij}$; see Equation \ref{eq:stressLevel1} [Level-1 equation]). The person-specific effects are also called \textit{random effects} and each is the sum of a fixed-effect parameter whose value is constant across all people ($\upgamma_{00}$ and $\upgamma_{10}$) and a random-effect parameter that represents the variance of the person-specific variables (i.e., $\upsigma_{00}$ and $\upsigma_{10}$; see Equations \ref{eq:intLevel2}--\ref{eq:slopeLevel2} [Level-2 equations]). Note that the fixed- and random-effect parameters are superscribed with a caret ($\hat{\phantom{\beta}}$) to indicate that the values of these parameters are estimated by the latent growth curve model. Also note that circles indicate latent variables, triangles indicate constants, and squares indicate observed (or manifest variables).}
+\end{apaFigure}
+```
+
+
+To understand why bias in parameter estimation increases as time structuredness decreases, it is important to discuss one component of the latent growth curve model not yet discussed: loadings. In latent variable models, *loadings* comprise numbers that indicate how a latent variable should be modelled. The numbers in loadings satisfy two needs of latent variables. First, loadings  give latent variables a unit; latent variables are inherently unitless, and so require a unit so that they can be meaningfully interpreted. By fixing at least one pathway between a latent and observed variable with a loading, the latent variable takes on the units of the observed variable. In the current example, the intercept and slope latent variables take on the units of the stress ratings (e.g., Likert units). Second, in latent growth curve models, latent variables need their effect to be specified, and loadings satisfy this need. In the current example, the intercept has a constant effect at each time point, and this is represented by setting its loadings at each time point to 1. The slope represents linearly increasing change over time, and so its loadings are set to increase by an integer value of 1 after each time point. 
+
+Although loadings allow latent variables to model change over time, their values are constant across participants and it is this characteristic that causes modelling accuracy to decrease as time structuredness decreases. In focusing on the slope variable in Figure \ref{fig:latent-growth}, the loadings of 0, 1, 2, 3, and 4 assume that only one response pattern describes how each participant provides their data over the five-month period. Specifically, the loadings assume that each participant provides data on the first day of each month, which is indicated by the gray rectangles (along with the loading number above each gray rectangle) in each panel of Figure \ref{fig:time-structure}. With time-structured data, constant loadings do not decrease modelling accuracy because each participant provides their data on the first day of each month. As examples of modelling accuracy with time-structured data, panels A and C of Figure \ref{fig:time-structure} show the predicted and actual patterns for individual participants with linear and logistic patterns of change, respectively. Because each individual participant displays a response pattern identical to the one specified by the loadings, the predicted and actual patterns of change are identical. With time-unstructured data, the predicted and actual patterns of change no longer overlap because response patterns in participants differ from the one assumed by the loadings. As examples of modelling accuracy with time-unstructured data, panels B and D of Figure \ref{fig:time-structure} show the predicted and actual patterns for individual participants with linear and logistic patterns of change, respectively. Although each participant provides data many days after the first day of each month, the constant loadings set in the model lead the it to assume that data were collected on the first day of each month. Because the model misattributes the time at which data are recorded, the predicted patterns of change are shifted leftward, leading to a decrease in modelling accuracy. In Figure \ref{fig:time-structure}B, the intercept ($b_{0j}$) increases due to time-unstructured data. In Figure \ref{fig:time-structure}D, the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$) decreases due to time-unstructured data. Therefore, the loading structured specified by default in latent growth curve model causes modelling accuracy to decrease when data are time unstructured.  
+
+
+```{r time-structured-plot, eval=F, include=F}
+#Create  data set
+##setup variables 
+shift_factor <- 20
+days <- 1:120
+days_shift <- 1:(length(days) + shift_factor)
+theta <- 3
+alpha <- 3.32
+beta <- 60
+beta_shift <- beta - shift_factor
+gamma <- 10
+
+m <- (alpha - theta)/length(days)
+num_measurements <- 5
+
+measurement_days <- compute_measurement_schedule(time_period = length(days), 
+                                                 num_measurements = num_measurements, 
+                                                 smallest_int_length =  30, 
+                                                 measurement_spacing = 'equal')$measurement_days
+
+linear_scores <-  3 + m*days_shift
+linear_point_scores <- linear_scores[c(1, measurement_days)]
+
+shift_linear_scores <- linear_scores[shift_factor] + m*days_shift
+shift_linear_point_scores <-  shift_linear_scores[c(1, measurement_days)]
+
+
+logistic_scores <- theta + (alpha - theta)/(1 + exp((beta - days_shift)/gamma))
+logistic_point_scores <- logistic_scores[c(1, measurement_days)]
+
+shift_logistic_scores <- theta + (alpha - theta)/(1 + exp((beta_shift - days_shift)/gamma))
+shift_logistic_point_scores <-  shift_logistic_scores[c(1, measurement_days)]
+
+#panel titles
+panel_A <- "atop(bold(A:~Predicted~Linear~Change~With), bold(`Time-Structured`~Data)~phantom(textf))"
+panel_B <- "atop(bold(B:~Predicted~Linear~Change~With), bold(`Time-Unstructured`~Data)~phantom(ti))"
+panel_C <- "atop(bold(C:~Predicted~Logistic~Change~With), bold(`Time-Structured`~Data)~phantom(textfsi))"
+panel_D <- "atop(bold(D:~Predicted~Logistic~Change~With), bold(`Time-Unstructured`~Data)~phantom(tex))"
+
+#observed data 
+observed_line_data <- data.frame('days' = c(days_shift, days_shift, days_shift, days_shift), 
+                            'scores' = c(linear_scores, shift_linear_scores,
+                                         logistic_scores, shift_logistic_scores), 
+                            'panel_title' =  c(rep(panel_A, 
+                                                 times = length(linear_scores)),
+                                               rep(panel_B, 
+                                                 times = length(shift_linear_scores)), 
+                                               rep(panel_C, 
+                                                 times = length(logistic_scores)), 
+                                                rep(panel_D, 
+                                                 times = length(shift_logistic_scores))))
+
+observed_point_data <- data.frame('days' = c(measurement_days, measurement_days+20, measurement_days, measurement_days+20), 
+                                            
+                                  'scores' = c(linear_point_scores, shift_linear_point_scores,
+                                             logistic_point_scores, shift_logistic_point_scores),
+                                  'panel_title' =  c(rep(panel_A, 
+                                                 times = length(linear_point_scores)),
+                                               rep(panel_B, 
+                                                 times = length(linear_point_scores)), 
+                                               rep(panel_C, 
+                                                 times = length(logistic_point_scores)), 
+                                                rep(panel_D, 
+                                                 times = length(logistic_point_scores))))
+
+#modelled data 
+modelled_line_data <- data.frame('days' = c(days_shift, days_shift, days_shift, days_shift), 
+                            'scores' = c(linear_scores, linear_scores, logistic_scores, logistic_scores),
+                            'panel_title' =  c(rep(panel_A, 
+                                                 times = length(days_shift)),
+                                               rep(panel_B, 
+                                                 times = length(days_shift)), 
+                                               rep(panel_C, 
+                                                 times = length(days_shift)), 
+                                                rep(panel_D, 
+                                                 times = length(days_shift))))
+
+modelled_point_data <- data.frame('days' = rep(measurement_days, times = 4), 
+                                  'scores' = c(linear_point_scores, shift_linear_point_scores, 
+                                               logistic_point_scores, shift_logistic_point_scores), 
+                                   'panel_title' =  c(rep(panel_A, 
+                                                 times = length(linear_point_scores)),
+                                               rep(panel_B, 
+                                                 times = length(logistic_point_scores)), 
+                                               rep(panel_C, 
+                                                 times = length(shift_linear_point_scores)), 
+                                                rep(panel_D, 
+                                                 times = length(shift_logistic_point_scores))))
+
+#combine observed & modelled data sets for modelled 
+line_data <- rbind(observed_line_data, modelled_line_data)
+line_data$line_type <- factor(x = c(rep(x = 'observed', times = nrow(observed_line_data)), 
+                                    rep('model', times = nrow(modelled_line_data))))
+point_data <- rbind(observed_point_data, modelled_point_data)
+point_data$point_type <- factor(rep(x = c('observed', 'model'), each = nrow(observed_point_data)))
+
+#rectangle data 
+width <- 1.5
+rectangle_data <- data.frame(
+  'xmin' = measurement_days - width,
+  'xmax' = measurement_days + width, 
+  'ymin' = rep(3.00, times = length(measurement_days)), 
+  'ymax' = rep(3.4,  length(measurement_days)), 
+ ' panel_title' =  c(rep(panel_A, 
+                         times = length(measurement_days))))
+                     #rep('bold(B:~Predicted~Linear~Change~(`Time-Structured`~Data))', 
+                     #  times = length(logistic_point_scores)), 
+                     #rep('bold(C:~Predicted~Logistic~Change~(`Time-Structured`~Data))', 
+                     #  times = length(shift_linear_point_scores)), 
+                     # rep('bold(D:~Predicted~Logistic~Change~(`Time-Unstructured`~Data))', 
+                     #  times = length(shift_logistic_point_scores))))
+
+arrow_data <- data.frame(
+  'panel_title' = c(rep(panel_B, times = length(shift_linear_point_scores)), 
+                    rep(panel_D, times = length(shift_logistic_point_scores))),
+               
+  xmin = c(measurement_days + 19, measurement_days + 19), 
+  xmax = c(measurement_days + 3, measurement_days + 3), 
+  ymin = c(shift_linear_point_scores, shift_logistic_point_scores), 
+  ymax = c(shift_linear_point_scores, shift_logistic_point_scores))
+
+text_data <- data.frame('text' = c('0', '1', '2', '3', '4'), 
+                        x = c( measurement_days), 
+                        y = 3.41)
+
+
+time_structure_plot <- ggplot(line_data, aes(x = days, y = scores, group = line_type)) + 
+  geom_rect(inherit.aes = F, data = rectangle_data, mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), 
+            fill = 'grey50', color = NA, alpha = 0.2) + 
+  geom_line(size = 1.5, mapping = aes(linetype = line_type)) + 
+  geom_text(inherit.aes = F, data = text_data, mapping = aes(x = x, y = y, label = text, family = 'Helvetica', fontface = 'bold'), size = 17) + 
+  scale_y_continuous(name = 'Stress Rating (Likert Units [1-5])', breaks = c(3.00, 3.16, 3.23, 3.32, 3.40), limits = c(3.00, 3.41)) +
+  geom_point(data = point_data, inherit.aes = F, mapping = aes(x = days, y = scores, shape = point_type, fill = point_type), size = 15) + 
+  theme_classic(base_family = 'Helvetica') + 
+
+  #arrows
+ geom_segment(data = arrow_data, inherit.aes = F, mapping = aes(x = xmin, xend = xmax, y = ymin, yend = ymax), 
+              arrow = arrow(length = unit(1, 'cm')), size = 2.5)  + 
+
+  nonlinSimsAnalysis:::facet_wrap_custom( ~ panel_title, scales = "free", ncol = 2, nrow = 2 , dir = 'h',
+                     labeller = label_parsed,  
+
+                            scale_overrides = list(
+                            nonlinSimsAnalysis:::scale_override(1,
+                              scale_x_continuous(
+                                breaks = c(0, 30, 60, 90, 120, 150),
+                                 labels = c('Feb', 'Mar', 'May', 'Apr', 'May', 'June'), 
+                                limits = c(-2.5, 150))), 
+                            
+                             nonlinSimsAnalysis:::scale_override(which = 2,
+                              scale_x_continuous(
+                                breaks = c(0, 30, 60, 90, 120, 150),
+                                 labels = c('Feb', 'Mar', 'May', 'Apr', 'May', 'June'), 
+                                limits = c(-2.5, 150))),  
+                            
+                            nonlinSimsAnalysis:::scale_override(which = 3,
+                               scale_x_continuous(
+                                breaks = c(0, 30, 60, 90, 120, 150),
+                                 labels = c('Feb', 'Mar', 'May', 'Apr', 'May', 'June'), 
+                                limits = c(-2.5, 150))), 
+                         
+                            nonlinSimsAnalysis:::scale_override(4,
+                              scale_x_continuous(
+                                   breaks = c(0, 30, 60, 90, 120, 150),
+                                   labels = c('Feb', 'Mar', 'May', 'Apr', 'May', 'June'), 
+                                limits = c(-2.5, 150))))) + 
+  
+   scale_shape_manual(name = 'Pattern of Change', 
+                      values=c(22,22),
+                       labels = c('Predicted', 'Actual')) + 
+                      
+  scale_linetype_manual(name = 'Pattern of Change', values = c('solid', 'dashed'), 
+                         labels = c('Predicted', 'Actual')) + 
+  scale_fill_manual(name = 'Pattern of Change',
+                    values = c('white', 'black'),
+                    labels = c('Predicted', 'Actual')) +  #set drop =FALSE s that unused levels are included
+
+
+  labs( x = 'Day') + 
+  
+  theme(
+      #panel details
+      strip.background = element_rect(fill = "white", color = "white"),
+      strip.text.x = element_text(face = 'bold', hjust = 0, size = 60, margin = unit(c(t = 3, r = 0, b = 1, l = 0), "cm")),
+
+      #axis details
+      axis.text = element_text(size = 50, color = 'black'),
+      axis.text.x = element_text(size = 55, vjust = 0.25, angle = 0), 
+      axis.title = element_text(size = 60),
+      axis.line = element_line(size = 2),
+      axis.ticks.length.x = unit(x = 1, units = 'cm'),
+      axis.title.x = element_text(margin = unit(c(t = 2, r = 0, 0, 0), "cm")),
+      axis.title.y = element_text(margin = unit(c(t = 0, r = 2, b = 0, l = 0), units = 'cm')),
+      axis.ticks = element_line(size = 2, colour = 'black'),
+      axis.ticks.length.y =  unit(x = 1, units = 'cm'),
+
+      #legend details
+     
+      legend.text = element_text(size = 45, margin = unit(c(t = 0, r = 3, b = 0, l = 0), "cm")),
+      legend.margin = margin(unit(x = c(t = 0, r= 10, b = 10, l = 10), "cm")),
+      legend.title = element_text(size = 50,  margin = unit(c(t = 0.5, r = 0, b = 0, l = 0), "cm")),
+      legend.key.size = unit(3, 'cm'),
+      legend.position = c(0.5, 0.51),
+      legend.direction = 'vertical',
+      legend.box.background = element_rect(colour = 'black', size = 3),
+
+      #panel details
+      panel.spacing.y = unit(x = 12, units = 'cm'),
+      panel.spacing.x = unit(x = 2, units = 'cm'))
+
+
+set_panel_size(p = time_structure_plot, height = unit(x = 32, units = 'cm'),
+                 width = unit(x = 40, units = 'cm'),
+                 file =  'Figures/time_structure_plots.pdf')
+
+
+
+```
+
+
+```{=tex}
+\begin{apaFigure}
+[portrait]
+[samepage]
+[-0.2cm]
+{Modelling Accuracy Decreases as Time Structuredness Decreases}
+{time_structure}
+{0.165}
+{Figures/time_structure_plots}
+{Panel A: Predicted and actual linear patterns of change are identical because of time-structured data. Panel B: Predicted and actual linear patterns of change are different because of time-untructured data decreases modelling accuracy. Panel C: Predicted and actual logistic patterns of change are identical because of time-structured data. Panel D: Predicted and actual logistic patterns of change differ because of time-unstructured data decreases modelling accuracy. Predicted patterns of change are based on empty dots and actual patterns of change are based on filled dots. Shaded vertical rectangles indicate the response pattern expected across all participants by the loadings set in the latent growth curve model depicted in Figure \ref{fig:latent-growth}.}
+\end{apaFigure}
+```
+
+### Eliminating the Bias Caused by Time Unstructuredness: Using Definition Variables 
+
+In examining the effects of time structuredness, the results show that modelling accuracy decreases as time structuredness decreases. Importantly, the decrease in modelling accuracy is often constant regardless of the number of measurements or sample size. Because data are likely to be time unstructured, then the constant error incurred seems inevitable and this can be disconcerting. Fortunately, this error can be avoided by using actual times of measurements, otherwise known as definition variables [@mehta2000; @mehta2015]. Figure \ref{fig:latent-def} shows a latent variable with definition variables. 
+
+To show that definition variables can eliminate the error incurred by time-unstructured data, I ran an additional set of simulations.   
+
+```{r plots-slow-response-def, include=F, eval=F}
+generate_day_likert_facet_plot(analytical_data = exp_3_def_analytical, 
+                               target_col = 'time_structuredness', target_value = 'Time unstructured (slow response)',
+                              x_axis_name = expression("Sample Size ("*italic(N)*")"), 
+                               x_axis_var = 'sample_size', exp_num = 'exp3_def', beta_lower = 160, beta_upper = 210,
+                                 beta_ticks = 5)
+
+```
+
+```{=tex}
+\begin{apaFigure}
+[portrait]
+[samepage]
+[-0.2cm]
+{Parameter Estimation Plots for Day-Unit Parameters When Using Definition Variables To Model Time-Unstructured Data Characterized by a Slow Response Rate}
+{exp3_plot_days_def}
+{0.165}
+{Figures/exp3_defplot_days_time unstructured (slow response)}
+{Panel A: Parameter estimation plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Parameter estimation plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Parameter estimation plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Parameter estimation plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed}$ = 180.00, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3-def} for specific values estimated for each parameter and Table \ref{tab:omega-exp3-def} for $\upomega^2$ effect size values.}
+\end{apaFigure}
+```
 
 ## Summary 
 

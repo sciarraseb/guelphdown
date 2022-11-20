@@ -29,12 +29,12 @@
 %----------------------------------------------------------------------------------------
 %	REQUIRED PACKAGES
 %----------------------------------------------------------------------------------------
+\usepackage[hyperfootnotes = false]{hyperref} %turn off footnote hyperlinking (doesn't work well and also not necessary)
 \usepackage{titlecaps} %capitalizes first letter of words (needed to toc entries when using \addcontentsline)
 \usepackage{titlesec}
 \usepackage{fancyhdr} %needed for header and footer formatting
 \usepackage{etoolbox}
 \usepackage{multicol} %needed for multicolumn layout in abstract papge
-\usepackage[hyperfootnotes = false]{hyperref} %turn off footnote hyperlinking (doesn't work well and also not necessary)
 \usepackage[multiple, hang,flushmargin]{footmisc}  %removes indentation in footnotes
 \usepackage[labelfont = {bf, up}]{caption}
 \usepackage[flushleft]{threeparttable}
@@ -57,7 +57,6 @@
 \usepackage{longtable,booktabs,setspace}
 \usepackage{xargs} %needed to create environments with multiple optional arguments (e.g., apaFigure)
 \usepackage{enumitem} %needed to remove spacing between list items
-\usepackage[style=authoryear]{biblatex}
 
  % Required for customising links and the PDF
 \hypersetup{pdfpagemode={UseOutlines},
