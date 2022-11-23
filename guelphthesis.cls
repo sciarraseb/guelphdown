@@ -36,6 +36,7 @@
 \usepackage{etoolbox}
 \usepackage{multicol} %needed for multicolumn layout in abstract papge
 \usepackage[multiple, hang,flushmargin]{footmisc}  %removes indentation in footnotes
+
 \usepackage[labelfont = {bf, up}]{caption}
 \usepackage[flushleft]{threeparttable}
 \usepackage{anyfontsize} %needed for tables to take on Helvetica font
@@ -454,6 +455,67 @@ breaklinks=true
   \fi
 }
 
+%----------------------------------------------------------------------------------------
+%	CODE CHUNK FORMATTING
+%----------------------------------------------------------------------------------------
+%https://stackoverflow.com/questions/50702942/does-rmarkdown-allow-captions-and-references-for-code-chunks
+%chunk numbering
+
+
+
+\usepackage{fvextra}
+%syntax highlighting
+%see https://gist.github.com/Manuel-S/f285795979f42f65a144bf87ac52013b for all possible syntax highlighting customizations
+\AtBeginEnvironment{Shaded}{
+  \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\},  breaksymbol=}
+  \definecolor{shadecolor}{rgb}{0.94, 0.97, 1.0} %background color for code chunks
+}
+
+\AtBeginEnvironment{verbatim}{
+  \definecolor{shadecolor}{rgb}{0.94, 0.97, 1.0} %background color for code chunks
+}
+
+\AtBeginEnvironment{Highlighting}{
+  \setstretch{1}\fontsize{10pt}{10pt}
+  \renewcommand{\CommentTok}[1]{\textcolor[RGB]{94, 90, 90}{#1}}%#comment colour
+  \renewcommand{\DocumentationTok}[1]{\textcolor[RGB]{94, 90, 90}{#1}} %multiline comments colour
+  \renewcommand{\NormalTok}[1]{\textcolor[RGB]{0, 24, 45}{#1}} %variable name color
+  \renewcommand{\OtherTok}[1]{\fontsize{8pt}{8pt}\textcolor[RGB]{0, 24, 45}{#1}}
+  \renewcommand{\AttributeTok}[1]{\textcolor[RGB]{0, 24, 45}{#1}} %attribute color
+  \renewcommand{\FunctionTok}[1]{\textcolor[RGB]{6, 120, 225}{#1}} %function names
+  \renewcommand{\StringTok}[1]{\textcolor[RGB]{212, 93, 196}{#1}} %strings
+  \renewcommand{\ConstantTok}[1]{\textcolor[RGB]{212, 93, 196}{#1}} %constants such as NA, NULL
+}
+
+
+
+\usepackage{newfloat} %cannot use floatrow when using caption (or else formatting of figures and tables will be messed up)
+
+\DeclareFloatingEnvironment[fileext = chk, name =]{chunk}
+
+
+%\usepackage{floatrow}
+%\DeclareNewFloatType{chunk}{placement=H, fileext=chk, name=}
+\captionsetup{options=chunk}
+\renewcommand{\thechunk}{\theapp.\arabic{chunk}}
+\DeclareCaptionLabelFormat{chunkLabel}{Code Block \thechunk}
+
+\makeatletter
+\@addtoreset{chunk}{section}
+\makeatother
+
+\captionsetup[chunk]{labelformat = chunkLabel,  labelfont={CaptionFont, titleSize, bf}, textfont = {it, CaptionFont, titleSize}, labelsep = captionSep, justification= raggedright, singlelinecheck=off, skip = 30pt}
+
+
+%vertical space above and below chunk
+%\setlength{\OuterFrameSep}{-20pt}
+\usepackage{framed}
+\setlength{\topsep}{-20pt}
+\AfterEndEnvironment{Shaded}{\vspace{20pt}}
+
+%restores paragraph indenting after using captionof for caption of code blocks
+\edef\restoreparindent{\parindent = 1cm}
+\restoreparindent
 
 
 

@@ -1,3 +1,5 @@
+
+
 `r if(knitr:::is_latex_output()) '\\appendix'`
 
 `r if(!knitr:::is_latex_output()) '# (APPENDIX) Appendix {-}'` 
@@ -6,10 +8,21 @@
 ```{r package_loading_int_app, include=F}
 #devtools::install_github(repo = 'sciarraseb/nonlinSimsAnalysis', force = T)
 library(easypackages)
-packages <- c('tidyverse', 'RColorBrewer', 'parallel', 'data.table', 'kableExtra', 'ggtext', 'egg', 'ggbrace', 'cowplot', 'nonlinSimsAnalysis', 'nonlinSims')
+packages <- c('tidyverse', 'RColorBrewer', 'parallel', 'data.table', 'kableExtra', 'ggtext', 'egg', 'ggbrace', 'cowplot', 'nonlinSimsAnalysis', 'nonlinSims', 'knitr', 'formatR')
 libraries(packages)
 
 knitr::opts_chunk$set(message = F)
+
+data_wide <- read_csv(file = 'data/data_wide.csv')
+#see https://stackoverflow.com/questions/50702942/does-rmarkdown-allow-captions-and-references-for-code-chunks 
+#note that \\restoreparindent is needed so that \\captionof does not eliminate paragraph indenting
+oldSource <- knit_hooks$get("source")
+knit_hooks$set(source = function(x, options) {
+  x <- oldSource(x, options)
+  x <- ifelse(!is.null(options$ref), paste0("\\label{", options$ref,"}", x), x)
+  ifelse(!is.null(options$codecap), paste0("\\captionof{chunk}{", options$codecap,"}", "\\restoreparindent", x), x)
+})
+
 ```
 
 ```{r knitting_setup_int_app, echo=F, message = F, warning = F}
@@ -106,8 +119,199 @@ saveRDS(object = param_summary_exp_3, file = 'data/uf_param_summary_exp_3.RData'
 \renewcommand{\theequation}{\theapp.\arabic{equation}}  %reset figure number counter for each appendix
 \counterwithin{equation}{app} %reset figure number counter for each appendix
 
+\counterwithin{chunk}{app} %reset code chunk numbering
+
 ```
 \newpage
+
+
+\app{OpenMx Code for Structured Latent Growth Curve Model Used in Simulation Experiments}
+\label{structured-lgc-code}
+
+```{r structured-lgc, echo=T, eval=F, attr.source='.numberLines', ref = "structured-model", codecap = "OpenMx Code for Structured Latent Growth Curve Model"}
+#Manifest variable names (i.e., names of columns cotaining data points at each time point [e.g., ])
+manifest_vars <- nonlinSims:::extract_manifest_var_names(data_wide = data_wide)
+
+#Latent variable names (theta = baseline, alpha = maximal elevation, beta = days-to-halfway elevation, gamma = triquarter-haflway elevation)
+latent_vars <- c('theta', 'alpha', 'beta', 'gamma') 
+
+#initial checks 
+  tryCatch(expr = model_name, error = function(e) {message("Error: model_name is not a character vector")})
+  
+  manifest_vars <- extract_manifest_var_names(data_wide = data_wide)
+  latent_vars <- c('theta', 'alpha', 'beta', 'gamma')
+  measurement_days <- measurement_days
+
+  model <- mxModel(model = model_name,
+                   type = 'RAM', independent = T,
+                   mxData(observed = data_wide, type = 'raw'),
+                   
+                   manifestVars = manifest_vars,
+                   latentVars = latent_vars,
+                   
+                   #Residual variances; by using one label, they are assumed to all be equal (homogeneity of variance)
+                   mxPath(from = manifest_vars,
+                          arrows=2, free=TRUE,  labels='epsilon', values = 1, lbound = 0),
+                   
+                   #Latent variable covariances and variances
+                   mxPath(from = latent_vars,
+                          connect='unique.pairs', arrows=2,
+                          #aa(diff_rand), ab(cov_diff_beta), ac(cov_diff_gamma), bb(beta_rand), bc(var_beta_gamma), cc(gamma_rand)
+                          free = c(TRUE,FALSE, FALSE, FALSE, 
+                                   TRUE, FALSE, FALSE, 
+                                   TRUE, FALSE, 
+                                   TRUE), 
+                          values=c(1, NA, NA, NA, 
+                                   1, NA, NA, 
+                                   1, NA,
+                                   1),
+                          labels=c('theta_rand', 'NA(cov_theta_alpha)', 'NA(cov_theta_beta)', 
+                                   'NA(cov_theta_gamma)',
+                                   'alpha_rand','NA(cov_alpha_beta)', 'NA(cov_alpha_gamma)', 
+                                   'beta_rand', 'NA(cov_beta_gamma)', 
+                                   'gamma_rand'), 
+                          lbound = c(1e-3, NA, NA, NA, 
+                                     1e-3, NA, NA, 
+                                     1, NA,
+                                     1), 
+                          ubound = c(2, NA, NA, NA, 
+                                     2, NA, NA, 
+                                     90^2, NA, 
+                                     45^2)),
+                   
+                   #Latent variable means (linear parameters). Note that the nonlinear parameters of beta and gamma do not have estimated means
+                   mxPath(from = 'one', to = c('theta', 'alpha'), free = c(TRUE, TRUE), arrows = 1,
+                          labels = c('theta_fixed', 'alpha_fixed'), lbound = 0, ubound = 7, 
+                          values = c(1, 1)),
+                   
+                   #Functional constraints
+                   mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+                            labels = 'theta_fixed', name = 't', values = 1, lbound = 0,  ubound = 7), 
+                   mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+                            labels = 'alpha_fixed', name = 'a', values = 1, lbound = 0,  ubound = 7), 
+                   mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+                            labels = 'beta_fixed', name = 'b', values = 1, lbound = 1, ubound = 360),
+                   mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+                            labels = 'gamma_fixed', name = 'g', values = 1, lbound = 1, ubound = 360), 
+  
+                   mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = FALSE, 
+                            values = measurement_days, name = 'time'),
+                   
+                   #Algebra specifying first partial derivatives; 
+                   mxAlgebra(expression = 1 - 1/(1 + exp((b - time)/g)), name="Tl"),
+                   mxAlgebra(expression = 1/(1 + exp((b - time)/g)), name = 'Al'), 
+                   mxAlgebra(expression = -((a - t) * (exp((b - time)/g) * (1/g))/(1 + exp((b - time)/g))^2), name = 'Bl'),
+                   mxAlgebra(expression =  (a - t) * (exp((b - time)/g) * ((b - time)/g^2))/(1 + exp((b -time)/g))^2, name = 'Gl'),
+                   
+                   #Factor loadings; all fixed and, importantly, constrained to change according to their partial derivatives (i.e., nonlinear functions) 
+                   mxPath(from = 'theta', to = manifest_vars, arrows=1, free=FALSE,  
+                          labels = sprintf(fmt = 'Tl[%d,1]', 1:length(manifest_vars))),
+                   mxPath(from = 'alpha', to = manifest_vars, arrows=1, free=FALSE,  
+                          labels = sprintf(fmt = 'Al[%d,1]', 1:length(manifest_vars))), 
+                   mxPath(from='beta', to = manifest_vars, arrows=1,  free=FALSE,
+                          labels =  sprintf(fmt = 'Bl[%d,1]', 1:length(manifest_vars))), 
+                   mxPath(from='gamma', to = manifest_vars, arrows=1,  free=FALSE,
+                          labels =  sprintf(fmt = 'Gl[%d,1]', 1:length(manifest_vars))), 
+                   
+                   mxFitFunctionML(vector = FALSE)
+                   
+  )
+```
+
+```{r echo=T, results = 'hold'}
+names(data_wide)[2:8]
+
+```
+`r knit_exit()`
+
+
+\app{OpenMx Code for Structured Latent Growth Curve Model With Definition Variables}
+\label{def-model-code}
+
+Code Block \ref{definition-model} OpenMx Code for Structured Latent Growth Curve Model With Definition Variables OpenMx Code for Structured Latent Growth Curve Model With Definition Variables section on Appendix \ref{def-model-code}
+
+```{r def-lfc, echo=T, eval=F, attr.source='.numberLines', ref = "definition-model", codecap = "OpenMx Code for Structured Latent Growth Curve Model With Definition Variables"}
+#Manifest variable names 
+manifest_vars <- nonlinSims:::extract_manifest_var_names(data_wide = data_wide)
+
+#Latent variable names (theta = baseline, alpha = maximal elevation, beta = days-to-halfway elevation, gamma = triquarter-haflway elevation)
+latent_vars <- c('theta', 'alpha', 'beta', 'gamma') 
+
+#Definition variable (data. prefix tells OpenMx to use recorded time of observation for each person's data)
+obs_score_days <- paste('data.', extract_obs_score_days(data = data_wide), sep = '') 
+
+model <- mxModel(
+  model = model_name,
+  type = 'RAM', independent = T,
+  mxData(observed = data_wide, type = 'raw'),
+
+  #Residual variances; by using one label, they are assumed to all be equal (homogeneity of variance)
+  mxPath(from = manifest_vars,arrows=2, free=TRUE,  labels='epsilon', values = 1, lbound = 0),
+
+  #Latent variable covariances and variances
+  mxPath(from = latent_vars,
+         connect='unique.pairs', arrows=2,
+         free = c(TRUE,FALSE, FALSE, FALSE, 
+                  TRUE, FALSE, FALSE, 
+                  TRUE, FALSE, 
+                  TRUE), 
+         values=c(1, NA, NA, NA, 
+                  1, NA, NA, 
+                  1, NA,
+                  1),
+         labels=c('theta_rand', 'NA(cov_theta_alpha)', 'NA(cov_theta_beta)', 
+                  'NA(cov_theta_gamma)',
+                  'alpha_rand','NA(cov_alpha_beta)', 'NA(cov_alpha_gamma)', 
+                  'beta_rand', 'NA(cov_beta_gamma)', 
+                  'gamma_rand'), 
+         lbound = c(1e-3, NA, NA, NA, 
+                    1e-3, NA, NA, 
+                    1, NA,
+                    1), 
+         ubound = c(2, NA, NA, NA, 
+                    2, NA, NA, 
+                    90^2, NA, 
+                    45^2)),
+  
+  #Latent variable means (linear parameters). Note that the nonlinear parameters of beta and gamma do not have estimated means
+  mxPath(from = 'one', to = c('theta', 'alpha'), free = c(TRUE, TRUE), arrows = 1,
+         labels = c('theta_fixed', 'alpha_fixed'), lbound = 0, ubound = 7, 
+         values = c(1, 1)),
+  
+  #Functional constraints
+  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+           labels = 'theta_fixed', name = 't', values = 1, lbound = 0,  ubound = 7), 
+  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+           labels = 'alpha_fixed', name = 'a', values = 1, lbound = 0,  ubound = 7), 
+  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+           labels = 'beta_fixed', name = 'b', values = 1, lbound = 1, ubound = 360),
+  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+           labels = 'gamma_fixed', name = 'g', values = 1, lbound = 1, ubound = 360), 
+  
+  #Definition variables set for loadings (accounts for time-unstructured data) 
+  mxMatrix(type = 'Full', nrow = length(obs_score_days), ncol = 1, free = FALSE, 
+           labels = obs_score_days, name = 'time'),
+  
+  #Algebra specifying first partial derivatives; 
+  mxAlgebra(expression = 1 - 1/(1 + exp((b - time)/g)), name="Tl"),
+  mxAlgebra(expression = 1/(1 + exp((b - time)/g)), name = 'Al'), 
+  mxAlgebra(expression = -((a - t) * (exp((b - time)/g) * (1/g))/(1 + exp((b - time)/g))^2), name = 'Bl'),
+  mxAlgebra(expression =  (a - t) * (exp((b - time)/g) * ((b - time)/g^2))/(1 + exp((b -time)/g))^2, name = 'Gl'),
+  
+  #Factor loadings; all fixed and, importantly, constrained to change according to their partial derivatives (i.e., nonlinear functions) 
+  mxPath(from = 'theta', to = manifest_vars, arrows=1, free=FALSE,  
+         labels = sprintf(fmt = 'Tl[%d,1]', 1:length(manifest_vars))),
+  mxPath(from = 'alpha', to = manifest_vars, arrows=1, free=FALSE,  
+         labels = sprintf(fmt = 'Al[%d,1]', 1:length(manifest_vars))), 
+  mxPath(from='beta', to = manifest_vars, arrows=1,  free=FALSE,
+         labels =  sprintf(fmt = 'Bl[%d,1]', 1:length(manifest_vars))), 
+  mxPath(from='gamma', to = manifest_vars, arrows=1,  free=FALSE,
+         labels =  sprintf(fmt = 'Gl[%d,1]', 1:length(manifest_vars))), 
+  
+  mxFitFunctionML(vector = FALSE)
+)
+```
+
 
 \app{Ergodicity and the Need to Conduct Longitudinal Research}
 
@@ -157,7 +361,7 @@ The guaranteed differences in cross-sectional and longitudinal variance values t
 With an understanding of the conditions required for ergodicity, a brief consideration of organizational phenomena finds that these conditions are regularly violated. Focusing only on homogeneity (each person's data are generated from the same distribution), several instances in organizational research violate this condition. As examples of homogeneity violations, employees show different patterns of absenteeism over five years [@magee2016], leadership development over the course of a seminar [@day2011], career stress over the course of 10 years [@igic2017], and job performance in response to organizational restructuring [@miraglia2015]. With respect to stationarity (constant values for statistical parameters across people over time), several examples can be generated by realizing how calendar events affect psychological processes and behaviours throughout the year. As examples of stationarity violations, consider how salespeople, on average, undoubtedly sell more products during holidays, how employees, on average, take more sick days during the winter months, and how accountants, on average, experience more stress during tax season. With ergodic condition violations commonly occurring in organizational psychology, it becomes fitting to echo the commonly held sentiment that few, if any, psychological processes are ergodic [@molenaar2004; @molenaar2008; @molenaar2009; @fisher2018; @curran2011; @wang2015; @hamaker2012]. 
 
 
-\app{Using Nonlinear Function in the Structural Equation Modelling Framework}
+\app{Using Nonlinear Function in the Structural Equation Modelling Framework} 
 \secapp{Nonlinear Latent Growth Curve Model Used to Analyze Each Generated Data Set}
 
 The sections that follow will first review the framework used to build

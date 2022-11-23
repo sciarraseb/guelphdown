@@ -1,0 +1,154 @@
+\contentsline {chapter}{\titlecap {Abstract}}{ii}{Doc-Start}%
+\contentsline {chapter}{\titlecap {Dedication}}{iii}{Doc-Start}%
+\contentsline {chapter}{\titlecap {Acknowledgements}}{iv}{Doc-Start}%
+\contentsline {chapter}{Table of Contents}{v}{section*.1}%
+\contentsline {chapter}{List of Tables}{x}{section*.2}%
+\contentsline {chapter}{List of Figures}{xi}{section*.3}%
+\contentsline {chapter}{List of Appendices}{xii}{section*.4}%
+\contentsline {chapter}{\numberline {1}thesisdown::thesis\_gitbook: default}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}The Need to Conduct Longitudinal Research}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Understanding Patterns of Change That Emerge Over Time}{1}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Challenges Involved in Conducting Longitudinal Research}{1}{section.1.3}%
+\contentsline {subsection}{\numberline {1.3.1}Number of Measurements}{1}{subsection.1.3.1}%
+\contentsline {subsection}{\numberline {1.3.2}Spacing of Measurements}{1}{subsection.1.3.2}%
+\contentsline {subsection}{\numberline {1.3.3}Time Structuredness}{1}{subsection.1.3.3}%
+\contentsline {subsubsection}{\numberline {1.3.3.1}Time-Structured Data}{1}{subsubsection.1.3.3.1}%
+\contentsline {subsubsection}{\numberline {1.3.3.2}Time-Unstructured Data}{1}{subsubsection.1.3.3.2}%
+\contentsline {subsection}{\numberline {1.3.4}Summary}{1}{subsection.1.3.4}%
+\contentsline {section}{\numberline {1.4}Using Simulations To Assess Modelling Accuracy}{1}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Systematic Review of Simulation Literature}{1}{section.1.5}%
+\contentsline {subsection}{\numberline {1.5.1}Systematic Review Methodology}{1}{subsection.1.5.1}%
+\contentsline {subsection}{\numberline {1.5.2}Systematic Review Results}{1}{subsection.1.5.2}%
+\contentsline {subsection}{\numberline {1.5.3}Next Steps}{1}{subsection.1.5.3}%
+\contentsline {section}{\numberline {1.6}Methods of Modelling Nonlinear Patterns of Change Over Time}{1}{section.1.6}%
+\contentsline {section}{\numberline {1.7}Overview of Simulation Experiments}{1}{section.1.7}%
+\contentsline {chapter}{\numberline {2}Experiment 1}{1}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Methods}{3}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Variables Used in Simulation Experiment}{3}{subsection.2.1.1}%
+\contentsline {subsubsection}{\numberline {2.1.1.1}Independent Variables}{3}{subsubsection.2.1.1.1}%
+\contentsline {paragraph}{\numberline {2.1.1.1.1}Spacing of Measurements}{3}{paragraph.2.1.1.1.1}%
+\contentsline {paragraph}{\numberline {2.1.1.1.2}Number of Measurements}{3}{paragraph.2.1.1.1.2}%
+\contentsline {paragraph}{\numberline {2.1.1.1.3}Population Values Set for The Fixed-Effect Days-to-Halfway Elevation Parameter \(\upbeta _{fixed}\) (Nature of Change)}{3}{paragraph.2.1.1.1.3}%
+\contentsline {subsubsection}{\numberline {2.1.1.2}Constants}{3}{subsubsection.2.1.1.2}%
+\contentsline {subsubsection}{\numberline {2.1.1.3}Dependent Variables}{3}{subsubsection.2.1.1.3}%
+\contentsline {paragraph}{\numberline {2.1.1.3.1}Convergence Success Rate}{3}{paragraph.2.1.1.3.1}%
+\contentsline {paragraph}{\numberline {2.1.1.3.2}Bias}{3}{paragraph.2.1.1.3.2}%
+\contentsline {paragraph}{\numberline {2.1.1.3.3}Precision}{3}{paragraph.2.1.1.3.3}%
+\contentsline {subsection}{\numberline {2.1.2}Overview of Data Generation}{3}{subsection.2.1.2}%
+\contentsline {subsubsection}{\numberline {2.1.2.1}Data Generation}{3}{subsubsection.2.1.2.1}%
+\contentsline {paragraph}{\numberline {2.1.2.1.1}Function Used to Generate Each Data Set}{3}{paragraph.2.1.2.1.1}%
+\contentsline {paragraph}{\numberline {2.1.2.1.2}Population Values Used for Function Parameters}{3}{paragraph.2.1.2.1.2}%
+\contentsline {subsection}{\numberline {2.1.3}Modelling of Each Generated Data Set}{3}{subsection.2.1.3}%
+\contentsline {subsection}{\numberline {2.1.4}Analysis of Data Modelling Output and Accompanying Visualizations}{3}{subsection.2.1.4}%
+\contentsline {subsubsection}{\numberline {2.1.4.1}Analysis of Convergence Success Rate}{3}{subsubsection.2.1.4.1}%
+\contentsline {subsubsection}{\numberline {2.1.4.2}Analysis and Visualization of Bias}{3}{subsubsection.2.1.4.2}%
+\contentsline {subsubsection}{\numberline {2.1.4.3}Analysis and Visualization of Precision}{3}{subsubsection.2.1.4.3}%
+\contentsline {paragraph}{\numberline {2.1.4.3.1}Effect Size Computation for Precision}{3}{paragraph.2.1.4.3.1}%
+\contentsline {section}{\numberline {2.2}Results and Discussion}{3}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Framework for Interpreting Results}{3}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Pre-Processing of Data and Model Convergence}{3}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Equal Spacing}{3}{subsection.2.2.3}%
+\contentsline {subsubsection}{\numberline {2.2.3.1}Nature of Change That Leads to Highest Modelling Accuracy}{3}{subsubsection.2.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.2.3.2}Bias}{3}{subsubsection.2.2.3.2}%
+\contentsline {subsubsection}{\numberline {2.2.3.3}Precision}{3}{subsubsection.2.2.3.3}%
+\contentsline {subsubsection}{\numberline {2.2.3.4}Qualitative Description}{3}{subsubsection.2.2.3.4}%
+\contentsline {subsubsection}{\numberline {2.2.3.5}Summary of Results}{3}{subsubsection.2.2.3.5}%
+\contentsline {subsection}{\numberline {2.2.4}Time-Interval Increasing Spacing}{3}{subsection.2.2.4}%
+\contentsline {subsubsection}{\numberline {2.2.4.1}Nature of Change That Leads to Highest Modelling Accuracy}{3}{subsubsection.2.2.4.1}%
+\contentsline {subsubsection}{\numberline {2.2.4.2}Bias}{3}{subsubsection.2.2.4.2}%
+\contentsline {subsubsection}{\numberline {2.2.4.3}Precision}{3}{subsubsection.2.2.4.3}%
+\contentsline {subsubsection}{\numberline {2.2.4.4}Qualitative Description}{3}{subsubsection.2.2.4.4}%
+\contentsline {subsubsection}{\numberline {2.2.4.5}Summary of Results}{3}{subsubsection.2.2.4.5}%
+\contentsline {subsection}{\numberline {2.2.5}Time-Interval Decreasing Spacing}{3}{subsection.2.2.5}%
+\contentsline {subsubsection}{\numberline {2.2.5.1}Nature of Change That Leads to Highest Modelling Accuracy}{3}{subsubsection.2.2.5.1}%
+\contentsline {subsubsection}{\numberline {2.2.5.2}Bias}{3}{subsubsection.2.2.5.2}%
+\contentsline {subsubsection}{\numberline {2.2.5.3}Precision}{3}{subsubsection.2.2.5.3}%
+\contentsline {subsubsection}{\numberline {2.2.5.4}Qualitative Description}{3}{subsubsection.2.2.5.4}%
+\contentsline {subsubsection}{\numberline {2.2.5.5}Summary of Results}{3}{subsubsection.2.2.5.5}%
+\contentsline {subsection}{\numberline {2.2.6}Middle-and-Extreme Spacing}{3}{subsection.2.2.6}%
+\contentsline {subsubsection}{\numberline {2.2.6.1}Nature of Change That Leads to Highest Modelling Accuracy}{3}{subsubsection.2.2.6.1}%
+\contentsline {subsubsection}{\numberline {2.2.6.2}Bias}{3}{subsubsection.2.2.6.2}%
+\contentsline {subsubsection}{\numberline {2.2.6.3}Precision}{3}{subsubsection.2.2.6.3}%
+\contentsline {subsubsection}{\numberline {2.2.6.4}Qualitative Description}{3}{subsubsection.2.2.6.4}%
+\contentsline {subsubsection}{\numberline {2.2.6.5}Summary of Results}{3}{subsubsection.2.2.6.5}%
+\contentsline {subsection}{\numberline {2.2.7}Addressing My Research Questions}{3}{subsection.2.2.7}%
+\contentsline {subsubsection}{\numberline {2.2.7.1}Does Placing Measurements Near Periods of Change Increase Modelling Accuracy?}{3}{subsubsection.2.2.7.1}%
+\contentsline {subsubsection}{\numberline {2.2.7.2}When the Nature of Change is Unknown, How Should Measurements be Spaced?}{3}{subsubsection.2.2.7.2}%
+\contentsline {section}{\numberline {2.3}Summary of Experiment 1}{3}{section.2.3}%
+\contentsline {chapter}{\numberline {3}Experiment 2}{3}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Methods}{5}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Variables Used in Simulation Experiment}{5}{subsection.3.1.1}%
+\contentsline {subsubsection}{\numberline {3.1.1.1}Independent Variables}{5}{subsubsection.3.1.1.1}%
+\contentsline {paragraph}{\numberline {3.1.1.1.1}Spacing of Measurements}{5}{paragraph.3.1.1.1.1}%
+\contentsline {paragraph}{\numberline {3.1.1.1.2}Number of Measurements}{5}{paragraph.3.1.1.1.2}%
+\contentsline {paragraph}{\numberline {3.1.1.1.3}Sample Size}{5}{paragraph.3.1.1.1.3}%
+\contentsline {subsubsection}{\numberline {3.1.1.2}Constants}{5}{subsubsection.3.1.1.2}%
+\contentsline {subsubsection}{\numberline {3.1.1.3}Dependent Variables}{5}{subsubsection.3.1.1.3}%
+\contentsline {paragraph}{\numberline {3.1.1.3.1}Convergence Success Rate}{5}{paragraph.3.1.1.3.1}%
+\contentsline {paragraph}{\numberline {3.1.1.3.2}Bias}{5}{paragraph.3.1.1.3.2}%
+\contentsline {paragraph}{\numberline {3.1.1.3.3}Precision}{5}{paragraph.3.1.1.3.3}%
+\contentsline {subsection}{\numberline {3.1.2}Overview of Data Generation}{5}{subsection.3.1.2}%
+\contentsline {subsection}{\numberline {3.1.3}Modelling of Each Generated Data Set}{5}{subsection.3.1.3}%
+\contentsline {subsection}{\numberline {3.1.4}Analysis of Data Modelling Output and Accompanying Visualizations}{5}{subsection.3.1.4}%
+\contentsline {section}{\numberline {3.2}Results and Discussion}{5}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Framework for Interpreting Results}{5}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Pre-Processing of Data and Model Convergence}{5}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Equal Spacing}{5}{subsection.3.2.3}%
+\contentsline {subsubsection}{\numberline {3.2.3.1}Bias}{5}{subsubsection.3.2.3.1}%
+\contentsline {subsubsection}{\numberline {3.2.3.2}Precision}{5}{subsubsection.3.2.3.2}%
+\contentsline {subsubsection}{\numberline {3.2.3.3}Qualitative Description}{5}{subsubsection.3.2.3.3}%
+\contentsline {subsubsection}{\numberline {3.2.3.4}Summary of Results}{5}{subsubsection.3.2.3.4}%
+\contentsline {subsection}{\numberline {3.2.4}Time-Interval Increasing Spacing}{5}{subsection.3.2.4}%
+\contentsline {paragraph}{\numberline {3.2.4.0.1}Bias}{5}{paragraph.3.2.4.0.1}%
+\contentsline {paragraph}{\numberline {3.2.4.0.2}Precision}{5}{paragraph.3.2.4.0.2}%
+\contentsline {paragraph}{\numberline {3.2.4.0.3}Qualitative Description}{5}{paragraph.3.2.4.0.3}%
+\contentsline {subsubsection}{\numberline {3.2.4.1}Summary of Results}{5}{subsubsection.3.2.4.1}%
+\contentsline {subsection}{\numberline {3.2.5}Time-Interval Decreasing Spacing}{5}{subsection.3.2.5}%
+\contentsline {subsubsection}{\numberline {3.2.5.1}Bias}{5}{subsubsection.3.2.5.1}%
+\contentsline {subsubsection}{\numberline {3.2.5.2}Precision}{5}{subsubsection.3.2.5.2}%
+\contentsline {subsubsection}{\numberline {3.2.5.3}Qualitative Description}{5}{subsubsection.3.2.5.3}%
+\contentsline {subsubsection}{\numberline {3.2.5.4}Summary of Results}{5}{subsubsection.3.2.5.4}%
+\contentsline {subsection}{\numberline {3.2.6}Middle-and-Extreme Spacing}{5}{subsection.3.2.6}%
+\contentsline {paragraph}{\numberline {3.2.6.0.1}Bias}{5}{paragraph.3.2.6.0.1}%
+\contentsline {paragraph}{\numberline {3.2.6.0.2}Precision}{5}{paragraph.3.2.6.0.2}%
+\contentsline {paragraph}{\numberline {3.2.6.0.3}Qualitative Description}{5}{paragraph.3.2.6.0.3}%
+\contentsline {subsubsection}{\numberline {3.2.6.1}Summary of Results}{5}{subsubsection.3.2.6.1}%
+\contentsline {section}{\numberline {3.3}What Measurement Number-Sample Size Pairings Should be Used With Each Spacing Schedule?}{5}{section.3.3}%
+\contentsline {chapter}{\numberline {4}Experiment 3}{5}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Methods}{7}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Variables Used in Simulation Experiment}{7}{subsection.4.1.1}%
+\contentsline {subsubsection}{\numberline {4.1.1.1}Independent Variables}{7}{subsubsection.4.1.1.1}%
+\contentsline {paragraph}{\numberline {4.1.1.1.1}Number of Measurements}{7}{paragraph.4.1.1.1.1}%
+\contentsline {paragraph}{\numberline {4.1.1.1.2}Sample Size}{7}{paragraph.4.1.1.1.2}%
+\contentsline {paragraph}{\numberline {4.1.1.1.3}Time Structuredness}{7}{paragraph.4.1.1.1.3}%
+\contentsline {subsubsection}{\numberline {4.1.1.2}Constants}{7}{subsubsection.4.1.1.2}%
+\contentsline {subsubsection}{\numberline {4.1.1.3}Dependent Variables}{7}{subsubsection.4.1.1.3}%
+\contentsline {paragraph}{\numberline {4.1.1.3.1}Convergence Success Rate}{7}{paragraph.4.1.1.3.1}%
+\contentsline {paragraph}{\numberline {4.1.1.3.2}Bias}{7}{paragraph.4.1.1.3.2}%
+\contentsline {paragraph}{\numberline {4.1.1.3.3}Precision}{7}{paragraph.4.1.1.3.3}%
+\contentsline {subsection}{\numberline {4.1.2}Overview of Data Generation}{7}{subsection.4.1.2}%
+\contentsline {paragraph}{\numberline {4.1.2.0.1}Simulation Procedure for Time Structuredness}{7}{paragraph.4.1.2.0.1}%
+\contentsline {subsection}{\numberline {4.1.3}Modelling of Each Generated Data Set}{7}{subsection.4.1.3}%
+\contentsline {subsection}{\numberline {4.1.4}Analysis of Data Modelling Output and Accompanying Visualizations}{7}{subsection.4.1.4}%
+\contentsline {section}{\numberline {4.2}Results and Discussion}{7}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Framework for Interpreting Results}{7}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Pre-Processing of Data and Model Convergence}{7}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Time-Structured Data}{7}{subsection.4.2.3}%
+\contentsline {paragraph}{\numberline {4.2.3.0.1}Bias}{7}{paragraph.4.2.3.0.1}%
+\contentsline {paragraph}{\numberline {4.2.3.0.2}Precision}{7}{paragraph.4.2.3.0.2}%
+\contentsline {paragraph}{\numberline {4.2.3.0.3}Qualitative Description}{7}{paragraph.4.2.3.0.3}%
+\contentsline {subsubsection}{\numberline {4.2.3.1}Summary of Results}{7}{subsubsection.4.2.3.1}%
+\contentsline {subsection}{\numberline {4.2.4}Time-Unstructured Data Characterized by a Fast Response Rate}{7}{subsection.4.2.4}%
+\contentsline {paragraph}{\numberline {4.2.4.0.1}Bias}{7}{paragraph.4.2.4.0.1}%
+\contentsline {paragraph}{\numberline {4.2.4.0.2}Precision}{7}{paragraph.4.2.4.0.2}%
+\contentsline {paragraph}{\numberline {4.2.4.0.3}Qualitative Description}{7}{paragraph.4.2.4.0.3}%
+\contentsline {subsubsection}{\numberline {4.2.4.1}Summary of Results}{7}{subsubsection.4.2.4.1}%
+\contentsline {subsection}{\numberline {4.2.5}Time-Unstructured Data Characterized by a Slow Response Rate}{7}{subsection.4.2.5}%
+\contentsline {paragraph}{\numberline {4.2.5.0.1}Bias}{7}{paragraph.4.2.5.0.1}%
+\contentsline {paragraph}{\numberline {4.2.5.0.2}Precision}{7}{paragraph.4.2.5.0.2}%
+\contentsline {paragraph}{\numberline {4.2.5.0.3}Qualitative Description}{7}{paragraph.4.2.5.0.3}%
+\contentsline {subsubsection}{\numberline {4.2.5.1}Summary of Results}{7}{subsubsection.4.2.5.1}%
+\contentsline {subsection}{\numberline {4.2.6}How Does Time Structuredness Affect Modelling Accuracy?}{7}{subsection.4.2.6}%
+\contentsline {subsection}{\numberline {4.2.7}Eliminating the Bias Caused by Time Unstructuredness: Using Definition Variables}{7}{subsection.4.2.7}%
+\contentsline {section}{\numberline {4.3}Summary}{7}{section.4.3}%
+\contentsline {chapter}{\numberline {5}References}{8}{chapter.5}%

@@ -13,11 +13,7 @@ degree: 'Doctorate of Philosophy'
 #specialization: 'Statistics'
 knit: bookdown::render_book
 site: bookdown::bookdown_site
-
 header-includes:
-  #- \newtheorem{theorem}{Theorem}
-  #- \newtheorem{example}[theorem]{Example}
-  #- \renewcommand\theadfont{} #sets cell font to be same as table font when using thead{}
 
 params:
   'Install needed packages for {thesisdown}': True
@@ -187,6 +183,7 @@ The importance of time has also been recognized in organizational theory. In def
 
 Despite the considerable attention given towards investigating processes over time and its ubiquity in organizational theory, the prevalence of longitudinal research has historically remained low. One study examined the prevalence of longitudinal research from 1970--2006 across five organizational psychology journals and found that 4% of articles used longitudinal designs (Roe, 2014). Another survey of two applied psychology journals in 2005 found that approximaely 10% (10 of 105 studies) of studies used longitudinal designs [@roe2008]. Similarly, two surveys of studies employing longitudinal designs with mediation analysis found that, across five journals, only about 10% (7 of 72 studies) did so in 2005 [@maxwell2007] and approximately 16% (15 of 92 studies) did so in 2006 [@mitchell2013].\footnote{Note that the definition of a longitudinal design in (ref:maxwell2007) and (ref:mitchell2013) required that measurements be taken over at least three time points so that measurements of the predictor, mediator, and outcome variables were separated over time.} Thus, the prevalence of longitudinal research has remained low.
 
+`r knitr::knit_exit()`
 In the six sections that follow, I will explain why longitudinal research is necessary and the factors that must be considered when conducting such research. In the first section, I will explain why conducting longitudinal research is essential for understanding the dynamics of psychological processes. In the second section, I will overview patterns of change that are likely to emerge over time. In the the third section, I will overview design and analytical issues involved in designing longitudinal studies. In the fourth section, I will explain how design and analytical issues encountered in conducting longitudinal research can be investigated. In the fifth section, I will provide a systematic review of the research that has investigated design and analytical issues involved in conducting longitudinal research. Finally, in the sixth section, I will briefly explain strategies for modelling nonlinear change. A summary of the three simulation experiments that I conducted in my dissertation will then be provided. 
 
 ## The Need to Conduct Longitudinal Research
