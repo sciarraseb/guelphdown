@@ -31,9 +31,8 @@ english]{guelphthesis}
 \usepackage{graphicx,latexsym}
 \usepackage{amsmath}
 \usepackage{amssymb,amsthm}
+
 \usepackage{longtable,booktabs,setspace}
-
-
 \usepackage{lmodern}
 \usepackage{float}
 \usepackage{etoolbox}
@@ -47,7 +46,8 @@ english]{guelphthesis}
 \usepackage{lineno} %allows option for line numbering
 \usepackage{draftwatermark} %for draft watermark
 \SetWatermarkText{} %ensures draft is not printed when draft:false
-\usepackage[backend=biber, style=authoryear]{biblatex}
+%\usepackage[backend=biber]{biblatex}
+
 
 % Syntax highlighting #22
 $if(highlighting-macros)$
@@ -101,7 +101,6 @@ $if(csl-refs)$
  }%
  {}
 $endif$
-
 
 
 \urlstyle{rm}
@@ -168,16 +167,17 @@ $endif$
   \renewcommand{\headrulewidth}{0pt}
   \fancyfoot[C]{\arabic{page}}% Roman page number in footer centre
 
-  \hypersetup{pdfpagemode={UseOutlines},
+ \hypersetup{pdfpagemode={UseOutlines},
     bookmarksopen=true,
     hypertexnames=true,
     colorlinks = true,
-    citecolor = blue,
+    citecolor = true,
     linkcolor = $linkcolor$,
     urlcolor= blue,
     anchorcolor = blue,
     pdfstartview={FitV},
-    breaklinks=true}
+    breaklinks=true,
+    hyperindex = true}
 
   $if(ArialFont)$
    \fancyfoot[C]{\sffamily\arabic{page}}

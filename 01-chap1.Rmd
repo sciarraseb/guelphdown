@@ -104,222 +104,17 @@ saveRDS(object = param_summary_exp_3, file = 'data/uf_param_summary_exp_3.RData'
 ```
 
   
-# Experiment 1
+# Experiment 1 {#exp-1}
 
 
-In Experiment 1, I investigated the number of measurements needed to obtain accurate modelling (i.e., unbiased and precise parameter estimation) under different spacing schedules and natures of change. Before presenting the results of Experiment 1, I will present my design and analysis goals. For the design, I conducted a 4(measurement spacing:equal, time-interval increasing, time-interval decreasing, middle-and-extreme) x 4(number of measurements: 5, 7, 9, 11) x 3(nature of change: population value for the fixed-effect days-to-halfway elevation parameter [$\upbeta_{fixed}$] of 80, 180, or 280) study. For the analysis, I was interested in answering two questions. First, I was interested in whether placing measurements near periods of change leads to higher modelling accuracy. To answer the first question, I determined whether modelling accuracy under each spacing schedule increased when measurements were taken closer to periods of change.
+In Experiment 1, I investigated the number of measurements needed to obtain high modelling accuracy of each logistic function parameter (i.e., unbiased and precise estimation) under different spacing schedules and natures of change. Before presenting the results of Experiment 1, I will present my design and analysis goals. For the design, I conducted a 4 (measurement spacing:equal, time-interval increasing, time-interval decreasing, middle-and-extreme) x 4 (number of measurements: 5, 7, 9, 11) x 3 (nature of change: population value for the fixed-effect days-to-halfway elevation parameter [$\upbeta_{fixed}$] of 80, 180, or 280) study. For the analysis, I was interested in answering two questions. First, I was interested in whether placing measurements near periods of change leads to higher modelling accuracy. To answer the first question, I determined whether modelling accuracy under each spacing schedule increased when measurements were taken closer to periods of change.
 
 Second, I was interested in how to space measurements when the nature of change is unknown. When the nature of change is unknown, this translates to a situation where a researcher has little to no knowledge of how change unfolds over time, and so any nature of change is a viable candidate for the true change. Therefore, to determine how to space measurements when the nature of change is unknown, I averaged the modelling accuracy of each spacing schedule across all possible nature-of-change curves and considered the spacing schedule with the highest modelling accuracy to be the best one.
 
 ## Methods
-### Variables Used in Simulation Experiment
-
-#### Independent Variables
-
-
-To build on current research, Experiment 1 used independent variable manipulations from a select number of previous studies. In looking at the summary of the simulation literature in Table \ref{tab:systematicReview}, the study by @coulombe2016 was the only one to investigate three longitudinal issues of interest to my dissertation, and so represented the most comprehensive investigation. Because I was also interested in investigating measurement spacing, manipulations were inspired from the only other simulation study to manipulate measurement spacing [the study by @timmons2015]. The sections that follow will discuss each of the variables manipulated in Experiment 1. 
-
-##### Spacing of Measurements {#spacing-measurements}
-
-The only simulation study identified by my systematic review that manipulated measurement spacing was
-@timmons2015. Measurement spacing in @timmons2015 was manipulated in the
-following four ways:
-
-1)  **Equal spacing**: measurements were divided by intervals of
-    equivalent lengths.
-    
-2)  **Time-interval increasing spacing**: intervals that divided measurements
-    increased in length over time.
-
-3)  **Time-interval decreasing spacing**: intervals that divided measurements
-    decreased in length over time.
-
-4)  **Middle-and-extreme spacing**: measurements were clustered near the
-    beginning, middle, and end of the data collection period.
-
-\noindent To maintain consistency with the established literature, I manipulated measurement spacing in the same way as @timmons2015 presented above. Importantly, because @timmons2015 did not create their measurement spacing schedules with any systematicity, I developed a novel and replicable procedure for generating measurement schedules for each of the four measurement spacing conditions, which is described in [Appendix A](#appendix-A). I also automated the generation of measurement schedules by creating a set of functions in R [@rstudio]. 
-
-Table \@ref(tab:measurementDays) lists the measurement days that were
-used for all measurement spacing-measurement number cells. The first
-column lists the type of measurement spacing (i.e., equal, time-interval
-increasing, time-interval decreasing, or middle-and-extreme); the second
-column lists the number of measurements (5, 7, 9, or 11); the third
-column lists the measurement days that correspond to each measurement
-number-measurement spacing condition; and the fourth column lists the
-interval lengths that characterize each set of measurements. Note that
-the interval lengths are equal for the equal spacing, increase over time
-for the time-interval increasing spacing, and decrease over time for the
-time-interval decreasing spacing, For cells with middle-and-extreme
-spacing, the measurement days and and interval lengths corresponding to
-the middle of the measurement window have been emboldened.
-
-```{r measurementDays, echo=F}
-time_period <- 360
-num_measurements <- seq(from = 5, to = 11, by = 2)
-smallest_int_length <- 30
-
-#meausurement days 
-equal_5 <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'equal')$measurement_days
-equal_7 <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'equal')$measurement_days
-equal_9 <- compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'equal')$measurement_days
-equal_11 <- compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'equal')$measurement_days
-
-time_inc_5 <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'time_inc')$measurement_days
-time_inc_7 <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'time_inc')$measurement_days
-time_inc_9 <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'time_inc')$measurement_days, 2)
-time_inc_11 <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'time_inc')$measurement_days, 2)
-
-time_dec_5 <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'time_dec')$measurement_days
-time_dec_7 <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'time_dec')$measurement_days
-time_dec_9 <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'time_dec')$measurement_days, 2)
-time_dec_11 <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'time_dec')$measurement_days, 2)
-
-mid_ext_5 <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'mid_ext')$measurement_days
-mid_ext_7 <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'mid_ext')$measurement_days
-mid_ext_9 <- compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'mid_ext')$measurement_days
-mid_ext_11 <- compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'mid_ext')$measurement_days
-
-
-#measurement intervals
-equal_5_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'equal')$interval_lengths
-equal_7_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'equal')$interval_lengths
-equal_9_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'equal')$interval_lengths
-equal_11_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'equal')$interval_lengths
-
-time_inc_5_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'time_inc')$interval_lengths
-time_inc_7_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'time_inc')$interval_lengths
-time_inc_9_int <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'time_inc')$interval_lengths, 2)
-time_inc_11_int <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'time_inc')$interval_lengths, 2)
-
-time_dec_5_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'time_dec')$interval_lengths
-time_dec_7_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'time_dec')$interval_lengths
-time_dec_9_int <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'time_dec')$interval_lengths, 2)
-time_dec_11_int <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'time_dec')$interval_lengths, 2)
-
-mid_ext_5_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'mid_ext')$interval_lengths
-mid_ext_7_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'mid_ext')$interval_lengths
-mid_ext_9_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'mid_ext')$interval_lengths
-mid_ext_11_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'mid_ext')$interval_lengths
-
-
-measurement_days_df <- data.frame('Spacing Schedule' = c('Equal', '', '', '', 
-                                                         'Time-interval increasing', '', '', '', 
-                                                         'Time-interval decreasing', '', '', '', 
-                                                         'Middle-and-extreme', '', '', ''), 
-                                  'Number of Measurements' = rep(num_measurements, times = 4), 
-                                  'Measurement Days' = c(paste(equal_5, collapse = ', '), 
-                                                         paste(equal_7, collapse = ', '), 
-                                                         paste(equal_9, collapse = ', '), 
-                                                         paste(equal_11, collapse = ', '), 
-                                                         
-                                                         paste(time_inc_5, collapse = ', '),
-                                                         paste(time_inc_7, collapse = ', '),
-                                                         paste(time_inc_9, collapse = ', '),
-                                                         paste(time_inc_11, collapse = ', '),
-                                                         
-                                                         paste(time_dec_5, collapse = ', '),
-                                                         paste(time_dec_7, collapse = ', '),
-                                                         paste(time_dec_9, collapse = ', '),
-                                                         paste(time_dec_11, collapse = ', '),
-                                                         
-                                                        '1, \\textbf{150, 180, 210}, 360',
-                                                        '1, 30, \\textbf{150, 180, 210}, 330, 360',
-                                                        '1, 30, 60, \\textbf{150, 180, 210}, 300, 330, 360',
-                                                        '1, 30, 60, \\textbf{120, 150, 180, 210, 240,} 300, 330, 360'), 
-                                  
-                                  'Interval Lengths' = c(paste(equal_5_int, collapse = ', '), 
-                                                         paste(equal_7_int, collapse = ', '), 
-                                                         paste(equal_9_int, collapse = ', '), 
-                                                         paste(equal_11_int, collapse = ', '), 
-                                                         
-                                                         paste(time_inc_5_int, collapse = ', '),
-                                                         paste(time_inc_7_int, collapse = ', '),
-                                                         paste(time_inc_9_int, collapse = ', '),
-                                                         paste(time_inc_11_int, collapse = ', '),
-                                                         
-                                                         paste(time_dec_5_int, collapse = ', '),
-                                                         paste(time_dec_7_int, collapse = ', '),
-                                                         paste(time_dec_9_int, collapse = ', '),
-                                                         paste(time_dec_11_int, collapse = ', '),
-                                                         
-                                                        '150, \\textbf{30, 30}, 150',
-                                                         '30, 120, \\textbf{30, 30}, 120, 30',
-                                                         '30, 30, 90, \\textbf{30, 30}, 90, 30, 30',
-                                                         '30, 30, 60, \\textbf{30, 30, 30, 30}, 60, 30, 30'),
-                                  check.names = F)
-
-kbl(x = measurement_days_df, booktabs = TRUE, format = 'latex', longtable = T, 
-      align = c('l', 'l'), 
-    linesep = c(rep('', times = 3),
-            '\\cmidrule{1-4}\\addlinespace'), 
-      caption = 'Measurement Days Used for All Measurement Number-Measurement Spacing Conditions ', 
-    escape=F) %>%
-    column_spec(column = 1, width = '4.5cm') %>%
-  column_spec(column = 2, width = '3cm') %>%
-   column_spec(column = 3, width = '6.5cm') %>%
-     column_spec(column = 4, width = '6cm') %>%
-
-   kable_styling(latex_options= c('hold_position', 'repeat_header'), font_size = 10, position = 'left') %>%  
-    footnote(general =  "\\\\textit{Note. }For middle-and-extreme spacing levels, the measurement days and and interval lengths corresponding to the middle of measurement windows have been emboldened.",  threeparttable = T,  escape = F, general_title = '')%>%
-  landscape(margin = '2.54cm')
-
-```
-
-##### Number of Measurements{#number-measurements}
-
-(ref:loehlin2017) [(\textit{p}[{\textit{p} + 1}]/2\; see @loehlin2017]
-(ref:coulombe2016three) @coulomble2016 
-
-The smallest measurement number value in @coulombe2016 of three measurements could not be used in Experiment 1 (or any other simulation experiment that manipulated measurement number in my dissertation) because doing so would have created non-identified models. The model used in my simulations estimated 9 parameters \footnote{Degrees of freedom is calculated by multiplying the number of observed variables (\textit{p}) by \textit{p} + 1 and dividing it by 2 (ref:loehlin2017)}(*p* = 9; 4 fixed-effects + 4 random-effects + 1 error) and so the minimum number of measurements (or observed variables) required for model identification (and to allow model comparison) was 4. Although a measurement number of three could not be used in my manipulation of measurement number, the next highest measurement number values in @coulombe2016 of 5, 7, and 9 were used. Importantly, a larger value of 11 was added to test for a possible effect of a high measurement number. Therefore, my simulation experiments used the following values in manipulating the number of
-measurements: 5, 7, 9, and 11. 
-
-##### Population Values Set for The Fixed-Effect Days-to-Halfway Elevation Parameter $\upbeta_{fixed}$ (Nature of Change)
-
-The nature of change was manipulated by setting the days-to-halfway elevation parameter ($\upbeta_{fixed}$) to a value of either 80, 180, or 280 days (see Figure \ref{fig:combined_plot}A). Note that no other study in my systematic review manipulated nature of change using logistic curves and so its manipulation in Experiment 1 is, to the best of my knowledge, unique (in this literature). Nature of change was manipulated to simulate situations where uncertainty exists in the nature of change. 
-
-#### Constants 
-
-Because sample size was not manipulated in Experiment 1, I set it to have a constant value across all cells. I decided to set the sample size value to the average sample size used in organizational research [*n* = 225\; @bosco2015]. Another variable set to a constant value across the cells was time structuredness (data were assumed to be time structured). That is, data were generated such that, at each time point, all data were obtained at the exact same time. 
-
-#### Dependent Variables
-
-##### Convergence Success Rate{#convergence}
-
-The proportion of iterations in a cell where models converged defined
-the *convergence success rate*.\footnote{Specifically, convergence was obtained if the convergence code returned by OpenMx was 0.} Equation \@ref(eq:convergence) below shows the calculation used to compute the convergence success rate:
-
-```{=tex}
-\begin{align}
-  \text{Convergence success rate} =  \frac{\text{Number of models that successfully converged in a cell}}{n},
-  (\#eq:convergence) 
-\end{align}
-```
-\noindent where *n* represents the total number of models run in a cell.
-
-##### Bias{#bias-comp}
-
-Bias was calculated to evaluate the accuracy with which each logistic
-function parameter was estimated in each experimental cell. As shown below in Equation
-\@ref(eq:bias), *bias* was obtained by summing the differences
-between the population value set for a parameter and the value estimated for the parameter by each $i$ converged model and then dividing the sum by the number of $N$ converged models. 
-
-```{=tex}
-\begin{align}
-  \text{Bias} = \frac{\sum_i^N\text{(Population value for parameter} - \text{Average estimated value}_i)}{N}
-  (\#eq:bias) 
-\end{align}
-```
-
-\noindent Bias was calculated for the fixed- and random-effect parameters of the baseline ($\uptheta_{fixed}$, $\uptheta_{random}$), maximal elevation ($\upalpha_{fixed}$, $\upalpha_{random}$), days-to-halfway elevation ($\upbeta_{fixed}$, $\upbeta_{random}$), and the halfway-triquarter delta parameters ($\upgamma_{fixed}$, $\upgamma_{random}$) and the error parameter ($\upepsilon$). 
-
-##### Precision{#pres-precision}
-
-In addition to computing bias, precision was calculated to evaluate the variability with which each parameter was estimated. Importantly, metrics used to evaluate precision in previous studies assume estimates are normally distributed (e.g., mean-squared error and empirical standard error). Because some parameters in my simulations had skewed distributions, using a metric that assumed a normal distribution would likely yield inaccurate results. Correspondingly, I used a distribution-independent definition of precision. In my simulations, *precision* was defined as the range of values covered by the middle 95% of values estimated for a logistic parameter. 
-
 ### Overview of Data Generation  {#data-generation}
 
-#### Data Generation
-##### Function Used to Generate Each Data Set
+#### Function Used to Generate Each Data Set
 
 Data for each simulation experiment were generated using R [@rstudio].
 To generate the data, the *multilevel logistic function* shown below
@@ -540,7 +335,6 @@ complete_plot <- ggplot(data = logistic_data, aes(x = day, y = curve_score)) +
 ggsave(plot = complete_plot, filename = 'Figures/complete_logistic_exp_plot.pdf', width = 9, height = 6)
 ```
 
-
 The logistic growth function (Equation \ref{eq:logFunction-generation}
 was used because it is a common pattern of organizational change [or
 institutionalization\; @lawrence2001]. Institutionalization curves follow
@@ -552,13 +346,11 @@ magnitude of the difference between baseline and maximal elevation
 parameters ($\upalpha$ - $\uptheta$, respectively).
 
 
-##### Population Values Used for Function Parameters
+#### Population Values Used for Function Parameters
 
 (ref:bosco2015) [@bosco2015]
 
-Table \@ref(tab:parameterValues) lists the parameter values that will be
-used for the population parameters. Given that the decisions for setting the values for the baseline, maximal elevation, and residual variance parameters were informed by past research, the discussion that follows highlights how these decisions were made. The difference between the baseline and maximal elevation
-parameters ($\uptheta$ and $\upalpha$, respectively) corresponded to the effect size most commonly observed in organizational research [i.e., the 50^th^ percentile effect size value\; @bosco2015]. Because the meta-analysis of @bosco2015 computed effect sizes as correlations, the the 50^th^ percentile effect size value of $r = .16$ was computed to a standardized effect size using the following conversion function shown in Equation \ref{eq:conversion-effect} [@borenstein2009, Chapter 7]:
+Table \@ref(tab:parameterValues) lists the parameter values that were used for the population parameters. Given that the decisions for setting the values for the baseline, maximal elevation, and residual variance parameters were informed by past research, the discussion that follows highlights how these decisions were made. The difference between the baseline and maximal elevation parameters ($\uptheta$ and $\upalpha$, respectively) corresponded to the effect size most commonly observed in organizational research [i.e., the 50^th^ percentile effect size value\; @bosco2015]. Because the meta-analysis of @bosco2015 computed effect sizes as correlations, the the 50^th^ percentile effect size value of $r = .16$ was computed to a standardized effect size using the following conversion function shown in Equation \ref{eq:conversion-effect} [@borenstein2009, Chapter 7]:
 
 \begin{align}
 d = \frac{2r}{\sqrt{1 - r^2}}, 
@@ -574,6 +366,12 @@ governed by annual events (e.g., performance reviews, annual returns,
 regulations, etc.). Importantly, because @coulombe2016 set covariances
 between parameters to zero, all the simulation experiments used
 zero-value covariances.
+
+### Modelling of Each Generated Data Set {#data-modelling}
+
+Previously, I described how data were generated. Here, I describe how the generated data were modelled.
+
+Each data set generated by the multilevel logistic function (Equation \ref{eq:logFunction-generation}) was analyzed using a modified latent growth curve model known as a structure latent growth curve model [@preacher2015]. 
 
 ```{r parameterValues, echo=F}
 #specify parameters for parameter table 
@@ -637,30 +435,240 @@ kbl(parameterValues_df, booktabs = TRUE, format = 'latex', longtable = T,
 ```
 
 
-### Modelling of Each Generated Data Set {#data-modelling}
+\noindent Importantly, the model fit to each generated data set estimated nine parameters: A fixed-effect parameter for each of the four logistic function parameters, a random-effect parameter for each of the four logistic function parameters, and an error parameter. As with a multilevel model, a fixed-effect parameter has a constant value across all individuals, whereas a random-effect parameter represents the variability of values across all modelled people.\footnote{Estimating a random-effect for a parameter allows person- or data-point-specific values to be computed for the parameter.} To fit the logistic function to a given data set (Equation \ref{eq:logFunction-generation}), a linear approximation of the logistic function was needed so that it could fit within the linear nature of structural equation modelling framework.\footnote{The logistic function (Equation \ref{eq:logFunction-generation}) is a nonlinear function and so cannot be directly inserted into the structural equation modelling framework because this framework only allows linear computations of matrix-matrix, matrix-vector, and vector-vector operations. Unfortunately, the algebraic operations permitted in a linear framework cannot directly reproduce the operations in the logistic function (Equation \ref{eq:logFunction-generation}) and so a linear approximation of the logistic function must be constructed so that the logistic function can be inserted into the structural equation modelling framework.} To construct a linear approximation of the logistic function, a first-order Taylor series was constructed for the logistic function. For a detailed explanation of how the logistic function was fit into the structural equation modelling framework, see Appendix \ref{structured-lgc} for an explanation of the model and Appendix  \ref{structured-lgc-code} for the code used to create the model. 
 
-Previously, I described how data were generated. Here, I describe how the generated data were modelled.
+### Variables Used in Simulation Experiment
 
-Each data set generated by the multilevel logistic function (Equation \ref{eq:logFunction-generation}) was analyzed using a modified latent growth curve model known as a structure latent growth curve model [@preacher2015]. Importantly, the model fit to each generated data set estimated nine parameters: A fixed-effect parameter for each of the four logistic function parameters, a random-effect parameter for each of the four logistic function parameters, and an error parameter. As with a multilevel model, a fixed-effect parameter has a constant value across all individuals, whereas a random-effect parameter represents the variability of values across all modelled people.\footnote{Estimating a random-effect for a parameter allows person- or data-point-specific values to be computed for the parameter.} To fit the logistic function to a given data set (Equation \ref{eq:logFunction-generation}), a linear approximation of the logistic function was needed so that it could fit within the linear nature of structural equation modelling framework.\footnote{The logistic function (Equation \ref{eq:logFunction-generation}) is a nonlinear function and so cannot be directly inserted into the structural equation modelling framework because this framework only allows linear computations of matrix-matrix, matrix-vector, and vector-vector operations. Unfortunately, the algebraic operations permitted in a linear framework cannot directly reproduce the operations in the logistic function (Equation \ref{eq:logFunction-generation}) and so a linear approximation of the logistic function must be constructed so that the logistic function can be inserted into the structural equation modelling framework.} To construct a linear approximation of the logistic function, a first-order Taylor series was constructed for the logistic function. For a detailed explanation of how the logistic function was fit into the structural equation modelling framework, see [Technical Appendix B](#structured-latent). 
+#### Independent Variables
+
+To build on current research, Experiment 1 used independent variable manipulations from a select number of previous studies. In looking at the summary of the simulation literature in Table \ref{tab:systematicReview}, the study by @coulombe2016 was the only one to investigate three longitudinal issues of interest to my dissertation, and so represented the most comprehensive investigation. Because I was also interested in investigating measurement spacing, manipulations were inspired from the only other simulation study to manipulate measurement spacing [the study by @timmons2015]. The sections that follow will discuss each of the variables manipulated in Experiment 1. 
+
+##### Spacing of Measurements {#spacing-measurements}
+
+The only simulation study identified by my systematic review that manipulated measurement spacing was
+@timmons2015. Measurement spacing in @timmons2015 was manipulated in the
+following four ways:
+
+1)  **Equal spacing**: measurements were divided by intervals of
+    equivalent lengths.
+    
+2)  **Time-interval increasing spacing**: intervals that divided measurements
+    increased in length over time.
+
+3)  **Time-interval decreasing spacing**: intervals that divided measurements
+    decreased in length over time.
+
+4)  **Middle-and-extreme spacing**: measurements were clustered near the
+    beginning, middle, and end of the data collection period.
+
+\noindent To maintain consistency with the established literature, I manipulated measurement spacing in the same way as @timmons2015 presented above. Importantly, because @timmons2015 did not create their measurement spacing schedules with any systematicity, I developed a novel and replicable procedure for generating measurement schedules for each of the four measurement spacing conditions, which is described in Appendix \ref{measurement-schedules}. I also automated the generation of measurement schedules by creating a set of functions in R [@rstudio]. 
+
+Table \@ref(tab:measurementDays) lists the measurement days that were
+used for all measurement spacing-measurement number cells. The first
+column lists the type of measurement spacing (i.e., equal, time-interval
+increasing, time-interval decreasing, or middle-and-extreme); the second
+column lists the number of measurements (5, 7, 9, or 11); the third
+column lists the measurement days that correspond to each measurement
+number-measurement spacing condition; and the fourth column lists the
+interval lengths that characterize each set of measurements. Note that
+the interval lengths are equal for the equal spacing, increase over time
+for the time-interval increasing spacing, and decrease over time for the
+time-interval decreasing spacing, For cells with middle-and-extreme
+spacing, the measurement days and and interval lengths corresponding to
+the middle of the measurement window have been emboldened.
+
+##### Number of Measurements{#number-measurements}
+
+(ref:loehlin2017) [(\textit{p}[{\textit{p} + 1}]/2\; see @loehlin2017]
+(ref:coulombe2016three) @coulomble2016 
+
+The smallest measurement number value in @coulombe2016 of three measurements could not be used in Experiment 1 (or any other simulation experiment that manipulated measurement number in my dissertation) because doing so would have created non-identified models The model used in my simulations estimated 9 parameters
+
+```{r measurementDays, echo=F}
+time_period <- 360
+num_measurements <- seq(from = 5, to = 11, by = 2)
+smallest_int_length <- 30
+
+#meausurement days 
+equal_5 <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'equal')$measurement_days
+equal_7 <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'equal')$measurement_days
+equal_9 <- compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'equal')$measurement_days
+equal_11 <- compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'equal')$measurement_days
+
+time_inc_5 <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'time_inc')$measurement_days
+time_inc_7 <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'time_inc')$measurement_days
+time_inc_9 <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'time_inc')$measurement_days, 2)
+time_inc_11 <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'time_inc')$measurement_days, 2)
+
+time_dec_5 <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'time_dec')$measurement_days
+time_dec_7 <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'time_dec')$measurement_days
+time_dec_9 <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'time_dec')$measurement_days, 2)
+time_dec_11 <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'time_dec')$measurement_days, 2)
+
+mid_ext_5 <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'mid_ext')$measurement_days
+mid_ext_7 <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'mid_ext')$measurement_days
+mid_ext_9 <- compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'mid_ext')$measurement_days
+mid_ext_11 <- compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'mid_ext')$measurement_days
+
+
+#measurement intervals
+equal_5_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'equal')$interval_lengths
+equal_7_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'equal')$interval_lengths
+equal_9_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'equal')$interval_lengths
+equal_11_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'equal')$interval_lengths
+
+time_inc_5_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'time_inc')$interval_lengths
+time_inc_7_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'time_inc')$interval_lengths
+time_inc_9_int <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'time_inc')$interval_lengths, 2)
+time_inc_11_int <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'time_inc')$interval_lengths, 2)
+
+time_dec_5_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'time_dec')$interval_lengths
+time_dec_7_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'time_dec')$interval_lengths
+time_dec_9_int <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'time_dec')$interval_lengths, 2)
+time_dec_11_int <- round(compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'time_dec')$interval_lengths, 2)
+
+mid_ext_5_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 5, smallest_int_length,measurement_spacing = 'mid_ext')$interval_lengths
+mid_ext_7_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 7, smallest_int_length,measurement_spacing = 'mid_ext')$interval_lengths
+mid_ext_9_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 9, smallest_int_length,measurement_spacing = 'mid_ext')$interval_lengths
+mid_ext_11_int <- compute_measurement_schedule(time_period = time_period, num_measurements = 11, smallest_int_length,measurement_spacing = 'mid_ext')$interval_lengths
+
+
+measurement_days_df <- data.frame('Spacing Schedule' = c('Equal', '', '', '', 
+                                                         'Time-interval increasing', '', '', '', 
+                                                         'Time-interval decreasing', '', '', '', 
+                                                         'Middle-and-extreme', '', '', ''), 
+                                  'Number of Measurements' = rep(num_measurements, times = 4), 
+                                  'Measurement Days' = c(paste(equal_5, collapse = ', '), 
+                                                         paste(equal_7, collapse = ', '), 
+                                                         paste(equal_9, collapse = ', '), 
+                                                         paste(equal_11, collapse = ', '), 
+                                                         
+                                                         paste(time_inc_5, collapse = ', '),
+                                                         paste(time_inc_7, collapse = ', '),
+                                                         paste(time_inc_9, collapse = ', '),
+                                                         paste(time_inc_11, collapse = ', '),
+                                                         
+                                                         paste(time_dec_5, collapse = ', '),
+                                                         paste(time_dec_7, collapse = ', '),
+                                                         paste(time_dec_9, collapse = ', '),
+                                                         paste(time_dec_11, collapse = ', '),
+                                                         
+                                                        '1, \\textbf{150, 180, 210}, 360',
+                                                        '1, 30, \\textbf{150, 180, 210}, 330, 360',
+                                                        '1, 30, 60, \\textbf{150, 180, 210}, 300, 330, 360',
+                                                        '1, 30, 60, \\textbf{120, 150, 180, 210, 240,} 300, 330, 360'), 
+                                  
+                                  'Interval Lengths' = c(paste(equal_5_int, collapse = ', '), 
+                                                         paste(equal_7_int, collapse = ', '), 
+                                                         paste(equal_9_int, collapse = ', '), 
+                                                         paste(equal_11_int, collapse = ', '), 
+                                                         
+                                                         paste(time_inc_5_int, collapse = ', '),
+                                                         paste(time_inc_7_int, collapse = ', '),
+                                                         paste(time_inc_9_int, collapse = ', '),
+                                                         paste(time_inc_11_int, collapse = ', '),
+                                                         
+                                                         paste(time_dec_5_int, collapse = ', '),
+                                                         paste(time_dec_7_int, collapse = ', '),
+                                                         paste(time_dec_9_int, collapse = ', '),
+                                                         paste(time_dec_11_int, collapse = ', '),
+                                                         
+                                                        '150, \\textbf{30, 30}, 150',
+                                                         '30, 120, \\textbf{30, 30}, 120, 30',
+                                                         '30, 30, 90, \\textbf{30, 30}, 90, 30, 30',
+                                                         '30, 30, 60, \\textbf{30, 30, 30, 30}, 60, 30, 30'),
+                                  check.names = F)
+
+kbl(x = measurement_days_df, booktabs = TRUE, format = 'latex', longtable = T, 
+      align = c('l', 'l'), 
+    linesep = c(rep('', times = 3),
+            '\\cmidrule{1-4}\\addlinespace'), 
+      caption = 'Measurement Days Used for All Measurement Number-Measurement Spacing Conditions ', 
+    escape=F) %>%
+    column_spec(column = 1, width = '4.5cm') %>%
+  column_spec(column = 2, width = '3cm') %>%
+   column_spec(column = 3, width = '6.5cm') %>%
+     column_spec(column = 4, width = '6cm') %>%
+
+   kable_styling(latex_options= c('hold_position', 'repeat_header'), font_size = 10, position = 'left') %>%  
+    footnote(general =  "\\\\textit{Note. }For middle-and-extreme spacing levels, the measurement days and and interval lengths corresponding to the middle of measurement windows have been emboldened.",  threeparttable = T,  escape = F, general_title = '')%>%
+  landscape(margin = '2.54cm')
+
+```
+
+\noindent (*p* = 9; 4 fixed-effects + 4 random-effects + 1 error)\footnote{Degrees of freedom is calculated by multiplying the number of observed variables (\textit{p}) by \textit{p} + 1 and dividing it by 2 (ref:loehlin2017).} and so the minimum number of measurements (or observed variables) required for model identification (and to allow model comparison) was 4. Although a measurement number of three could not be used in my manipulation of measurement number, the next highest measurement number values in @coulombe2016 of 5, 7, and 9 were used. Importantly, a larger value of 11 was added to test for a possible effect of a high measurement number. Therefore, my simulation experiments used the following values in manipulating the number of
+measurements: 5, 7, 9, and 11. 
+
+##### Population Values Set for The Fixed-Effect Days-to-Halfway Elevation Parameter $\upbeta_{fixed}$ (Nature of Change)
+
+The nature of change was manipulated by setting the days-to-halfway elevation parameter ($\upbeta_{fixed}$) to a value of either 80, 180, or 280 days (see Figure \ref{fig:combined_plot}A). Note that no other study in my systematic review manipulated nature of change using logistic curves and so its manipulation in Experiment 1 is, to the best of my knowledge, unique (in this literature). Nature of change was manipulated to simulate situations where uncertainty exists in the nature of change. 
+
+#### Constants 
+
+Because sample size was not manipulated in Experiment 1, I set it to have a constant value across all cells. I decided to set the sample size value to the average sample size used in organizational research [*n* = 225\; @bosco2015]. Another variable set to a constant value across the cells was time structuredness (data were assumed to be time structured). That is, data were generated such that, at each time point, all data were obtained at the exact same time. 
+
+#### Dependent Variables
+
+##### Convergence Success Rate{#convergence}
+
+The proportion of iterations in a cell where models converged defined
+the *convergence success rate*.\footnote{Specifically, convergence was obtained if the convergence code returned by OpenMx was 0.} Equation \@ref(eq:convergence) below shows the calculation used to compute the convergence success rate:
+
+```{=tex}
+\begin{align}
+  \text{Convergence success rate} =  \frac{\text{Number of models that successfully converged in a cell}}{n},
+  (\#eq:convergence) 
+\end{align}
+```
+\noindent where *n* represents the total number of models run in a cell.
+
+##### Modelling Accuracy 
+
+Because I was interested in examining the accuracy with which each logistic parameter was estimated under each experimental cell, it was necessary to give modelling accuracy a parameter-level definition. With modelling accuracy being defined at the parameter level, it became important to measure two metrics: bias and precision. For any given logistic function parameter, two questions were of central importance: 1) How well is the parameter estimated on average (bias) and 2) what is a plausible range of values that can be expected for an estimate from the output of a single model (precision). In the two sections that follow, I will discuss each metric of modelling accuracy and the cutoffs used to determine whether estimation was unbiased and precise. 
+
+###### Bias{#bias-comp}
+
+Bias was calculated to evaluate the accuracy with which each logistic
+function parameter was estimated in each experimental cell. As shown below in Equation
+\@ref(eq:bias), *bias* was obtained by summing the differences
+between the population value set for a parameter and the value estimated for the parameter by each $i$ converged model and then dividing the sum by the number of $N$ converged models. 
+
+```{=tex}
+\begin{align}
+  \text{Bias} = \frac{\sum_i^N\text{(Population value for parameter} - \text{Average estimated value}_i)}{N}
+  (\#eq:bias) 
+\end{align}
+```
+
+\noindent Bias was calculated for the fixed- and random-effect parameters of the baseline ($\uptheta_{fixed}$, $\uptheta_{random}$), maximal elevation ($\upalpha_{fixed}$, $\upalpha_{random}$), days-to-halfway elevation ($\upbeta_{fixed}$, $\upbeta_{random}$), and the halfway-triquarter delta parameters ($\upgamma_{fixed}$, $\upgamma_{random}$) and the error parameter ($\upepsilon$). 
+
+###### Precision{#pres-precision}
+
+In addition to computing bias, precision was calculated to evaluate the variability with which each parameter was estimated. Importantly, metrics used to evaluate precision in previous studies assume estimates are normally distributed (e.g., mean-squared error and empirical standard error). Because some parameters in my simulations had skewed distributions, using a metric that assumed a normal distribution would likely yield inaccurate results. Correspondingly, I used a distribution-independent definition of precision. In my simulations, *precision* was defined as the range of values covered by the middle 95% of values estimated for a logistic parameter. 
+
 
 ### Analysis of Data Modelling Output and Accompanying Visualizations {#analysis-visualization}
 
-To analyse and visualize modelling performancel, I calculated values for convergence success rate, bias, and precision in each experimental cell (see [dependent variables](#dependent-variables)). The sections that follow provide details on how I analysed each dependent variable and constructed plots to visualize bias and precision. 
+To analyse and visualize modelling performance, I calculated values for convergence success rate, bias, and precision in each experimental cell (see [dependent variables](#dependent-variables)). The sections that follow provide details on how I analysed each dependent variable and constructed plots to visualize bias and precision. 
 
 #### Analysis of Convergence Success Rate {#convergence-analysis}
 
 For the analysis of convergence success rate, the mean convergence success rate was computed for each cell in each experiment (see section on [convergence success rate](#convergence)). Because convergence rates exhibited little
-variability across cells due to the nearly unanimous high rates (almost all cells across all experiments had convergence success rates above 90%), examining the effects of any independent variable on these rates would have provided little information. Therefore, I only reported the average convergence success rate for each cell (see [Appendix B](#appendix-a-convergence-rates)). 
+variability across cells due to the nearly unanimous high rates (almost all cells across all experiments had convergence success rates above 90%), examining the effects of any independent variable on these rates would have provided little information. Therefore, I only reported the average convergence success rate for each cell (see Appendix \ref{convergence-tables}). 
 
 
 #### Analysis and Visualization of Bias{#bias-analysis}
  
-In accordance with several simulation studies, an estimate with a bias value within a $\pm10\%$ margin of error of the parameter's population value was deemed unbiased [@muthen1997]. To visualize bias, I constructed bias/precision plots. Figure \ref{fig:param-estimation-ex} shows a bias/precision plot for the fixed-effect halfway-triquarter parameter ($\upgamma_{fixed}$) for each measurement number and nature of change. The dots (squares, circles, triangles, diamonds) indicate the average estimated value (see [bias](#bias-comp)). The horizontal blue line indicates the population value ($\upgamma_{fixed}$ = 4.00) and the gray band indicates the acceptable margin of error of $\pm10\%$ of the parameter's population value. Dots that lie within the gray margin of error are filled and dots that lie outside of the margin remain unfilled. In the current example, the average value estimated for the fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$) is only biased (i.e., lies outside the margin of error) with five measurements and a nature of change with an early halfway-elevation point (i.e., $\upbeta_{fixed}$ = 80). Therefore, estimates are unbiased in almost all cells.
+In accordance with several simulation studies, an estimate with a bias value within a $\pm10\%$ margin of error of the parameter's population value was deemed unbiased [@muthen1997]. To visualize bias, I constructed bias/precision plots. Figure \ref{fig:param-estimation-ex} shows a bias/precision plot for the fixed-effect halfway-triquarter parameter ($\upgamma_{fixed}$) for each measurement number and nature of change. The dots (squares, circles, triangles, diamonds) indicate the average estimated value (see [bias](#bias-comp)). The horizontal blue line indicates the population value ($\upgamma_{fixed}$ = 4.00) and the gray band indicates the acceptable margin of error of $\pm10\%$ of the parameter's population value. Dots that lie within the gray margin of error are filled and dots that lie outside of the margin remain unfilled. In the current example, the average value estimated for the fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$) is only biased (i.e., lies outside the margin of error) with five measurements and a nature of change with a nature-of-change value of 80 ($\upbeta_{fixed}$ = 80). Therefore, estimates are unbiased in almost all cells.
+
+#### Analysis and Visualization of Precision{#precision-analysis}
+
+As discussed previously, precision was defined as the range of values covered by the middle 95% of estimated values for a given parameter (see [precision][Precision]). The cutoff value used to estimate precision directly followed from the cutoff value used for bias. Given that bias values within a $\pm10\%$ of a parameter's population value were deemed acceptable, an acceptable value for precision should not allow any bias values above the $\pm10\%$ cutoff. That is, the range covered by the middle 95% of estimated values should not allow a bias value outside the the $\pm10\%$ cutoff. If the range of values covered by the middle 95% of estimate values is conceptualized as an error bar centered on the population value, then an acceptable value for precision implies that neither
 
 ```{=tex}
 \begin{apaFigure}
 [portrait]
-[-0.8cm]
+[0cm]
 {Bias/Precision Plot for the Fixed-Effect Days-to-Halfway Elevation Parameter ($\upgamma_{fixed}$)}
 {param-estimation-ex}
 {0.9}
@@ -670,11 +678,9 @@ In accordance with several simulation studies, an estimate with a bias value wit
 ```
 
 
-#### Analysis and Visualization of Precision{#precision-analysis}
+\noindent the lower nor upper whiskers have a length greater than 10% of the parameter's population value. In summary, I deemed precision acceptable if no estimate within the range of values covered by the middle 95% of estimated values had a bias value greater than 10% of the population value, which also means that neither the lower nor upper whiskers of the error bar have a length greater than 10% of the population value. 
 
-As discussed previously, precision was defined as the range of values covered by the middle 95% of estimated values for a given parameter (see [precision][Precision]). The cutoff value used to estimate precision directly followed from the cutoff value used for bias. Given that bias values within a $\pm10\%$ of a parameter's population value were deemed acceptable, an acceptable value for precision should not allow any bias values above the $\pm10\%$ cutoff. That is, the range covered by the middle 95% of estimated values should not allow a bias value outside the the $\pm10\%$ cutoff. If the range of values covered by the middle 95% of estimate values is conceptualized as an error bar centered on the population value, then an acceptable value for precision implies that neither the lower nor upper whiskers have a length greater than 10% of the parameter's population value. In summary, I deemed precision acceptable if no estimate within the range of values covered by the middle 95% of estimated values had a bias value greater than 10% of the population value, which also means that neither the lower nor upper whiskers of the error bar have a length greater than 10% of the population value. 
-
-Like bias, I also depicted precision in bias/precision plots using error bar. Each error bar in the parameter estimation plot of Figure \ref{fig:param-estimation-ex} indicates the range of values covered by the middle 95% of estimated values in the given cell for the fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$). Importantly, if estimation is not precise, then at least one of the lower and/or upper whisker lengths exceeds 10% of the parameter's population value. When estimation is not precise, the error bar is light blue. When estimation is precise (i.e., neither of the lower or upper whisker lengths exceed 10% of the parameter's population value), the corresponding error bar is black. In the current example, all error bars are light blue and so precision is low in all cells. 
+Like bias, I also depicted precision in bias/precision plots using error bar. Each error bar in the bias/precision plot of Figure \ref{fig:param-estimation-ex} indicates the range of values covered by the middle 95% of estimated values in the given cell for the fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$). Importantly, if estimation is not precise, then at least one of the lower and/or upper whisker lengths exceeds 10% of the parameter's population value. When estimation is not precise, the error bar is light blue. When estimation is precise (i.e., neither of the lower or upper whisker lengths exceed 10% of the parameter's population value), the corresponding error bar is black. In the current example, all error bars are light blue and so precision is low in all cells. 
 
 ```{r variability-histograms, eval=F, include=F}
 exp_2 <- read_csv(file = 'data/exp_2_data.csv')
@@ -743,14 +749,14 @@ space measurements when the nature of change is unknown, modelling accuracy acro
 must be calculated for each spacing schedule. The spacing schedule that obtains the lowest modelling accuracy across all
 nature-of-change values can then be determined as the best schedule to use. 
 
-For each spacing schedule, I will first present a concise summary table of the results and then provide a detailed report for each column of the summary table. Because the lengths of the detailed reports are considerable, I provide concise summaries before the detailed reports to establish a framework to interpret the detailed reports. The detailed report of each spacing schedule presents the results of each day-unit's parameter estimation plot, modelling accuracy under each nature-of-change value, and then provides a qualitative summary. After providing the results for each spacing schedule, I then use the results to answer my research questions. 
+For each spacing schedule, I will first present a concise summary table of the results and then provide a detailed report for each column of the summary table. Because the lengths of the detailed reports are considerable, I provide concise summaries before the detailed reports to establish a framework to interpret the detailed reports. The detailed report of each spacing schedule presents the results of each day-unit's bias/precision plot, modelling accuracy under each nature-of-change value, and then provides a qualitative summary. After providing the results for each spacing schedule, I then use the results to answer my research questions. 
 
 
 ### Framework for Interpreting Results
 
 To conduct Experiment 1, the three variables of number of measurements (4 levels), spacing of measurements (4 levels), and nature of change (3 levels) were manipulated, which yielded a total of 48 cells. Importantly, within each cell, bias and precision values were also computed for each of the nine parameters estimated by the structured latent growth curve models (for a review, see [modelling of each generated data set](#modelling-data-sets)). Thus, because the analysis of Experiment 1 computes values for many dependent variables, interpreting the results can become overwhelming. Therefore, I will provide a framework to help the reader efficiently navigate the results section. 
 
-Because I will present the results of Experiment 1 by each level of measurement spacing,  the framework I will describe in Figure \ref{fig:results-plot-primer} shows a template for the bias/precision plots that I will present for each spacing schedule. The results of each spacing schedule contain a bias/precision plot for each of the nine estimated parameters. Each bias/precision plot shows the bias and precision for the estimation of one parameter across all measurement number and nature-of change levels.  Within each bias/precision plot, dots indicate the average estimated value (which indicates bias bias) and error bars represent the middle 95% range of estimated values (which indicates precision). Bias/precision plots with black outlines show the results for day-unit parameters and plots with gray outlines show the results for Likert-unit parameters. Importantly, only the results for the day-unit parameters will be presented (i.e., fixed- and random-effect days-to-halfway elevation and halfway-triquarter delta parameters [$\upbeta_{fixed}$, $\upbeta_{random}$, $\upgamma_{fixed}$, $\upgamma_{random}$, respectively]). The results for the Likert-unit parameters (i.e., fixed- and random-effect baseline and maximal elevation parameters [$\uptheta_{fixed}$, $\uptheta_{random}$, $\upalpha_{fixed}$, $\upalpha_{random}$, respectively]) were largely trivial and so are presented in [Appendix B](#appendix-b). Therefore, the results of each spacing schedule will only present the bias/precision plots for four parameters (i.e., the day-unit parameters). 
+Because I will present the results of Experiment 1 by each level of measurement spacing,  the framework I will describe in Figure \ref{fig:results-plot-primer} shows a template for the bias/precision plots that I will present for each spacing schedule. The results of each spacing schedule contain a bias/precision plot for each of the nine estimated parameters. Each bias/precision plot shows the bias and precision for the estimation of one parameter across all measurement number and nature-of change levels.  Within each bias/precision plot, dots indicate the average estimated value (which indicates bias bias) and error bars represent the middle 95% range of estimated values (which indicates precision). Bias/precision plots with black outlines show the results for day-unit parameters and plots with gray outlines show
 
 ```{=tex}
 \begin{apaFigure}
@@ -765,21 +771,22 @@ Because I will present the results of Experiment 1 by each level of measurement 
 \end{apaFigure}
 ```
 
+\noindent the results for Likert-unit parameters. Importantly, only the results for the day-unit parameters will be presented (i.e., fixed- and random-effect days-to-halfway elevation and halfway-triquarter delta parameters [$\upbeta_{fixed}$, $\upbeta_{random}$, $\upgamma_{fixed}$, $\upgamma_{random}$, respectively]). The results for the Likert-unit parameters (i.e., fixed- and random-effect baseline and maximal elevation parameters [$\uptheta_{fixed}$, $\uptheta_{random}$, $\upalpha_{fixed}$, $\upalpha_{random}$, respectively]) were largely trivial and so are presented in Appendix \ref{complete-versions}. Therefore, the results of each spacing schedule will only present the bias/precision plots for four parameters (i.e., the day-unit parameters). 
 
 ### Pre-Processing of Data and Model Convergence
 
 After collecting the output from the simulations, non-converged models
 (and their corresponding parameter estimates) were removed from
-subsequent analyses. Table \ref{tab:conv-exp-1} in [Appendix C](#appendix-c-convergence-rates) provides the convergence
+subsequent analyses. Table \ref{tab:conv-exp-1} in Appendix \ref{convergence-tables} provides the convergence
 success rates for each cell in Experiment 1. Model convergence was almost always above 90% and convergence rates
 rates below 90% only occurred in two cells with five measurements. 
 
 
 ### Equal Spacing {#concise-tab}
 
-For equal spacing, Table \ref{tab:summary-table-equal-spacing-exp1} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp1_plot_equal} for the corresponding parameter estimation plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-equal-spacing-exp1} and provide elaboration when necessary. 
+For equal spacing, Table \ref{tab:summary-table-equal-spacing-exp1} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp1_plot_equal} for the corresponding bias/precision plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-equal-spacing-exp1} and provide elaboration when necessary. 
 
-Before presenting the results for equal spacing, I provide a brief description of the concise summary table created for each spacing schedule and shown for equal spacing in Table \ref{tab:summary-table-equal-spacing-exp1}. Text within the 'Highest Modelling Accuracy' column indicates the nature-of-change value that leads to the highest modelling accuracy for each day-unit parameter. Text within the 'Unbiased' and 'Precise' columns indicates the number of measurements needed to, respectively, obtain unbiased and precise parameter estimation across all manipulated nature-of-change values. Emboldened text in the 'Unbiased' and 'Qualitative Description' columns indicates the measurement number that, respectively, results in unbiased estimation and the greatest improvements in bias and precision across all day-unit parameters and manipulated nature-of-change values. The 'Error Bar Length' column indicates the average error bar length across all manipulated nature-of-change values that results from using the measurement number listed in the 'Qualitative Description' column. 
+Before presenting the results for equal spacing, I provide a brief description of the concise summary table created for each spacing schedule and shown for equal spacing in Table \ref{tab:summary-table-equal-spacing-exp1}. Text within the 'Highest Modelling Accuracy' column indicates the nature-of-change value that leads to the highest modelling accuracy for each day-unit parameter.
 
 ```{r summary-table-equal-spacing-exp1, echo=F}
 errorbar_lengths <- compute_errorbar_lengths(exp_analytical_days = exp_1_analytical$days, iv_level = 'Equal spacing', num_measurements = 7)
@@ -831,13 +838,15 @@ kbl(x = summary_table, format = 'latex',
 
 ```
 
+
+\noindent Text within the 'Unbiased' and 'Precise' columns indicates the number of measurements needed to, respectively, obtain unbiased and precise parameter estimation across all manipulated nature-of-change values. Emboldened text in the 'Unbiased' and 'Qualitative Description' columns indicates the measurement number that, respectively, results in unbiased estimation and the greatest improvements in bias and precision across all day-unit parameters and manipulated nature-of-change values. The 'Error Bar Length' column indicates the average error bar length across all manipulated nature-of-change values that results from using the measurement number listed in the 'Qualitative Description' column. 
+
 #### Nature of Change That Leads to Highest Modelling Accuracy {#nature-change-equal-exp1}
 
-For equal spacing, Table \ref{tab:errorbar-equal-nc} lists the precision values (i.e., error bar lengths) for each day-unit parameter across each nature-of-change value. The 'Total' column indicates the total error bar length, which is a sum of the  the lower ('Lower') and upper ('Upper') whisker lengths. Given that the lower and upper whisker lengths are largely equivalent for each parameter, they are largely redundant and so will not be reported for the remainder of the results for equal spacing. Although modelling accuracy was determined by bias and precision, results for bias are not shown because the differences in bias across the nature-of-change values are negligible. Note that error bar lengths are obtained by computing the average length across all manipulated number of measurements. The columns shaded in gray indicate the nature of change where precision was highest (i.e., shortest error bar lengths) for equal spacing. For equal spacing, precision was lowest with a nature-of-change value of 180 for all day-unit parameters with one exception (i.e., midway change; see the 'Highest Modelling Accuracy' column in Table \ref{tab:summary-table-equal-spacing-exp1}). 
+For equal spacing, Table \ref{tab:errorbar-equal-nc} lists the precision values (i.e., error bar lengths) for each day-unit parameter across each nature-of-change value. The 'Total' column indicates the total error bar length, which is a sum of the  the lower ('Lower') and upper ('Upper') whisker lengths. Given that the lower and upper whisker lengths are largely equivalent for each parameter, they are largely redundant and so will not be reported for the remainder of the results for equal spacing. Although modelling accuracy was determined by bias and precision, results for bias are not shown because the differences in bias across the nature-of-change values are negligible. Note that error bar lengths are obtained by computing the average length across all manipulated number of measurements. The columns shaded in gray indicate the nature of change where precision was highest (i.e., shortest error bar lengths) for equal spacing. For equal spacing, precision was lowest with a nature-of-change value of 180 for all day-unit parameters with one exception (i.e., see the 'Highest Modelling Accuracy' column in Table \ref{tab:summary-table-equal-spacing-exp1}). 
 
-One important result to discuss concerns the error bar length of the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$) across the nature-of-change values. Precision was highest (i.e, shortest error bars) when the halfway-elevation point occurred midway through the measurement period (i.e., 180 days) for each day-unit parameter except the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). For the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$), precision was lowest (i.e., longest error bars) when the halfway-elevation point occurred midway through the measurement period (i.e., 180 days). An inspection of the error bar lengths for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$) in Figure \ref{fig:exp1_plot_equal}D revealed that the lower precision (i.e., longer error bars) observed for $\upgamma_{random}$ with a nature of change of 180 resulted from a longer upper whisker with five measurements. 
 
-To understand why precision for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$) is lower with a nature-of-change value of 180, I looked at the 
+To understand why precision for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$) was lower with a nature-of-change value of 180, I looked at the 
 
 ```{r errorbar-equal-nc, echo=F}
 param_midpoint_equal <- exp_1_analytical$days %>%
@@ -881,9 +890,13 @@ kbl(x = param_midpoint_equal, format = 'latex',digits = 2,
   
 ```
 
-\noindent distribution of estimated values. Figure \ref{fig:density_gamma_equal} shows the distribution of values (i.e., density plots) estimated for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$) for each nature-of-change level with five measurements. Importantly, the error bars in the bias/precision plot of Figure \ref{fig:exp1_plot_equal}D with five measurements are created from the density plots shown in Figure \ref{fig:density_gamma_equal}. Panel A shows the density plot with an early halfway point (i.e., $\upbeta_{fixed} = 80$). Panel B shows the density plot with a midway halfway point (i.e., $\upbeta_{fixed} = 180$). Panel C shows the density plot with a late halfway point (i.e., $\upbeta_{fixed} = 280$). Regions shaded in in gray represent the the middle 95% of estimated values and the width of the shaded regions is indicated by the length of the horizontal error bars. As originally confirmed by Table \ref{tab:errorbar-equal-nc}, Figure \ref{fig:density_gamma_equal}B shows that precision is indeed lowest (i.e., longer error bars) with a nature of change of 180. In looking across the density plots in Figure \ref{fig:density_gamma_equal}, precision is lowest (i.e., longest error bars) for the random-effect triquarter-halfway parameter ($\upgamma_{random}$) with a nature-of-change value of 180 because of the existence of high-value outliers. 
+\noindent distribution of estimated values. Figure \ref{fig:density_gamma_equal} shows the distribution of values (i.e., density plots) estimated for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$) for each nature-of-change level with five measurements. Importantly, the error bars in the bias/precision plot of Figure \ref{fig:exp1_plot_equal}D with five measurements are created from the density plots shown in Figure \ref{fig:density_gamma_equal}. Panel A shows the density plot with a nature-of-change value of 80 ($\upbeta_{fixed}$ = 80). Panel B shows the density plot with a with a nature-of-change value of 180 ($\upbeta_{fixed}$ = 180). Panel C shows the density plot with a with a nature-of-change value of 280 ($\upbeta_{fixed}$ = 280). Regions shaded in in gray represent the the middle 95% of estimated values and the width of the shaded regions is indicated by the length of the horizontal error bars. As originally confirmed by Table \ref{tab:errorbar-equal-nc}, Figure \ref{fig:density_gamma_equal}B shows that precision was indeed lowest (i.e., longer error bars) with a nature of change of 180. In looking across the density plots in Figure \ref{fig:density_gamma_equal}, precision was lowest (i.e., longest error bars) for the random-effect triquarter-halfway parameter ($\upgamma_{random}$) with a nature-of-change value of 180 because of the existence of high-value outliers. 
 
-In summary, under equal spacing, modelling accuracy for all the day-unit parameters (with one exception) is greatest when the nature-of-change value set by the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$) has a value of 180. As one exception, modelling accuracy (as indicated by precision) is lower for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$) with a nature-of-change value of 180 because of high-value estimates. 
+In summary, under equal spacing, modelling accuracy for all the day-unit parameters (with one exception) was greatest when the nature-of-change value set by the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$) had a value of 180. As one exception, modelling accuracy (as indicated by precision) was lower for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$) with a nature-of-change value of 180 because of high-value estimates. 
+
+#### Bias {#bias-equal-exp1}
+
+Before presenting the results for bias, I provide a description of the set of bias/precision plots shown in Figure \ref{fig:exp1_plot_equal} and in the results sections for the other spacing schedules in Experiment 1. Figure \ref{fig:exp1_plot_equal} shows the bias/precision plots for each day-unit parameter and Table \ref{tab:omega-exp1-equal} provides the partial $\upomega^2$ values for each independent variable of each day-unit parameter. In Figure \ref{fig:exp1_plot_equal}, blue horizontal lines indicate the population values for each parameter (with population values of $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, and $\upgamma_{random}$ = 4.00). Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin. Error bars represent the middle 95% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Panels A--B show the bias/precision plots for the fixed- and random-effect days-to-halfway elevation parameters ($\upbeta_{fixed}$ and $\upbeta_{random}$, respectively). Panels C--D show the bias/precision plots for the fixed- and random-effect triquarter-halfway delta parameters ($\upgamma_{fixed}$ and $\upgamma_{random}$, respectively). Note that random-effect parameter units are in standard deviation units. Importantly, across all population values used for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180.
 
 
 ```{=tex}
@@ -900,13 +913,27 @@ In summary, under equal spacing, modelling accuracy for all the day-unit paramet
 ```
 
 
-#### Bias {#bias-equal-exp1}
-
-Before presenting the results for bias, I provide a description of the set of parameter estimation plots shown in Figure \ref{fig:exp1_plot_equal} and in the results sections for the other spacing schedules in Experiment 1. Figure \ref{fig:exp1_plot_equal} shows the parameter estimation plots for each day-unit parameter and Table \ref{tab:omega-exp1-equal} provides the partial $\upomega^2$ values for each independent variable of each day-unit parameter. In Figure \ref{fig:exp1_plot_equal}, blue horizontal lines indicate the population values for each parameter (with population values of $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, and $\upgamma_{random}$ = 4.00). Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin. Error bars represent the middle 95% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Panels A--B show the parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters ($\upbeta_{fixed}$ and $\upbeta_{random}$, respectively). Panels C--D show the parameter estimation plots for the fixed- and random-effect triquarter-halfway delta parameters ($\upgamma_{fixed}$ and $\upgamma_{random}$, respectively). Note that random-effect parameter units are in standard deviation units. Importantly, across all population values used for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180.
-
-With respect to bias for equal spacing, estimates are biased (i.e., above the acceptable 10% cutoff) for each day-unit parameter in the following cells:
+With respect to bias for equal spacing, estimates were biased (i.e., above the acceptable 10% cutoff) for each day-unit parameter in the following cells:
 
 * fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp1_plot_equal}A): no cells. 
+* fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp1_plot_equal}B): no cells.
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp1_plot_equal}C): no cells. 
+* random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$; Figure \ref{fig:exp1_plot_equal}D): five measurements with all manipulated nature-of-change values and seven measurements with nature-of-change values of 180 and 280.
+
+
+In summary, with equal spacing, estimation of all the day-unit parameters across all manipulated nature-of-change values was unbiased using nine or more measurements, which is indicated by the emboldened text in the 'Unbiased' column of Table \ref{tab:summary-table-equal-spacing-exp1}.
+
+#### Precision {#precision-equal-exp1}
+
+With respect to precision for equal spacing, estimates were imprecise (i.e., error bar length with at least one whisker length exceeding 10% of a parameter's population value) in the following cells for each day-unit parameter: 
+
+* fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp1_plot_equal}A): no cells. 
+* fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp1_plot_equal}B): all cells. 
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp1_plot_equal}C): all cells. 
+* random-effect halfway-triquarter delta parameter [$\upgamma_{random}$] in Figure \ref{fig:exp1_plot_equal}D): all cells. 
+
+
+In summary, with equal spacing, estimation across all manipulated nature-of-change values was only precise for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$) with five or more measurements. No manipulated measurement number resulted in precise estimation of the fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$) or the random-effect day-unit parameters (see the 'Precise' column of Table \ref{tab:summary-table-equal-spacing-exp1}). 
 
 ```{r plots-equal-exp1, include=F, eval=F}
 generate_day_likert_facet_plot(analytical_data = exp_1_analytical, target_col = 'measurement_spacing', target_value = 'Equal spacing',
@@ -919,11 +946,11 @@ generate_day_likert_facet_plot(analytical_data = exp_1_analytical, target_col = 
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day-Unit Parameters With Equal Spacing in Experiment 1}
+{Bias/Precision Plots for Day-Unit Parameters With Equal Spacing in Experiment 1}
 {exp1_plot_equal}
 {0.16}
 {Figures/exp1_plot_days_equal spacing}
-{Panel A: Parameter estimation plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Parameter estimation plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Parameter estimation plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Parameter estimation plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:exp1-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp1-equal} for $\upomega^2$ effect size values.}
+{Panel A: Bias/precision plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Bias/precision plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Bias/precision plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Bias/precision plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:exp1-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp1-equal} for $\upomega^2$ effect size values.}
 \end{apaFigure}
 ```
 
@@ -942,50 +969,52 @@ parameter_labels = c('$\\upbeta_{fixed}$ (Figure \\ref{fig:exp1_plot_equal}A)',
                      '$\\upgamma_{random}$ (Figure \\ref{fig:exp1_plot_equal}D)'))
 ```
 
-* fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp1_plot_equal}B): no cells.
-* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp1_plot_equal}C): no cells. 
-* random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$; Figure \ref{fig:exp1_plot_equal}D): five measurements with all manipulated nature-of-change values and seven measurements with nature-of-change values of 180 and 280.
-
-In summary, with equal spacing, estimation of all the day-unit parameters across all manipulated nature-of-change values is unbiased using nine or more measurements, which is indicated by the emboldened text in the 'Unbiased' column of Table \ref{tab:summary-table-equal-spacing-exp1}.
-
-#### Precision {#precision-equal-exp1}
-
-With respect to precision for equal spacing, estimates are imprecise (i.e., error bar length with at least one whisker length exceeding 10% of a parameter's population value) in the following cells for each day-unit parameter: 
-
-* fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp1_plot_equal}A): no cells. 
-* fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp1_plot_equal}B): all cells. 
-* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp1_plot_equal}C): all cells. 
-* random-effect halfway-triquarter delta parameter [$\upgamma_{random}$] in Figure \ref{fig:exp1_plot_equal}D): all cells. 
-
-In summary, with equal spacing, estimation across all manipulated nature-of-change values is only precise for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$) with five or more measurements. No manipulated measurement number results in precise estimation of the fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$) or the random-effect day-unit parameters (see the 'Precise' column of Table \ref{tab:summary-table-equal-spacing-exp1}). 
 
 
- 
 #### Qualitative Description {#qualitative-equal-exp1}
 
 ```{r echo=F}
 errorbar_lengths <- compute_errorbar_lengths(exp_analytical_days = exp_1_analytical$days, iv_level = 'Equal spacing', num_measurements = 7)$errorbar_length
 ```
 
-Although no manipulated measurement number results in precise estimation of all the day-unit parameters, the largest improvements in precision (and bias) result from using moderate measurements numbers. With respect to bias under equal spacing, the largest improvements in bias across all manipulated nature-of-change values result from using the following measurement numbers for the following day-unit parameters (note that only the random-effect triquarter halfway delta parameter [$\upgamma_{random}$] had instances of high bias): 
+Although no manipulated measurement number resulted in precise estimation of all the day-unit parameters, the largest improvements in precision (and bias) resulted from using moderate measurements numbers. With respect to bias under equal spacing, the largest improvements in bias across all manipulated nature-of-change values resulted from using the following measurement numbers for the following day-unit parameters (note that only the random-effect triquarter halfway delta parameter [$\upgamma_{random}$] had instances of high bias): 
 
 * random-effect triquarter-halfway delta parameters ($\upgamma_{random}$): seven measurements.
 
-\noindent With respect to precision under equal spacing, the largest improvements precision in the estimation of all day-unit parameters (except the fixed-effect days-to-halfway elevation parameter [$\upbeta_{fixed}$]) are obtained with following measurement numbers:
+\noindent With respect to precision under equal spacing, the largest improvements precision in the estimation of all day-unit parameters (except the fixed-effect days-to-halfway elevation parameter [$\upbeta_{fixed}$]) were obtained with following measurement numbers:
 
 * fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): seven measurements, which results in a maximum error bar length of `r errorbar_lengths[2]` days.
 * random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): seven measurements, which results in a maximum error bar length of `r errorbar_lengths[3]` days.
 * random-effect triquarter-halfway delta parameter ($\upgamma_{random}$): seven measurements,which results in a maximum error bar length of `r errorbar_lengths[4]` days.
 
-\noindent Therefore, for equal spacing, seven measurements results leads to the greatest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values (see the emboldened text in the 'Qualitative Description' column of Table \ref{tab:summary-table-equal-spacing-exp1}). 
+\noindent Therefore, for equal spacing, seven measurements led to the greatest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values (see the emboldened text in the 'Qualitative Description' column of Table \ref{tab:summary-table-equal-spacing-exp1}). 
 
 #### Summary of Results 
 
-In summarizing the results for equal spacing, modelling accuracy is greatest across all day-unit parameters with a nature-of-change value of 180, with the random-effect days-to-halfway elevation parameter ($\upgamma_{random}$) being an exception (see [highest modelling accuracy](#nature-change-equal-exp1)). Unbiased estimation of all the day-unit parameters across all manipulated nature-of-change values results from using nine or more measurements (see [bias](#bias-equal-exp1)). Precise estimation of all the day-unit parameters is never obtained with any manipulated measurement number (see [precision](#precision-equal-exp1)). Although it may be discouraging that no manipulated measurement number under equal spacing results in precise estimation of all the day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters are obtained with moderate measurement numbers. With equal spacing, the largest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values are obtained using seven measurements (see [Qualitative Description](#qualitative-equal-exp1)). 
+In summarizing the results for equal spacing, modelling accuracy was greatest across all day-unit parameters with a nature-of-change value of 180, with the random-effect days-to-halfway elevation parameter ($\upgamma_{random}$) being an exception (see [highest modelling accuracy](#nature-change-equal-exp1)). Unbiased estimation of all the day-unit parameters across all manipulated nature-of-change values resulted from using nine or more measurements (see [bias](#bias-equal-exp1)). Precise estimation of all the day-unit parameters was never obtained with any manipulated measurement number (see [precision](#precision-equal-exp1)). Although it may be discouraging that no manipulated measurement number under equal spacing resulted in precise estimation of all the day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters were obtained with moderate measurement numbers. With equal spacing, the largest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values were obtained using seven measurements (see [Qualitative Description](#qualitative-equal-exp1)). 
 
 ### Time-Interval Increasing Spacing 
 
-For time-interval increasing spacing, Table \ref{tab:summary-table-time-inc-exp1} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp1_plot_time_inc} for the corresponding parameter estimation plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-time-inc-exp1} and provide elaboration when necessary (for a description of Table \ref{tab:summary-table-time-inc-exp1}, see [concise summary table](#concise-tab)). 
+For time-interval increasing spacing, Table \ref{tab:summary-table-time-inc-exp1} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp1_plot_time_inc} for the corresponding bias/precision plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-time-inc-exp1} and provide elaboration when necessary (for a description of Table \ref{tab:summary-table-time-inc-exp1}, see [concise summary table](#concise-tab)). 
+
+#### Nature of Change That Leads to Highest Modelling Accuracy {#nature-change-time-inc-exp1}
+
+For time-interval increasing spacing, Table \ref{tab:errorbar-time-inc-nc} lists the precision values (i.e., error bar lengths) for each day-unit parameter across each nature-of-change value. The 'Total' column indicates the total error bar length, which is a sum of the  the lower ('Lower') and upper ('Upper') whisker lengths. Given that the lower and upper whisker lengths are largely equivalent for each parameter, they are largely redundant and so will not be reported for the remainder of the results for time-interval increasing spacing. Although modelling accuracy is determined by bias and precision, results for bias are not shown because the differences in bias across the nature-of-change values are negligible. Note that error bar lengths are obtained by computing the average length across all manipulated number of measurements. The columns shaded in gray indicate the nature of change where precision is highest (i.e., shortest error bar lengths). For time-interval increasing spacing, precision was lowest (i.e., longest error bars) with a nature-of-change value of 80 for all day-unit parameters (see the 'Highest Modelling Accuracy' in Table \ref{tab:summary-table-time-inc-exp1}). 
+
+#### Bias {#bias-time-inc-exp1}
+
+With respect to bias for time-interval increasing spacing, estimates were biased (i.e., above the acceptable 10% cutoff) for each day-unit parameter in the following cells:
+
+* fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp1_plot_time_inc}A): no cells. 
+* fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp1_plot_time_inc}B): no cells
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp1_plot_time_inc}C): five measurements with a nature-of-change value of 280.
+* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp1_plot_time_inc}C): five measurements with all nature-of-change values and seven measurements with nature-of-change values of 180 and 280.
+
+In summary, with time-interval increasing spacing, estimation of all the day-unit parameters across all manipulated nature-of-change values was unbiased using nine or more measurements, which is indicated by the emboldened text in the 'Unbiased' column of Table \ref{tab:summary-table-time-inc-exp1}.
+
+#### Precision {#precision-time-inc-exp1}
+
+With respect to precision for time-interval increasing spacing, estimates were imprecise (i.e., error bar length with at least one whisker length exceeding 10% of a parameter's population value) in the following cells for each day-unit parameter: 
 
 
 ```{r summary-table-time-inc-exp1, echo=F}
@@ -1285,19 +1314,6 @@ time_inc_fixed_density <- base_density_plot +
 
 ```
 
-#### Nature of Change That Leads to Highest Modelling Accuracy {#nature-change-time-inc-exp1}
-
-For time-interval increasing spacing, Table \ref{tab:errorbar-time-inc-nc} lists the precision values (i.e., error bar lengths) for each day-unit parameter across each nature-of-change value. The 'Total' column indicates the total error bar length, which is a sum of the  the lower ('Lower') and upper ('Upper') whisker lengths. Given that the lower and upper whisker lengths are largely equivalent for each parameter, they are largely redundant and so will not be reported for the remainder of the results for time-interval increasing spacing. Although modelling accuracy is determined by bias and precision, results for bias are not shown because the differences in bias across the nature-of-change values are negligible. Note that error bar lengths are obtained by computing the average length across all manipulated number of measurements. The columns shaded in gray indicate the nature of change where precision is highest (i.e., shortest error bar lengths). For time-interval increasing spacing, precision is lowest (i.e., longest error bars) with a nature-of-change value of 80 for all day-unit parameters  (i.e., early halfway point; see the 'Highest Modelling Accuracy' in Table \ref{tab:summary-table-time-inc-exp1}). 
-
-#### Bias {#bias-time-inc-exp1}
-
-With respect to bias for time-interval increasing spacing, estimates are biased (i.e., above the acceptable 10% cutoff) for each day-unit parameter in the following cells:
-
-* fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp1_plot_time_inc}A): no cells. 
-* fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp1_plot_time_inc}B): no cells
-* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp1_plot_time_inc}C): five measurements with a nature-of-change value of 280.
-* random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp1_plot_time_inc}C): five measurements with all nature-of-change values and seven measurements with nature-of-change values of 180 and 280.
-
 ```{r errorbar-time-inc-nc, echo=F}
 param_midpoint_time_inc <- exp_1_analytical$days %>%
   filter(str_detect(string = measurement_spacing, pattern = 'increasing')) %>%
@@ -1335,21 +1351,14 @@ kbl(x = param_midpoint_time_inc, format = 'latex',digits = 2,
   kable_styling(position = 'left')
 ```
 
-In summary, with time-interval increasing spacing, estimation of all the day-unit parameters across all manipulated nature-of-change values is unbiased using nine or more measurements, which is indicated by the emboldened text in the 'Unbiased' column of Table \ref{tab:summary-table-time-inc-exp1}.
-
-
-#### Precision {#precision-time-inc-exp1}
-
-With respect to precision for time-interval increasing spacing, estimates are imprecise (i.e., error bar length with at least one whisker length exceeding 10% of a parameter's population value) in the following cells for each day-unit parameter: 
 
 * fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp1_plot_time_inc}A): five measurements with nature-of-change values of 180 and 280. 
 * fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp1_plot_time_inc}B): all cells. 
 * random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp1_plot_time_inc}C): all cells.
 * random-effect triquarter-halfway delta parameter ($\upgamma_{random}$; Figure \ref{fig:exp1_plot_time_inc}D): all cells.
 
-In summary, with time-interval increasing spacing, precise estimation of the fixed-effect day-unit parameters across all manipulated nature-of-change values results with seven or more measurements, but no manipulated measurement number results in precise estimation of the random-effect day-unit parameters (see the 'Precise' column of Table \ref{tab:summary-table-time-inc-exp1}). 
 
- In summary, with time-interval increasing spacing, estimation across all manipulated nature-of-change values is only precise for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$) with seven or more measurements. No manipulated measurement number results in precise estimation of the fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$) or the random-effect day-unit parameters (see the 'Precise' column of Table \ref{tab:summary-table-time-inc-exp1}). 
+In summary, with time-interval increasing spacing, estimation across all manipulated nature-of-change values was only precise for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$) with seven or more measurements. No manipulated measurement number resulted in precise estimation of the fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$) or the random-effect day-unit parameters (see the 'Precise' column of Table \ref{tab:summary-table-time-inc-exp1}). 
 
 
 ```{r plots-time-increasing-exp1, include=F, eval=F}
@@ -1362,12 +1371,12 @@ generate_day_likert_facet_plot(analytical_data = exp_1_analytical, target_col = 
 \begin{apaFigure}
 [portrait] %orientation (portrait or landscape)
 [samepage] 
-[-0.2cm] #spacing between bottom of figure and footnote
-{Parameter Estimation Plots for Day-Unit Parameters With Time-Interval Increasing Spacing in Experiment 1} %figure title 
+[-0.2cm] %spacing between bottom of figure and footnote
+{Bias/Precision Plots for Day-Unit Parameters With Time-Interval Increasing Spacing in Experiment 1} %figure title 
 {exp1_plot_time_inc} %figure label 
 {0.16} %scaling factor: modifying height and width together 
 {Figures/exp1_plot_days_time-interval increasing} %location of where to get figure 
-{Panel A: Parameter estimation plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Parameter estimation plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Parameter estimation plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Parameter estimation plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80.00, 180.00, 280.00}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:exp1-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp1-time-inc} for $\upomega^2$ effect size values.}
+{Panel A: Bias/precision plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Bias/precision plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Bias/precision plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Bias/precision plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80.00, 180.00, 280.00}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:exp1-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp1-time-inc} for $\upomega^2$ effect size values.}
 \end{apaFigure}
 ```
 
@@ -1395,28 +1404,32 @@ errorbar_lengths <- c(errorbar_lengths_nm7$errorbar_length[1], errorbar_lengths_
                      errorbar_lengths_nm7$errorbar_length[3], errorbar_lengths_nm9$errorbar_length[4])
 ```
 
-For time-interval increasing spacing in Figure \ref{fig:exp1_plot_time_inc}, although no manipulated measurement number results in precise estimation of all the day-unit parameters, the largest improvements in precision (and bias) result from using moderate measurements numbers. With respect to bias under time-interval increasing spacing, the largest improvements across all manipulated nature-of-change values in bias occur with the following measurement numbers for the random-effect day-unit parameters: 
+For time-interval increasing spacing in Figure \ref{fig:exp1_plot_time_inc}, although no manipulated measurement number resulted in precise estimation of all the day-unit parameters, the largest improvements in precision (and bias) resulted from using moderate measurements numbers. With respect to bias under time-interval increasing spacing, the largest improvements across all manipulated nature-of-change values in bias occurred with the following measurement numbers for the random-effect day-unit parameters: 
 
 * random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): seven measurements.
 * random-effect triquarter-halfway delta parameters ($\upgamma_{random}$): nine measurements.
 
-\noindent With respect to precision under time-interval increasing spacing, the largest improvements precision in the estimation of all day-unit parameters across all manipulated nature-of-change values result with following measurement numbers:
+\noindent With respect to precision under time-interval increasing spacing, the largest improvements precision in the estimation of all day-unit parameters across all manipulated nature-of-change values resulted with the following measurement numbers:
 
 * fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$): seven measurements, which results in an average error bar length of `r errorbar_lengths[1]` days.
 * fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): nine measurements, which results in an average error bar length of `r errorbar_lengths[2]` days.
 * random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): nine measurements, which results in an average error bar length of `r errorbar_lengths[3]` days.
 * random-effect triquarter-halfway delta parameter ($\upgamma_{random}$): nine measurements, which results in an average error bar length of `r errorbar_lengths[4]` days. 
 
-\noindent Therefore, for time-interval increasing spacing, nine measurements leads to the greatest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values (see the 'Qualitative Description` column in Table \ref{tab:summary-table-time-inc-exp1}). 
+\noindent Therefore, for time-interval increasing spacing, nine measurements resulted in the greatest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values (see the 'Qualitative Description` column in Table \ref{tab:summary-table-time-inc-exp1}). 
 
 #### Summary of Results 
 
-In summarizing the results for time-interval increasing spacing, modelling accuracy is highest for each day-unit parameter with a nature-of-change value of 80 (i.e., early halfway point; see [highest modelling accuracy](#nature-change-time-inc-exp1)). Estimation of all day-unit parameters is unbiased across all manipulated nature-of-change values using nine or more measurements (see [bias](#bias-time-inc-exp1)). Precise estimation is never obtained in the estimation of all day-unit parameters with any manipulated measurement (see [precision](#precision-time-inc-exp1)). Although it may be discouraging that no manipulated measurement number under time-interval increasing spacing results in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters are obtained with moderate measurement numbers. With time-interval increasing spacing, the largest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values are obtained using nine measurements (see [qualitative description](#qualitative-time-inc-exp1)).  
+In summarizing the results for time-interval increasing spacing, modelling accuracy was highest for each day-unit parameter with a nature-of-change value of 80 ($\upbeta_{fixed}$ = 80; see [highest modelling accuracy](#nature-change-time-inc-exp1)). Estimation of all day-unit parameters was unbiased across all manipulated nature-of-change values using nine or more measurements (see [bias](#bias-time-inc-exp1)). Precise estimation was never obtained in the estimation of all day-unit parameters with any manipulated measurement (see [precision](#precision-time-inc-exp1)). Although it may be discouraging that no manipulated measurement number under time-interval increasing spacing resulted in precise estimation of all the day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters were obtained with moderate measurement numbers. With time-interval increasing spacing, the largest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values resulted from using nine measurements (see [qualitative description](#qualitative-time-inc-exp1)).  
 
 
 ### Time-Interval Decreasing Spacing 
 
-For time-interval decreasing spacing, Table \ref{tab:summary-table-time-dec-exp1} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp1_plot_time_dec} for the corresponding parameter estimation plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-time-dec-exp1} and provide elaboration when necessary (for a description of Table \ref{tab:summary-table-time-dec-exp1}, see [concise summary table](#concise-tab)). 
+For time-interval decreasing spacing, Table \ref{tab:summary-table-time-dec-exp1} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp1_plot_time_dec} for the corresponding bias/precision plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-time-dec-exp1} and provide elaboration when necessary (for a description of Table \ref{tab:summary-table-time-dec-exp1}, see [concise summary table](#concise-tab)). 
+
+#### Nature of Change That Leads to Highest Modelling Accuracy {#nature-change-time-dec-exp1}
+
+For time-interval decreasing spacing, Table \ref{tab:errorbar-time-dec-nc} lists the error bar lengths for each day-unit parameter and nature-of-change value. Although modelling accuracy is determined by bias and precision, results for bias are not discussed or computed because the differences in bias across the nature-of-change values are negligible. Given that the lower and upper whisker lengths are largely equivalent for each parameter, they are largely redundant and so will not be reported for the remainder of the results for time-interval decreasing spacing. Note that error bar lengths are computed by computing the average length across all manipulated number-of-measurement values. The column shaded in gray indicates the nature-of-change value that results in the shortest error bar lengths
 
 ```{r summary-table-time-dec-exp1, echo=F}
 errorbar_lengths_nm7 <- compute_errorbar_lengths(exp_analytical_days = exp_1_analytical$days, iv_level = 'Time-interval decreasing', num_measurements = 7)
@@ -1469,10 +1482,7 @@ kbl(x = summary_table, format = 'latex',
   landscape(margin = '2.54cm')
 ```
 
-#### Nature of Change That Leads to Highest Modelling Accuracy {#nature-change-time-dec-exp1}
-
-For time-interval decreasing spacing, Table \ref{tab:errorbar-time-dec-nc} lists the error bar lengths for each day-unit parameter and nature-of-change value. Although modelling accuracy is determined by bias and precision, results for bias are not discussed or computed because the differences in bias across the nature-of-change values are negligible. Given that the lower and upper whisker lengths are largely equivalent for each parameter, they are largely redundant and so will not be reported for the remainder of the results for time-interval decreasing spacing. Note that error bar lengths are computed by computing the average length across all manipulated number-of-measurement values. The column shaded in gray indicates the nature-of-change value that results in the shortest error bar lengths under equal spacing. For time-interval decreasing spacing, precision is lowest (i.e., longest error bars) with a nature-of-change value of 280 for all day-unit parameters  (i.e., late halfway point; see the 'Highest Modelling Accuracy' in Table \ref{tab:summary-table-time-dec-exp1}). 
-
+\noindent under equal spacing. For time-interval decreasing spacing, precision was lowest (i.e., longest error bars) with a nature-of-change value of 280 for all day-unit parameters (see the 'Highest Modelling Accuracy' in Table \ref{tab:summary-table-time-dec-exp1}). 
 
 
 ```{r errorbar-time-dec-nc, echo=F}
@@ -1517,26 +1527,26 @@ kbl(x = param_midpoint_time_dec, format = 'latex',digits = 2,
 
 #### Bias {#bias-time-dec-exp1}
 
-With respect to bias for time-interval decreasing spacing, estimates are biased (i.e., above the acceptable 10% cutoff) for each day-unit parameter in the following cells:  
+With respect to bias for time-interval decreasing spacing, estimates were biased (i.e., above the acceptable 10% cutoff) for each day-unit parameter in the following cells:  
 
 * fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp1_plot_time_dec}A): no cells.
 * fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp1_plot_time_dec}B): five measurements with a nature-of-change value of 80.
 * random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp1_plot_time_dec}C): five measurements with a nature-of-change value of 80. 
 * random-effect halfway-triquarter delta parameter ($\upgamma_{random}$; Figure \ref{fig:exp1_plot_time_dec}D): five measurements across all manipulated nature-of-change values and seven measurements with nature-of-change values of 80 and 180. 
 
-In summary, with time-interval decreasing spacing, unbiased estimation can be obtained for all day-unit parameters across all manipulated nature-of-change values using nine or more measurements, which is indicated by the emboldened text in the 'Unbiased' column of Table \ref{tab:summary-table-time-dec-exp1}.
+In summary, with time-interval decreasing spacing, unbiased estimation was obtained for all day-unit parameters across all manipulated nature-of-change values using nine or more measurements, which is indicated by the emboldened text in the 'Unbiased' column of Table \ref{tab:summary-table-time-dec-exp1}.
 
 
 #### Precision {#precision-time-dec-exp1}
 
-With respect to precision for time-interval decreasing spacing, estimates are imprecise (i.e., error bar length with at least one whisker length exceeding 10% of a parameter's population value) in the following cells for each day-unit parameter:  
+With respect to precision for time-interval decreasing spacing, estimates were imprecise (i.e., error bar length with at least one whisker length exceeding 10% of a parameter's population value) in the following cells for each day-unit parameter:  
 
 * fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp1_plot_time_dec}A): five measurements with nature-of-change values of 80 and 180 an seven measurements with a nature-of-change value of 80.
 * fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp1_plot_time_dec}B): all cells. 
 * random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp1_plot_time_dec}C): all cells. 
 * random-effect triquarter-halfway delta parameter ($\upgamma_{random}$; Figure \ref{fig:exp1_plot_time_dec}D): all cells. 
 
-In summary, with time-interval increasing spacing, estimation across all manipulated nature-of-change values is only precise for the estimation of the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$)  with nine or more measurements. No manipulated measurement number results in precise estimation of the fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$) or the random-effect day-unit parameters (see the 'Precise' column of Table \ref{tab:summary-table-time-dec-exp1}). 
+In summary, with time-interval increasing spacing, estimation across all manipulated nature-of-change values was only precise for the estimation of the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$) with nine or more measurements. No manipulated measurement number resulted in precise estimation of the fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$) or the random-effect day-unit parameters (see the 'Precise' column of Table \ref{tab:summary-table-time-dec-exp1}). 
 
 ```{r plots-time-decreasing-exp1, include=F, eval=F}
 generate_day_likert_facet_plot(analytical_data = exp_1_analytical, target_col = 'measurement_spacing', target_value = 'Time-interval decreasing',
@@ -1549,11 +1559,11 @@ generate_day_likert_facet_plot(analytical_data = exp_1_analytical, target_col = 
 [portrait]
 [samepage]
 [-0.2cm] %distance between bottom of figure and beggining of the note 
-{Parameter Estimation Plots for Day-Unit Parameters With Time-Interval Decreasing Spacing in Experiment 1} 
+{Bias/Precision Plots for Day-Unit Parameters With Time-Interval Decreasing Spacing in Experiment 1} 
 {exp1_plot_time_dec}
 {0.16} %scaling factor 
 {Figures/exp1_plot_days_time-interval decreasing} %path to figure 
-{Panel A: Parameter estimation plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Parameter estimation plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Parameter estimation plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Parameter estimation plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80.00, 180.00, 280.00}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:exp1-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp1-time-dec} for $\upomega^2$ effect size values.}
+{Panel A: Bias/precision plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Bias/precision plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Bias/precision plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Bias/precision plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80.00, 180.00, 280.00}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:exp1-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp1-time-dec} for $\upomega^2$ effect size values.}
 \end{apaFigure}
 ```
 
@@ -1572,7 +1582,6 @@ parameter_labels = c('$\\upbeta_{fixed}$ (Figure \\ref{fig:exp1_plot_time_dec}A)
                      '$\\upgamma_{random}$ (Figure \\ref{fig:exp1_plot_time_dec}D)'))
 ```
 
-
 #### Qualitative Description {#qualitative-time-dec-exp1}
 
 ```{r echo=F}
@@ -1582,28 +1591,28 @@ errorbar_lengths <- c(errorbar_lengths_nm7$errorbar_length[1],
                       errorbar_lengths_nm9$errorbar_length[4])
 ```
 
-For time-interval decreasing spacing in Figure \ref{fig:exp1_plot_time_dec}, although no manipulated measurement number results in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) are obtained using moderate measurements numbers. With respect to bias under time-interval decreasing spacing, the largest improvements across all manipulated nature-of-change values in bias occur with the following measurement numbers for the random-effect day-unit parameters: 
+For time-interval decreasing spacing in Figure \ref{fig:exp1_plot_time_dec}, although no manipulated measurement number resulted in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) were obtained using moderate measurements numbers. With respect to bias under time-interval decreasing spacing, the largest improvements across all manipulated nature-of-change values in bias occurred with the following measurement numbers for the random-effect day-unit parameters: 
 
 * random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): seven measurements
 * random-effect triquarter-halfway delta parameters ($\upgamma_{random}$): nine measurements
 
-\noindent With respect to precision under time-interval decreasing spacing, the largest improvements precision in the estimation of all day-unit parameters across all manipulated nature-of-change values are obtained with following measurement numbers:
+\noindent With respect to precision under time-interval decreasing spacing, the largest improvements precision in the estimation of all day-unit parameters across all manipulated nature-of-change values were obtained with the following measurement numbers:
 
 * fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$): seven measurements, which results in a maximum error bar length of `r errorbar_lengths[1]` days.
 * fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): nine measurements, which results in a maximum error bar length of `r errorbar_lengths[2]` days.
 * random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): nine measurements, which results in a maximum error bar length of `r errorbar_lengths[3]` days.
 * random-effect triquarter-halfway delta parameter ($\upgamma_{random}$): nine measurements, which results in a maximum bar length of `r errorbar_lengths[4]` days.
 
-\noindent Therefore, for time-interval decreasing spacing, nine measurements leads to the greatest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values (see the emboldened text in the 'Qualitative Description' column in Table \ref{tab:summary-table-time-dec-exp1}). 
+\noindent Therefore, for time-interval decreasing spacing, nine measurements resulted in the greatest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values (see the emboldened text in the 'Qualitative Description' column in Table \ref{tab:summary-table-time-dec-exp1}). 
 
 #### Summary of Results 
 
-In summarizing the results for time-interval decreasing spacing, modelling accuracy is highest for each day-unit parameter with a nature-of-change value of 280 (i.e., late halfway point; see [highest modelling accuracy](#nature-change-time-dec-exp1)). Unbiased estimation of the day-unit parameters across all manipulated nature-of-change values results from using nine or more measurements (see [bias](#bias-time-dec-exp1)). Precise estimation of all the day-unit parameters is never obtained using any of the manipulated measurement numbers (see [precision](#precision-time-dec-exp1)). Although it may be discouraging that no manipulated measurement number under time-interval decreasing spacing results in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters are obtained with moderate measurement numbers. With time-interval decreasing spacing, the largest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values are obtained using nine measurements (see [qualitative description](#qualitative-time-inc-exp1)).  
+In summarizing the results for time-interval decreasing spacing, modelling accuracy was highest for each day-unit parameter with a nature-of-change value of 280 ($\upbeta_{fixed}$ = 280; see [highest modelling accuracy](#nature-change-time-dec-exp1)). Unbiased estimation of the day-unit parameters across all manipulated nature-of-change values resulted from using nine or more measurements (see [bias](#bias-time-dec-exp1)). Precise estimation of all the day-unit parameters was never obtained using any of the manipulated measurement numbers (see [precision](#precision-time-dec-exp1)). Although it may be discouraging that no manipulated measurement number under time-interval decreasing spacing resulted in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters were obtained with moderate measurement numbers. With time-interval decreasing spacing, the largest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values were obtained using nine measurements (see [qualitative description](#qualitative-time-inc-exp1)).  
 
 
 ### Middle-and-Extreme Spacing  
 
-For middle-and-extreme spacing, Table \ref{tab:summary-table-mid-ext-exp1} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp1_plot_time_mid_ext} for the corresponding parameter estimation plots). The sections that follow will present the results for each column of Table  \ref{tab:summary-table-mid-ext-exp1} and provide elaboration when necessary (for a description of Table  \ref{tab:summary-table-mid-ext-exp1}, see [concise summary table](#concise-tab)). 
+For middle-and-extreme spacing, Table \ref{tab:summary-table-mid-ext-exp1} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp1_plot_time_mid_ext} for the corresponding bias/precision plots). The sections that follow will present the results for each column of Table  \ref{tab:summary-table-mid-ext-exp1} and provide elaboration when necessary (for a description of Table  \ref{tab:summary-table-mid-ext-exp1}, see [concise summary table](#concise-tab)). 
 
 ```{r summary-table-mid-ext-exp1, echo=F}
 errorbar_lengths_nm7 <- compute_errorbar_lengths(exp_analytical_days = exp_1_analytical$days, iv_level = 'Middle-and-extreme spacing', num_measurements = 7)
@@ -1663,7 +1672,7 @@ kbl(x = summary_table, format = 'latex',
 
 #### Nature of Change That Leads to Highest Modelling Accuracy {#nature-change-mid-ext-exp1}
 
-For middle-and-extreme spacing, Table \ref{tab:errorbar-mid-ext-nc} lists the error bar lengths for each day-unit parameter and nature-of-change value. Although modelling accuracy is determined by bias and precision, results for bias are not discussed or computed because the differences in bias across the nature-of-change values are negligible. Given that the lower and upper whisker lengths are largely equivalent for each parameter, they are largely redundant and so will not be reported for the remainder of the results for middle-and-extreme spacing. Note that error bar lengths are computed by computing the average length across all manipulated number-of-measurement values. The column shaded in gray indicates the nature-of-change value that results in the shortest error bar lengths under equal spacing. For middle-and-extreme spacing, precision is lowest (i.e., longest error bars) with a nature-of-change value of 180 for all day-unit parameters  (i.e., midway halfway point; see the 'Highest Modelling Accuracy' in Table \ref{tab:summary-table-mid-ext-exp1}). 
+For middle-and-extreme spacing, Table \ref{tab:errorbar-mid-ext-nc} lists the error bar lengths for each day-unit parameter and nature-of-change value. Although modelling accuracy is determined by bias and precision, results for bias are not discussed or computed because the differences in bias across the nature-of-change values are negligible. Given that the lower and upper whisker lengths are largely equivalent for each parameter, they are largely redundant and so will not be reported for the remainder of the results for middle-and-extreme spacing. Note that error bar lengths are computed by computing the average length across all manipulated number-of-measurement values. The column shaded in gray indicates the nature-of-change value that results in the shortest error bar lengths under equal spacing. For middle-and-extreme spacing, precision was highest (i.e., shortest error bars) with a nature-of-change value of 180 for all day-unit parameters  (see the 'Highest Modelling Accuracy' in Table \ref{tab:summary-table-mid-ext-exp1}). 
 
 
 ```{r errorbar-mid-ext-nc, echo=F}
@@ -1705,25 +1714,25 @@ kbl(x = param_midpoint_mid_ext, format = 'latex',digits = 2,
 
 #### Bias {#bias-mid-ext-exp1}
 
-With respect to bias for middle-and-extreme spacing, estimates are biased (i.e., above the acceptable 10% cutoff) for each day-unit parameter in the following cells:
+With respect to bias for middle-and-extreme spacing, estimates were biased (i.e., above the acceptable 10% cutoff) for each day-unit parameter in the following cells:
 
 * fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp1_plot_time_dec}A): no cells. 
 * fixed-effect halfway-triquarter delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp1_plot_time_mid_ext}B): five measurements with nature-of-change values of 80 and 280.
 * random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp1_plot_time_mid_ext}C): five and seven measurements with nature-of-change values of 80 and 280.
 * random-effect triquarter-halfway delta parameter ($\upgamma_{random}$; Figure \ref{fig:exp1_plot_time_mid_ext}D): five, seven, and nine measurements with nature-of-change values of 80 and 280.
 
-In summary, with middle-and-extreme spacing, estimation of all the day-unit parameters across all manipulated nature-of-change values is unbiased using 11 measurements, which is indicated by the emboldened text in the 'Unbiased' column of Table \ref{tab:summary-table-mid-ext-exp1}.
+In summary, with middle-and-extreme spacing, estimation of all the day-unit parameters across all manipulated nature-of-change values were unbiased using 11 measurements, which is indicated by the emboldened text in the 'Unbiased' column of Table \ref{tab:summary-table-mid-ext-exp1}.
 
 #### Precision {#precision-mid-ext-exp1}
 
-With respect to precision for middle-and-extreme spacing, estimates are imprecise (i.e., error bar length with at least one whisker length exceeding 10% of a parameter's population value) in the following cells for each day-unit parameter:   
+With respect to precision for middle-and-extreme spacing, estimates were imprecise (i.e., error bar length with at least one whisker length exceeding 10% of a parameter's population value) in the following cells for each day-unit parameter:   
 
 * fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$; Figure \ref{fig:exp1_plot_time_mid_ext}A): five measurements with nature-of-change values of 80 and 280.
 * fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$; Figure \ref{fig:exp1_plot_time_mid_ext}B): five and seven, an nine measurements with nature-of-change values of 80 and 280 (shown on x-axis).
 * random-effect days-to-halfway elevation parameter ($\upbeta_{random}$; Figure \ref{fig:exp1_plot_time_mid_ext}C): all cells.
 * random-effect triquarter-halfway delta parameter ($\upgamma_{random}$; Figure \ref{fig:exp1_plot_time_mid_ext}D): all cells. 
 
-\noindent In summary, with middle-and-extreme spacing, precise estimation of the fixed-effect day-unit parameters across all manipulated nature-of-change values is obtained with 11 measurements, but no manipulated measurement number results in precise estimation of the random-effect day-unit parameters (see the 'Precise' column of Table \ref{tab:summary-table-mid-ext-exp1}). 
+\noindent In summary, with middle-and-extreme spacing, precise estimation of the fixed-effect day-unit parameters across all manipulated nature-of-change values was obtained with 11 measurements, but no manipulated measurement number resulted in precise estimation of the random-effect day-unit parameters (see the 'Precise' column of Table \ref{tab:summary-table-mid-ext-exp1}). 
 
 ```{r plots-mid-ext-exp1, include=F, eval=F}
 generate_day_likert_facet_plot(analytical_data = exp_1_analytical, target_col = 'measurement_spacing', target_value = 'Middle-and-extreme spacing',
@@ -1737,11 +1746,11 @@ generate_day_likert_facet_plot(analytical_data = exp_1_analytical, target_col = 
 [portrait]
 [samepage]
 [-0.2cm]
-{Parameter Estimation Plots for Day-Unit Parameters With Middle-and-Extreme Spacing in Experiment 1}
+{Bias/Precision Plots for Day-Unit Parameters With Middle-and-Extreme Spacing in Experiment 1}
 {exp1_plot_time_mid_ext}
 {0.16}
 {Figures/exp1_plot_days_middle-and-extreme spacing}
-{Panel A: Parameter estimation plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Parameter estimation plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Parameter estimation plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Parameter estimation plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80.00, 180.00, 280.00}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:exp1-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp1-mid-ext} for $\upomega^2$ effect size values.}
+{Panel A: Bias/precision plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Bias/precision plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Bias/precision plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Bias/precision plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80.00, 180.00, 280.00}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:exp1-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp1-mid-ext} for $\upomega^2$ effect size values.}
 \end{apaFigure}
 ```
 
@@ -1761,7 +1770,6 @@ parameter_labels = c('$\\upbeta_{fixed}$ (Figure \\ref{fig:exp1_plot_time_mid_ex
 ```
 
 
-
 #### Qualitative Description {#qualitative-mid-ext-exp1}
 
 ```{r echo=F}
@@ -1771,37 +1779,37 @@ errorbar_lengths <- c(errorbar_lengths_nm7$errorbar_length[1],
                       errorbar_lengths_nm9$errorbar_length[4])
 ```
 
-For middle-and-extreme spacing in Figure \ref{fig:exp1_plot_time_mid_ext}, although no manipulated measurement number results in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) are obtained using moderate measurements numbers. With respect to bias under middle-and-extreme spacing, the largest improvements across all manipulated nature-of-change values in bias occur with the following measurement numbers for the following day-unit parameters:
+For middle-and-extreme spacing in Figure \ref{fig:exp1_plot_time_mid_ext}, although no manipulated measurement number resulted in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) were obtained using moderate measurements numbers. With respect to bias under middle-and-extreme spacing, the largest improvements across all manipulated nature-of-change values in bias occurred with the following measurement numbers for the following day-unit parameters:
 
 * random-effect days-to-halfway elevation parameter ($\upgamma_{fixed}$): seven measurements
 * random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): nine measurements
 * random-effect triquarter-halfway delta parameters ($\upgamma_{random}$): 11 measurements
 
-\noindent With respect to precision under middle-and-extreme spacing, the largest improvements precision in the estimation of all day-unit parameters across all manipulated nature-of-change values result with following measurement numbers:
+\noindent With respect to precision under middle-and-extreme spacing, the largest improvements precision in the estimation of all day-unit parameters across all manipulated nature-of-change values result with the following measurement numbers:
 
 * fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$): seven measurements, which results in a maximum error bar length of `r errorbar_lengths[1]` days.
 * fixed-effect triquarter-halfway delta parameter ($\upgamma_{fixed}$): seven measurements, which results in a maximum error bar length of `r errorbar_lengths[2]` days.
 * random-effect days-to-halfway elevation parameter ($\upbeta_{random}$): nine measurements, which results in a maximum error bar length of `r errorbar_lengths[3]` days.
 * random-effect triquarter-halfway delta parameter ($\upgamma_{random}$): seven measurements, which results in a maximum error bar length of `r errorbar_lengths[4]` days.
 
-\noindent Therefore, for middle-and-extreme spacing, nine measurements obtain the greatest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values (see the emboldened text in the 'Qualitative Description' column in Table \ref{tab:summary-table-mid-ext-exp1}). 
+\noindent Therefore, for middle-and-extreme spacing, nine measurements resulted in the greatest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values (see the emboldened text in the 'Qualitative Description' column in Table \ref{tab:summary-table-mid-ext-exp1}). 
 
 #### Summary of Results 
 
-In summarizing the results for time-interval decreasing spacing, modelling accuracy is highestfor each day-unit parameter with a a nature-of-change value of 180 (i.e., midway halfway point; see [highest modelling accuracy](#nature-change-time-dec-exp1)). Unbiased estimation of the day-unit parameters across all manipulated nature-of-change values results from using nine or more measurements (see [bias](#bias-time-dec-exp1)). Precise estimation  of all the day-unit parameters is never obtained using any of the manipulated measurement numbers (see [precision](#precision-time-dec-exp1)). Although it may be discouraging that no manipulated measurement number under time-interval decreasing spacing results in precise estimation of all day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters are obtained with moderate measurement numbers. With time-interval decreasing spacing, the largest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values are obtained using nine measurements (see [qualitative description](#qualitative-time-inc-exp1)).  
+In summarizing the results for time-interval decreasing spacing, modelling accuracy was highest for each day-unit parameter with a nature-of-change value of 180 ($\upbeta_{fixed}$ = 180); see [highest modelling accuracy](#nature-change-time-dec-exp1)). Unbiased estimation of the day-unit parameters across all manipulated nature-of-change values resulted from using nine or more measurements (see [bias](#bias-time-dec-exp1)). Precise estimation of all the day-unit parameters was never obtained using any of the manipulated measurement numbers (see [precision](#precision-time-dec-exp1)). Although it may be discouraging that no manipulated measurement number under time-interval decreasing spacing resulted in precise estimation of all the day-unit parameters, the largest improvements in precision (and bias) across all day-unit parameters were obtained with moderate measurement numbers. With time-interval decreasing spacing, the largest improvements in bias and precision in the estimation of all day-unit parameters across all manipulated nature-of-change values resulted from using nine measurements (see [qualitative description](#qualitative-time-inc-exp1)).  
 
 
 ### Addressing My Research Questions 
 
 
-#### Does Placing Measurements Near Periods of Change Increase Modelling Accuracy?
+#### Does Placing Measurements Near Periods of Change Increase Modelling Accuracy? {#meas-placing}
 
-In Experiment 1, one question I had was whether placing measurements near periods of changeincreases modelling accuracy. To answer this question, I have recorded the nature of change values that result in the highest modelling accuracy for each spacing schedule in Table \ref{tab:summary-table-exp1-nc}. Text in the 'Highest Modelling Accuracy' column indicates the nature-of-change with which each spacing schedule obtains its highest modelling accuracy. The 'Error Bar Summary' columns list the error bar lengths obtained for each day-unit parameter using the nature-of-change value listed in the 'Highest Modelling Accuracy' column.\footnote{Bias values are not presented because the differences across the schedules are negligible.} Note that the error bar lengths are obtained by computing the average error bar length across all manipulated measurement numbers for the optimal nature-of-change value. Modelling accuracy for each spacing schedule is highest with the following nature-of-change values: 
+In Experiment 1, one question I had was whether placing measurements near periods of change increases modelling accuracy. To answer this question, I have recorded the nature of change values that result in the highest modelling accuracy for each spacing schedule in Table \ref{tab:summary-table-exp1-nc}. Text in the 'Highest Modelling Accuracy' column indicates the nature-of-change with which each spacing schedule obtains its highest modelling accuracy. The 'Error Bar Summary' columns list the error bar lengths obtained for each day-unit parameter using the nature-of-change value listed in the 'Highest Modelling Accuracy' column.\footnote{Bias values are not presented because the differences across the schedules are negligible.} Note that the error bar lengths are obtained by computing the average error bar length across all manipulated measurement numbers for the optimal nature-of-change value. Modelling accuracy for each spacing schedule is highest with the following nature-of-change values: 
 
-* equal spacing: $\upbeta_{fixed}$ = 180 (i.e., midway halfway point)
-* time-interval increasing spacing: $\upbeta_{fixed}$ = 80 (i.e., early halfway point)
-* time-interval decreasing spacing: $\upbeta_{fixed}$ = 280 (i.e., late halfway point)
-* middle-and-extreme spacing: $\upbeta_{fixed}$ = 180 (i.e., midway halfway point)
+* equal spacing: $\upbeta_{fixed}$ = 180 
+* time-interval increasing spacing: $\upbeta_{fixed}$ = 80 
+* time-interval decreasing spacing: $\upbeta_{fixed}$ = 280 
+* middle-and-extreme spacing: $\upbeta_{fixed}$ = 180 
 
 To understand why the modelling accuracy of each spacing schedule is highest with a specific nature of change, it is important to consider the locations on the curve where each schedule samples data. Figure \ref{fig:midpoint_plot} shows the measurement locations (indicated by dots) where each spacing schedule samples data for each manipulated nature of change ($\upbeta_{fixed} \in$ {80, 180, 180}). In Figure \ref{fig:midpoint_plot}A, data are sampled according to the equal spacing schedule. In Figure \ref{fig:midpoint_plot}B, data are sampled according to the time-interval increasing spacing schedule. In Figure \ref{fig:midpoint_plot}C, data are sampled according to the time-interval decreasing spacing schedule. In Figure \ref{fig:midpoint_plot}D, data are sampled according to the middle-and-extreme spacing schedule. Black curves indicate curves for which modelling accuracy is highest and gray curves indicating curves where modelling accuracy is not at its highest. Error bar lengths (i.e., precision) for the estimation of each day-unit parameter are copied over from Table \ref{tab:summary-table-exp1-nc} to provide a reference with which to compare modelling accuracy between the spacing schedules with the optimal nature of change. 
 
@@ -2307,7 +2315,7 @@ mid_5_180 <- exp_1_analytical$days %>%
   summarize(errorbar_length = mean(upper_ci) - mean(lower_ci))
 ```
 
-Third, middle-and-extreme spacing obtains higher modelling accuracy than equal spacing by sampling data at periods of greater change. Importantly, both equal and middle-and-extreme spacing obtain their highest modelling accuracy with a curve whose greatest change occurs at 180 days (i.e., midway halfway point), with middle-and-extreme spacing obtaining higher precision (i.e., shorter error bars) than equal spacing (see Figure \ref{fig:midpoint_plot} and Table \ref{tab:summary-table-exp1-nc}). An inspection of Figures \ref{fig:midpoint_plot}A and \ref{fig:midpoint_plot}D reveals that middle-and-extreme spacing samples measurements at moments of greater change. As an example, consider the measurement locations of equal and middle-and-extreme spacing with five measurements, where only second and fourth measurement locations differ between the schedules. For equal spacing, the second and fourth measurements are respectively sampled on days 90 and 270. For middle-and-extreme spacing, the second and fourth measurements are respectively taken on days 150 and 210. By consulting the first-derivative curve in Figure \ref{fig:first-deriv}, change is greater on days 150 and 210 than on days 90 and 270. Therefore, precision across all manipulated measurement numbers is greater (i.e., shorter error bars) with middle-and-extreme spacing than with equal spacing because middle-and-extreme spacing takes measurements closer to periods of change than equal spacing (see Figures \ref{fig:midpoint_plot}A and \ref{fig:midpoint_plot}D and Table \ref{tab:summary-table-exp1-nc}). 
+Third, middle-and-extreme spacing obtains higher modelling accuracy than equal spacing by sampling data at periods of greater change. Importantly, both equal and middle-and-extreme spacing obtain their highest modelling accuracy with a with a nature-of-change value of 180 ($\upbeta_{fixed}$ = 180), with middle-and-extreme spacing obtaining higher precision (i.e., shorter error bars) than equal spacing (see Figure \ref{fig:midpoint_plot} and Table \ref{tab:summary-table-exp1-nc}). An inspection of Figures \ref{fig:midpoint_plot}A and \ref{fig:midpoint_plot}D reveals that middle-and-extreme spacing samples measurements at moments of greater change. As an example, consider the measurement locations of equal and middle-and-extreme spacing with five measurements, where only second and fourth measurement locations differ between the schedules. For equal spacing, the second and fourth measurements are respectively sampled on days 90 and 270. For middle-and-extreme spacing, the second and fourth measurements are respectively taken on days 150 and 210. By consulting the first-derivative curve in Figure \ref{fig:first-deriv}, change is greater on days 150 and 210 than on days 90 and 270. Therefore, precision across all manipulated measurement numbers is greater (i.e., shorter error bars) with middle-and-extreme spacing than with equal spacing because middle-and-extreme spacing takes measurements closer to periods of change than equal spacing (see Figures \ref{fig:midpoint_plot}A and \ref{fig:midpoint_plot}D and Table \ref{tab:summary-table-exp1-nc}). 
 
 The idea that modelling accuracy increases when data are sampled during periods of greater change has received considerable discussion and preliminary support. Over the past 20 years, researchers have recommended that measurements be sampled during periods of greater change [@siegler2006; @ployhart2010], with one recent simulation study finding evidence to support this idea [@timmons2015]. Unfortunately, the evidence from @timmons2015 is preliminary for two reasons. First, the model used to estimate nonlinear change only ever included one random-effect parameter. Given that multilevel models often include several random-effect parameter in practice, the model employed in @timmons2015 may not necessary be realistic. Second, the estimates were obtained by using an impractical starting value procedure: Population values were used as starting values. Because practitioners never know the population value, it is not known whether the results of @timmons2015 replicate with a realistic starting value procedure. 
 
@@ -2315,7 +2323,7 @@ My simulations in Experiment 1 replicated the finding that modelling accuracy in
 
 Therefore, three results in Experiment 1 suggest that sampling data closer to periods of change leads to higher modelling accuracy. First, for each spacing schedule, modelling accuracy is highest when measurements are taken closer to periods of change. Second, the time-interval increasing and decreasing spacing schedules obtain nearly identical modelling accuracies for different curves because the sampled locations have the exact same rates of change. Third, middle-and-extreme spacing results in higher modelling accuracy than equal spacing by sampling measurements at periods of greater change. Although several researchers have posited modelling accuracy increases by sampling data closer to periods of change, with one simulation study (to my knowledege) having found support for this idea under unrealistic modelling conditions, my simulations in Experiment 1 support it under realistic modelling conditions. 
 
-#### When the Nature of Change is Unknown, How Should Measurements be Spaced?
+#### When the Nature of Change is Unknown, How Should Measurements be Spaced? {#unknown}
 
 A second question I had in Experiment 1 was how to space measurements when the nature of change is unknown. To answer this question, I first recorded the number of measurements needed to obtain the greatest improvements in modelling accuracy for each spacing schedule in Table \ref{tab:summary-table-exp1}. Text within the 'Qualitative Description' column indicates the number of measurements needed to obtain the largest improvements in bias and precision across all manipulated nature-of-change values for each spacing schedule. The 'Error Bar Summary' columns list the error bar lengths obtained for each day-unit parameter using the measurement number listed in the 'Qualitative Description' column. Note that the error bar lengths in the 'Error Bar Summary' column are obtained by computing the average length across all manipulated nature-of-change values for the measurement number listed Qualitative Description' column. For comprehensiveness, I also recorded the number of measurements needed to obtain unbiased and precise estimation of all the day-unit parameters across all manipulated nature-of-change values in the 'Unbiased' and 'Precise' columns.  
 
@@ -2410,8 +2418,6 @@ The finding that equal spacing results in the highest modelling accuracy when th
 I designed Experiment 1 to investigate two questions. The first question was whether placing measurements near peridos of change increases modelling accuracy. For each spacing schedule, modelling accuracy was highest when measurements were sampled at periods of greater change. Therefore, when a researcher has some knowledge of the nature of change, measurements should be placed near periods of change to increase modelling accuracy. 
 
 The second question was how to space measurements when the nature of change is unknown. Although no manipulated measurement number under any spacing schedule resulted in accurate modelling of all parameters, the improvements in modelling accuracy began to diminish under each spacing schedule at a specific measurement number. Given that each spacing schedule obtained comparable modelling accuracy when it began to diminish, I concluded that the spacing schedule that used the fewest number of measurements was most effective at modelling change when the nature of change was unknown. With equal spacing using the fewest number of measurements to obtain the greatest improvements in modelling accuracy, equal spacing was the most effective schedule to use when the nature of change was unknown. 
-
-
 
 
 

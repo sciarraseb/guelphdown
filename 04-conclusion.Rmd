@@ -1,6 +1,69 @@
----
-bibliography: bib/dissertation_references.bib
----
+
+```{r package_loading_int_conc, include=F}
+#devtools::install_github(repo = 'sciarraseb/nonlinSimsAnalysis', force = T)
+library(easypackages)
+packages <- c('tidyverse', 'RColorBrewer', 'parallel', 'data.table', 'kableExtra', 'ggtext', 'egg', 'ggbrace', 'cowplot', 'nonlinSimsAnalysis', 'nonlinSims')
+libraries(packages)
+
+knitr::opts_chunk$set(message = F)
+```
 
 
+# General Discussion 
+
+In systematically reviewing the simulation literature, I found that no study had comprehensively investigated the effects of longitudinal design and analysis factors on the modelling accuracy of nonlinear patterns of change. Given that longitudinal designs are necessary to understand the temporal dynamics of psychological processes (for a more detailed explanation, see Appendix \ref{ergodicity}), it is important that researchers understand how longitudinal design and analysis factors affect the accuracy of longitudinal analyses. Therefore, I designed three simulation experiments to address this gap in the literature. In each simulation experiment, a logistic pattern of change (i.e., s-shaped change pattern) was modelled under conditions that varied in nature of change, measurement number, sample size, and time structuredness.\footnote{Importantly, no simulation experiment manipulated more than three variables at once.} Importantly, each simulation experiment used a structured latent growth model to estimate nonlinear change (for a detailed explanation, see Appendix \ref{structured-lgc}).
+
+To investigate the effects of longitudinal design and analysis factors on the modelling accuracy of a logistic pattern of change, my simulation experiments examined the accuracy with which each logistic function parameter was estimated. Thus, modelling accuracy was defined at the parameter level. Importantly, in giving modelling accuracy a parameter-level definition, it became important to measure two metrics: bias and precision. For any given logistic function parameter, two questions are of central importance: 1) How well is the parameter estimated on average (bias) and 2) what is a plausible range of values that can be expected for an estimate from the output of a single model (precision). Therefore, bias and precision were computed for the estimation of each logistic function parameter. 
+
+To succinctly summarize each experiment, I have created Table \ref{tab:exp-summary-table}. Each row of Table \ref{tab:exp-summary-table} contains a summary of a simulation experiment. In Experiment 1, I was interested in answering two questions: 1) Does placing measurements near periods of change increase modelling accuracy and 2) how should measurements be spaced when the nature of change is unknown. To answer these two questions, I manipulated measurement spacing, number of measurements, and nature of change. With respect to the first question, three patterns of results in Experiment 1 suggest that modelling accuracy increases when measurements are placed closer to periods fo change (see section discussing [measurement spacing](#meas-placing)). With respect to the second question, the results of Experiment 1 suggest that, when a researcher has no knowledge of the nature of change, measurements should be spaced equally over time (see section discussing measurement spacing when the nature of change is [unknown](#unknown)). 
+
+```{r exp-summary-table, echo=F}
+summary_df <- data.frame('Simulation Exeriment' = c("Experiment 1", "Experiment 2", "Experiment 3"), 
+                         'Independent Variables' = c("\\thead[lt]{Spacing of measurements \\\\ Number of measurements \\\\ Nature of change}", 
+                                                     "\\thead[lt]{Spacing of measurements \\\\ Number of measurements \\\\ Sample size}", 
+                                                     "\\thead[lt]{Number of Measurements \\\\ Sample size \\\\ Time structuredness}"), 
+                         'Main Results' = c('\\tabitem Modelling accuracy is higher when measurements are placed closer to periods of change \\newline
+                                            \\tabitem Measurements should be spaced equally when the nature of change is unknown',
+                                            '\\tabitem The greatest improvements in modelling accuracy result from using either seven measurements with $N \\ge$ 200 or nine measurements with $N \\le$ 100',
+                                            '\\tabitem The greatest improvements in modelling accuracy across all time structuredness levels result from using either seven measurements with $N \\ge$ 200 or nine measurements with $N \\le$ 100 \\newline
+                                            \\tabitem Use definition variables to prevent modelling accuracy from decreasing as time structuredness decreases'), check.names = F)
+
+
+
+kbl(x = summary_df, format = 'latex', digits = 2,align = c('l', 'l', 'l'), 
+    longtable = T, booktabs = T,  escape = F,
+    caption = 'Summary of Each Simulation Experiment') %>%
+    column_spec(column = 3, width = '7.25cm') %>%
+   kable_styling(latex_options= c('repeat_header'), position = 'left')
+
+```
+
+In Experiment 2, I was interested in what measurement number-sample size pairings were needed to obtain accurate modelling (i.e., low bias, high precision) under different spacing schedules. To answer these questions, I manipulated measurement spacing, measurement number, and sample size. Although no manipulated measurement number-sample size pairing results in high modelling accuracy (low bias, high precision) of all parameters, the largest improvements in modelling accuracy result from using moderate measurement numbers and sample sizes. For all spacing schedules (except middle-and-extreme spacing), the largest improvements in modelling accuracy result from using either either seven measurements with *N* $\ge$ 200 or nine measurements with *N* $\le$ 100.  The results for middle-and-extreme spacing are largely an effect of the nature of change used in Experiment 2, and so are of little value to emphasize. 
+
+In Experiment 3, I was interested in examining how time structuredness affected modelling accuracy. To answer this question, I manipulated measurement spacing, measurement number, and time structuredness. Although the measurement number-sample size pairings that result in the greatest improvements in modelling accuracy are the same as in Experiment 2, two results suggest that modelling accuracy decreases as time structuredness decreases. First, precision decreases as time structuredness decreases. Second, and more pernicious, bias decreases as time structuredness decreases regardless of the measurement number or sample size. Importantly, the decrease in modelling accuracy can be prevented by using a latent growth curve model with definition variables, which I showed in an additional set of simulations (see section on [definition variables](#def-variables)). Therefore, to obtain the largest improvements in modelling accuracy, either seven measurements with *N* $\ge$ 200 or nine measurements with *N* $\le$ 100 must be used and, importantly, the latent growth curve model must used definition variables. 
+
+One results that appears in each simulation experiment deserves mention. 
+
+The results of my simulation experiments are the first (to my knowledge) to provide specific measurement number and sample size recommendations needed to accurately model nonlinear change over time. Importantly, although previous studies have investigated the effects of some longitudinal design and analysis factors on the modelling accuracy of nonlinear patterns, the results of these studies are limited because they either used unrealistic fixed-effects models [e.g., @finch2017], models with non-meaningful parameter interpretations [e.g., @fine2019; @liu2022], or unrealistic model fitting procedures [@finch2017]. Additionally, I developed novel and replicable procedures for creating spacing schedules (see Appendix \ref{measurement-schedules}) and simulating time structuredness (see [time structuredness](#simulating-time-struc)). 
+
+
+
+## Why is it Important to Model Nonlinear Patterns of Change? 
+
+1. Develop richer theory and conduct stronger tests of theory --> ultimately creates more specific theory. 
+
+With more specific theory, the research-practitioner gap can be decreased. . Several causes, one of which is the lack of research addressing organizational prob
+
+
+## How Should Researchers Model Nonlinear Change Over Time? 
+
+
+
+
+
+## Reconceptualization of What Defines Longitudinal Research
+
+Longitudinal research should investigate temporal dynamics over time. Given that change over time is unlikely to be linear, then pre-post studies should not be considered longitudinal and should simply be left as pre-post research. Although some definitions of longitudinal research have suggested a minimum of three measurements [@ployhart2010], 
+
+## Limitations and Future Directions 
 

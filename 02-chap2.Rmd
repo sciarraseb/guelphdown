@@ -97,13 +97,19 @@ saveRDS(object = param_summary_exp_2, file = 'data/uf_param_summary_exp_2.RData'
 saveRDS(object = param_summary_exp_3, file = 'data/uf_param_summary_exp_3.RData')
 ```
 
-# Experiment 2
+# Experiment 2 {#Exp2}
 
-
-
-In Experiment 2, I investigated the combinations of measurement number and sample size needed to achieve accurate modelling (i.e., unbiased and precise parameter estimation) under different spacing schedules. Before presenting the results of Experiment 2, I will present my design and and analysis goals. For the design, I conducted a 4 (spacing schedule: equal, time-interval increasing, time-interval decreasing, middle-and-extreme) x 4(number of measurements: 5, 7, 9, 11) x 6(sample size: 30, 50, 100, 200, 500, 1000) study. For the analysis, I was interested in determining, for each spacing schedule, the combinations of number of measurements and sample size that achieved accurate modelling (i.e., unbiased and precise parameter estimation). For parsimony, I present the sample size by number of measurements results for each level of spacing schedule.
+In Experiment 2, I investigated the combinations of measurement number and sample size needed to obtain accurate modelling (i.e., unbiased and precise parameter estimation) under different spacing schedules. Before presenting the results of Experiment 2, I will present my design and and analysis goals. For the design, I conducted a 4 (spacing schedule: equal, time-interval increasing, time-interval decreasing, middle-and-extreme) x 4(number of measurements: 5, 7, 9, 11) x 6(sample size: 30, 50, 100, 200, 500, 1000) study. For the analysis, I was interested in determining, for each spacing schedule, the combinations of number of measurements and sample size that achieved accurate modelling (i.e., unbiased and precise parameter estimation). For parsimony, I present the sample size by number of measurements results for each level of spacing schedule.
 
 ## Methods
+### Overview of Data Generation
+
+Data generation was computed the same way as in Experiment 1 (see [data generation](#data-generation)).  
+
+### Modelling of Each Generated Data Set {#data-modelling-exp2}
+
+Each generated data set was modelled using the structured latent growth curves outlined in Experiment 1 (see [data modelling](#data-modelling). 
+
 ### Variables Used in Simulation Experiment 
 
 #### Independent Variables
@@ -126,7 +132,7 @@ more complex than linear patterns of change, a sample size value of *N*
 values were used for my sample size manipulation: 30, 50, 100, 200, 500,
 and 1000.
 
-#### Constants 
+#### Constants {#constants-exp2}
 
 Because the nature of change not manipulated in Experiment 2, I set it to have a constant value across all cells. To keep the nature of change constant across all cells, I set the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$) to have a value of 180. Another variable set to a constant value across the cells was time structuredness (data were assumed to be time structured). That is, data were generated such that, at each time point, all data were obtained at the exact same time.  
 
@@ -145,34 +151,31 @@ the **convergence success rate**.\footnote{Specifically, convergence was obtaine
 ```
 \noindent where *n* represents the total number of models run in a cell.
 
-##### Bias
+##### Modelling Accuracy 
+
+Because I was interested in examining the accuracy with which each logistic parameter was estimated under each experimental cell, it was necessary to give modelling accuracy a parameter-level definition. With modelling accuracy being defined at the parameter level, it became important to measure two metrics: bias and precision. For any given logistic function parameter, two questions were of central importance: 1) How well is the parameter estimated on average (bias) and 2) what is a plausible range of values that can be expected for an estimate from the output of a single model (precision). In the two sections that follow, I will discuss each metric of modelling accuracy and the cutoffs used to determine whether estimation was unbiased and precise. 
+
+###### Bias{#bias-comp}
 
 Bias was calculated to evaluate the accuracy with which each logistic
-function parameter was estimated. As shown below in Equation
-\@ref(eq:bias), *bias* was obtained by calculating the difference
-between the population value set for a parameter and the average
-estimated value in each cell.
+function parameter was estimated in each experimental cell. As shown below in Equation
+\@ref(eq:bias), *bias* was obtained by summing the differences
+between the population value set for a parameter and the value estimated for the parameter by each $i$ converged model and then dividing the sum by the number of $N$ converged models. 
 
 ```{=tex}
 \begin{align}
-  \text{Bias} =  \text{Population value for parameter} - \text{Average estimated value}
+  \text{Bias} = \frac{\sum_i^N\text{(Population value for parameter} - \text{Average estimated value}_i)}{N}
   (\#eq:bias) 
 \end{align}
 ```
 
-\noindent Bias was calculated for the fixed- and random-effect parameters of the baseline ($\uptheta_{fixed}$, $\uptheta_{random}$), maximal elevation ($\upalpha_{fixed}$, $\upalpha_{random}$), days-to-halfway elevation ($\upbeta_{fixed}$, $\upbeta_{random}$), and the halfway-triquarter delta parameters ($\upgamma_{fixed}$, $\upgamma_{random}$). 
+\noindent Bias was calculated for the fixed- and random-effect parameters of the baseline ($\uptheta_{fixed}$, $\uptheta_{random}$), maximal elevation ($\upalpha_{fixed}$, $\upalpha_{random}$), days-to-halfway elevation ($\upbeta_{fixed}$, $\upbeta_{random}$), and the halfway-triquarter delta parameters ($\upgamma_{fixed}$, $\upgamma_{random}$) and the error parameter ($\upepsilon$). 
 
-##### Precision
+###### Precision{#pres-precision}
 
-In addition to computing bias, precision was calculated to evaluate the confidence with which each parameter was estimated in a given cell. *Precision* was obtained by computing the range of values covered by the middle 95% of values estimated for a logistic parameter in each cell. By using the middle 95% of estimated values, a plausible range of population estimates was obtained.   
+In addition to computing bias, precision was calculated to evaluate the variability with which each parameter was estimated. Importantly, metrics used to evaluate precision in previous studies assume estimates are normally distributed (e.g., mean-squared error and empirical standard error). Because some parameters in my simulations had skewed distributions, using a metric that assumed a normal distribution would likely yield inaccurate results. Correspondingly, I used a distribution-independent definition of precision. In my simulations, *precision* was defined as the range of values covered by the middle 95% of values estimated for a logistic parameter. 
 
-### Overview of Data Generation
 
-Data generation was computed the same way as in Experiment 1 (see [data generation](#data-generation)).  
-
-### Modelling of Each Generated Data Set {#data-modelling-exp2}
-
-Each generated data set was modelled using the structured latent growth curves outlined in Experiment 1 (see [data modelling](#data-modelling). For a detailed explanation of how the logistic function was fit into the structural equation modelling framework, see [Technical Appendix B](#structured-latent).
 
 ### Analysis of Data Modelling Output and Accompanying Visualizations
 
@@ -181,13 +184,13 @@ Analysis and visualization was conducted as outlined in Experiment 1 (see [analy
 
 ## Results and Discussion
 
-In the sections that follow, I organize the results by presenting them for each spacing schedule (equal, time-interval increasing, time-interval decreasing, middle-and-extreme). Importantly, only the results for the day-unit parameters will be presented (i.e., fixed- and random-effect days-to-halfway elevation and halfway-triquarter delta parameters [$\upbeta_{fixed}$, $\upbeta_{random}$, $\upgamma_{fixed}$, $\upgamma_{random}$, respectively]). The results for the likert-unit parameters (i.e., fixed- and random-effect baseline and maximal elevation parameters [$\uptheta_{fixed}$, $\uptheta_{random}$, $\upalpha_{fixed}$, $\upalpha_{random}$, respectively]) were largely trivial and so are presented in [Appendix C](#appendix-c)). 
+In the sections that follow, I organize the results by presenting them for each spacing schedule (equal, time-interval increasing, time-interval decreasing, middle-and-extreme). Importantly, only the results for the day-unit parameters will be presented (i.e., fixed- and random-effect days-to-halfway elevation and halfway-triquarter delta parameters [$\upbeta_{fixed}$, $\upbeta_{random}$, $\upgamma_{fixed}$, $\upgamma_{random}$, respectively]). The results for the likert-unit parameters (i.e., fixed- and random-effect baseline and maximal elevation parameters [$\uptheta_{fixed}$, $\uptheta_{random}$, $\upalpha_{fixed}$, $\upalpha_{random}$, respectively]) were largely trivial and so are presented in Appendix \ref{complete-versions}. 
 
 ### Framework for Interpreting Results
 
 To conduct Experiment 2, the three variables of number of measurements (4 levels), spacing of measurements (4 levels), and sample size (9 levels) were manipulated, which yielded a total of 96 cells. Importantly, within each cell, bias and precision values were also computed for each of the nine parameters estimated by the structured latent growth curve models (for a review, see [modelling of each generated data set](#modelling-data-sets)). Thus, because the analysis of Experiment 2 computes values for many dependent variables, interpreting the results can become overwhelming. Therefore, I will provide a framework to help the reader efficiently navigate the results section. 
 
-Because I will present the results of Experiment 2 by each level of measurement spacing, the framework I will describe in Figure \ref{fig:results-plot-primer-exp2} shows a template for the bias/precision plots that I will present for each spacing schedule. The results of each spacing schedule contain a bias/precision plot for each of the nine estimated parameters. Each bias/precision plot shows the bias and precision for the estimation of one parameter across all measurement number and nature-of change levels. Within each bias/precision plot, dots indicate the average estimated value (which indicates bias bias) and error bars represent the middle 95% range of estimated values (which indicates precision). Bias/precision plots with black outlines show the results for day-unit parameters and plots with gray outlines show the results for Likert-unit parameters. Importantly, only the results for the day-unit parameters will be presented (i.e., fixed- and random-effect days-to-halfway elevation and halfway-triquarter delta parameters [$\upbeta_{fixed}$, $\upbeta_{random}$, $\upgamma_{fixed}$, $\upgamma_{random}$, respectively]). The results for the Likert-unit parameters (i.e., fixed- and random-effect baseline and maximal elevation parameters [$\uptheta_{fixed}$, $\uptheta_{random}$, $\upalpha_{fixed}$, $\upalpha_{random}$, respectively]) were largely trivial and so are presented in [Appendix B](#appendix-b). Therefore, the results of each spacing schedule will only present the bias/precision plots for four parameters (i.e., the day-unit parameters). 
+Because I will present the results of Experiment 2 by each level of measurement spacing, the framework I will describe in Figure \ref{fig:results-plot-primer-exp2} shows a template for the bias/precision plots that I will present for each spacing schedule. The results of each spacing schedule contain a bias/precision plot for each of the nine estimated parameters. Each bias/precision plot shows the bias and precision for the estimation of one parameter across all measurement number and nature-of change levels. Within each bias/precision plot, dots indicate the average estimated value (which indicates bias bias) and error bars represent the middle 95% range of estimated values (which indicates precision). Bias/precision plots with black outlines show the results for day-unit parameters and plots with gray outlines show the results for Likert-unit parameters. Importantly, only the results for the day-unit parameters will be presented (i.e., fixed- and random-effect days-to-halfway elevation and halfway-triquarter delta parameters [$\upbeta_{fixed}$, $\upbeta_{random}$, $\upgamma_{fixed}$, $\upgamma_{random}$, respectively]). The results for the Likert-unit parameters (i.e., fixed- and random-effect baseline and maximal elevation parameters [$\uptheta_{fixed}$, $\uptheta_{random}$, $\upalpha_{fixed}$, $\upalpha_{random}$, respectively]) were largely trivial and so are presented in Appendix \ref{complete-versions}. Therefore, the results of each spacing schedule will only present the bias/precision plots for four parameters (i.e., the day-unit parameters). 
 
 ```{=tex}
 \begin{apaFigure}
@@ -198,7 +201,7 @@ Because I will present the results of Experiment 2 by each level of measurement 
 {results-plot-primer-exp2}
 {.77}
 {Figures/logistic_results_plot_exp2}
-{A parameter estimation plot is constructed for each parameter of the logistic function (see Equation \ref{eq:logFunction-generation}). Note that each parameter of the logistic function is modelled as a fixed and random effect along with an error term ($\upepsilon$; for a review, see Figure \ref{fig:combined_plot}).}
+{A bias/precision plot is constructed for each parameter of the logistic function (see Equation \ref{eq:logFunction-generation}). Note that each parameter of the logistic function is modelled as a fixed and random effect along with an error term ($\upepsilon$; for a review, see Figure \ref{fig:combined_plot}).}
 \end{apaFigure}
 ```
 
@@ -207,13 +210,13 @@ Because I will present the results of Experiment 2 by each level of measurement 
 
 After collecting the output from the simulations, non-converged models
 (and their corresponding parameter estimates) were removed from
-subsequent analyses. Table \ref{tab:conv-exp-2} in [Appendix D](#appendix-d-convergence-rates) provides the convergence
+subsequent analyses. Table \ref{tab:conv-exp-2} in Appendix \ref{convergence-tables} provides the convergence
 success rates for each cell in Experiment 2. Model convergence was almost always above 90% and convergence rates
 rates below 90% only occurred in two cells with five measurements. 
 
 ### Equal Spacing {#concise-example}
 
-For equal spacing, Table \ref{tab:summary-table-equal-spacing-exp2} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp2_plot_equal} for the corresponding parameter estimation plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-equal-spacing-exp2} and provide elaboration when necessary. 
+For equal spacing, Table \ref{tab:summary-table-equal-spacing-exp2} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp2_plot_equal} for the corresponding bias/precision plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-equal-spacing-exp2} and provide elaboration when necessary. 
 
 Before presenting the results for equal spacing, I provide a brief description of the concise summary table created for each spacing schedule and shown for equal spacing in Table \ref{tab:summary-table-equal-spacing-exp2}. ext in the 'Unbiased' and 'Precise' columns indicates the measurement number-sample size pairings that, respectively, result in unbiased and precise estimation. Emboldened text in the 'Unbiased' and 'Qualitative Description' columns indicates the measurement number-sample size pairing needed to, respectively, obtain unbiased estimates and the greatest improvements in bias and precision across all day-unit parameters (acceptable precision not achieved in the estimation of all day-unit parameters with equal spacing). The 'Error Bar Length' column indicates the error bar length that results from using the lower-bounding measurement number-sample size pairing listed in the 'Qualitative Description' column.
 
@@ -294,7 +297,7 @@ kbl(x = summary_table, format = 'latex',
 
 #### Bias {#bias-equal-exp2}
 
-Before presenting the results for bias, I provide a description of the set of parameter estimation plots shown in Figure \ref{fig:exp2_plot_equal} and in the results sections for the other spacing schedules in Experiment 2. Figure \ref{fig:exp2_plot_equal} shows the parameter estimation plots for each day-unit parameter and Table \ref{tab:omega-exp2-equal} provides the partial $\upomega^2$ values for each independent variable of each day-unit parameter. In Figure \ref{fig:exp2_plot_equal}, blue horizontal lines indicate the population values for each parameter (with population values of $\upbeta_{fixed}$ = 180.00, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, and $\upgamma_{random}$ = 4.00). Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin. Error bars represent the middle 95% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Panels A--B show the parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters ($\upbeta_{fixed}$ and $\upbeta_{random}$, respectively). Panels C--D show the parameter estimation plots for the fixed- and random-effect triquarter-halfway delta parameters ($\upgamma_{fixed}$ and $\upgamma_{random}$, respectively). Note that random-effect parameter units are in standard deviation units.
+Before presenting the results for bias, I provide a description of the set of bias/precision plots shown in Figure \ref{fig:exp2_plot_equal} and in the results sections for the other spacing schedules in Experiment 2. Figure \ref{fig:exp2_plot_equal} shows the bias/precision plots for each day-unit parameter and Table \ref{tab:omega-exp2-equal} provides the partial $\upomega^2$ values for each independent variable of each day-unit parameter. In Figure \ref{fig:exp2_plot_equal}, blue horizontal lines indicate the population values for each parameter (with population values of $\upbeta_{fixed}$ = 180.00, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, and $\upgamma_{random}$ = 4.00). Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin. Error bars represent the middle 95% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Panels A--B show the bias/precision plots for the fixed- and random-effect days-to-halfway elevation parameters ($\upbeta_{fixed}$ and $\upbeta_{random}$, respectively). Panels C--D show the bias/precision plots for the fixed- and random-effect triquarter-halfway delta parameters ($\upgamma_{fixed}$ and $\upgamma_{random}$, respectively). Note that random-effect parameter units are in standard deviation units.
 
 ```{r exp2-density-plot-equal, include=F, eval=F}
 ##generate figure showing density distributions if gamma_fizxd at N = 500 and N = 1000 with middle 95% area shaded. Emphasize
@@ -514,11 +517,11 @@ generate_day_likert_facet_plot(analytical_data = exp_2_analytical,
 [portrait]
 [samepage]
 [-0.2cm]
-{Parameter Estimation Plots for Day-Unit Parameters With Equal Spacing in Experiment 2}
+{Bias/Precision Plots for Day-Unit Parameters With Equal Spacing in Experiment 2}
 {exp2_plot_equal}
 {0.165}
 {Figures/exp2_plot_days_equal spacing}
-{Panel A: Parameter estimation plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Parameter estimation plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Parameter estimation plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Parameter estimation plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed}$ = 180.00, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:exp2-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp2-equal} for $\upomega^2$ effect size values.}
+{Panel A: Bias/precision plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Bias/precision plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Bias/precision plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Bias/precision plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed}$ = 180.00, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:exp2-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp2-equal} for $\upomega^2$ effect size values.}
 \end{apaFigure}
 ```
 
@@ -591,7 +594,7 @@ In summarizing the results for equal spacing, estimation of all day-unit paramet
 
 ### Time-Interval Increasing Spacing
 
-For time-interval increasing spacing, Table \ref{tab:summary-table-time-inc-exp2} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp2_plot_time_inc} for the corresponding parameter estimation plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-time-inc-exp2} and provide elaboration when necessary (for a description of Table \ref{tab:summary-table-time-inc-exp2}, see [concise summary table](#concise-example)). 
+For time-interval increasing spacing, Table \ref{tab:summary-table-time-inc-exp2} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp2_plot_time_inc} for the corresponding bias/precision plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-time-inc-exp2} and provide elaboration when necessary (for a description of Table \ref{tab:summary-table-time-inc-exp2}, see [concise summary table](#concise-example)). 
 
 ```{r summary-table-time-inc-exp2, echo=F}
 #beta_fixed 
@@ -683,11 +686,11 @@ generate_day_likert_facet_plot(analytical_data = exp_2_analytical,
 [portrait]
 [samepage]
 [-0.2cm]
-{Parameter Estimation Plots for Day-Unit Parameters With Time-Interval Increasing Spacing in Experiment 2}
+{Bias/Precision Plots for Day-Unit Parameters With Time-Interval Increasing Spacing in Experiment 2}
 {exp2_plot_time_inc}
 {0.16}
 {Figures/exp2_plot_days_time-interval increasing}
-{Panel A: Parameter estimation plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Parameter estimation plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Parameter estimation plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Parameter estimation plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed}$ = 180.00, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:exp2-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp2-time-inc} for $\upomega^2$ effect size values.}
+{Panel A: Bias/precision plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Bias/precision plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Bias/precision plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Bias/precision plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed}$ = 180.00, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:exp2-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp2-time-inc} for $\upomega^2$ effect size values.}
 \end{apaFigure}
 ```
 
@@ -738,7 +741,7 @@ In summarizing the results for time-interval increasing spacing, estimation of a
 
 ### Time-Interval Decreasing Spacing
 
-For time-interval decreasing spacing, Table \ref{tab:summary-table-time-dec-exp2} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp2_plot_time_dec} for the corresponding parameter estimation plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-time-dec-exp2} and provide elaboration when necessary (for a description of Table \ref{tab:summary-table-time-dec-exp2}, see [concise summary table](#concise-example)). 
+For time-interval decreasing spacing, Table \ref{tab:summary-table-time-dec-exp2} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp2_plot_time_dec} for the corresponding bias/precision plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-time-dec-exp2} and provide elaboration when necessary (for a description of Table \ref{tab:summary-table-time-dec-exp2}, see [concise summary table](#concise-example)). 
 
 ```{r summary-table-time-dec-exp2, echo=F}
 #beta_fixed 
@@ -831,11 +834,11 @@ generate_day_likert_facet_plot(analytical_data = exp_2_analytical,
 [portrait]
 [samepage]
 [-0.2cm]
-{Parameter Estimation Plots for Day-Unit Parameters With Time-Interval Decreasing Spacing in Experiment 2}
+{Bias/Precision Plots for Day-Unit Parameters With Time-Interval Decreasing Spacing in Experiment 2}
 {exp2_plot_time_dec}
 {0.16}
 {Figures/exp2_plot_days_time-interval decreasing}
-{Panel A: Parameter estimation plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Parameter estimation plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Parameter estimation plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Parameter estimation plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed}$ = 180.00, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:exp2-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp2-time-dec} for $\upomega^2$ effect size values.}
+{Panel A: Bias/precision plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Bias/precision plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Bias/precision plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Bias/precision plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed}$ = 180.00, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:exp2-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp2-time-dec} for $\upomega^2$ effect size values.}
 \end{apaFigure}
 ```
 
@@ -887,7 +890,7 @@ In summarizing the results for time-interval decreasing spacing, estimation of a
 
 ### Middle-and-Extreme Spacing
 
-For middle-and-extreme spacing, Table \ref{tab:summary-table-mid-ext-exp2} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp2_plot_mid_ext} for the corresponding parameter estimation plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-mid-ext-exp2} and provide elaboration when necessary (for a description of Table \ref{tab:summary-table-mid-ext-exp2}, see [concise summary table](#concise-example)). 
+For middle-and-extreme spacing, Table \ref{tab:summary-table-mid-ext-exp2} provides a concise summary of the results for the day-unit parameters (see Figure \ref{fig:exp2_plot_mid_ext} for the corresponding bias/precision plots). The sections that follow will present the results for each column of Table \ref{tab:summary-table-mid-ext-exp2} and provide elaboration when necessary (for a description of Table \ref{tab:summary-table-mid-ext-exp2}, see [concise summary table](#concise-example)). 
 
 
 ```{r summary-table-mid-ext-exp2, echo=F}
@@ -977,11 +980,11 @@ generate_day_likert_facet_plot(analytical_data = exp_2_analytical,
 [portrait]
 [samepage]
 [-0.2cm]
-{Parameter Estimation Plots for Day-Unit Parameters With Middle-and-Extreme Spacing in Experiment 2}
+{Bias/Precision Plots for Day-Unit Parameters With Middle-and-Extreme Spacing in Experiment 2}
 {exp2_plot_mid_ext}
 {0.16}
 {Figures/exp2_plot_days_middle-and-extreme spacing}
-{Panel A: Parameter estimation plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Parameter estimation plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Parameter estimation plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Parameter estimation plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed}$ = 180.00, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:exp2-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp2-mid-ext} for $\upomega^2$ effect size values.}
+{Panel A: Bias/precision plot for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$). Panel B: Bias/precision plot for the fixed-effect triquarter-halfway elevation parameter ($\upgamma_{fixed}$). Panel C: Bias/precision plot for the random-effect days-to-halfway elevation parameter ($\upbeta_{random}$). Panel D: Bias/precision plot for the random-effect triquarter-halfway elevation parameter ($\upgamma_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed}$ = 180.00, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:exp2-alpha-theta-param-est} for specific values estimated for each parameter and Table \ref{tab:omega-exp2-mid-ext} for $\upomega^2$ effect size values.}
 \end{apaFigure}
 ```
 
@@ -1038,8 +1041,7 @@ In Experiment 2, I was interested in determining the measurement number-sample s
 * time-interval decreasing: five measurements with *N* $\ge$ 500, seven measurements with *N* $\ge$ 200 or nine measurements with *N* $\le$ 200. 
 * middle-and-extreme: five measurements with any manipulated sample size. 
 
-\noindent Because each spacing schedule obtains comparable modelling accuracy as indicated by the similar error bar lengths,  two statements can be made. First, using either seven measurements with *N* $\ge$ 200 or nine measurements with *N* $\le$ 100 with any spacing schedule except middle-and-extreme spacing results in similar modelling accuracy. Second, middle-and-extreme spacing results in the highest modelling accuracy. 
-
+\noindent Because each spacing schedule obtains comparable modelling accuracy as indicated by the similar error bar lengths, two statements can be made. First, using either seven measurements with *N* $\ge$ 200 or nine measurements with *N* $\le$ 100 with any spacing schedule except middle-and-extreme spacing results in similar modelling accuracy. Second, given that only five measurements are needed with middle-and-extreme spacing to obtain modelling accuracy levels that the other spacing schedules obtained with at least seven measurement, middle-and-extreme spacing results in the highest modelling accuracy. Importantly, given that middle-and-extreme spacing led to the highest modelling accuracy in Experiment 1 with a midway halfway point (see section discussing [measurement spacing](#meas-placing)), the result that middle-and-extreme spacing results in the highest modelling accuracy is an expected outcome because the nature-of-change was fixed to 180 (see [constants](#constants-exp2)). 
 
 ```{r summary-table-exp2, echo=F}
 
@@ -1142,10 +1144,9 @@ linesep = c('\\cmidrule{1-8}', '\\cmidrule{1-8}', '\\cmidrule{1-8}'),
 
 ```
 
+The results of Experiment 2 are the first (to my knowledge) to provide measurement number and sample size guidelines for researchers interested in using nonlinear functions to model nonlinear change. Although previous simulation studies have investigated how to accurately model nonlinear change, three characteristics limit these results. First, some studies investigated the issue with fixed-effects models [e.g., @finch2017]. Given that researchers often model effects as random, findings with fixed-effects effects models are limited in their application. Second, some studies used linear functions to model nonlinear change [e.g., @fine2019; @liu2022]. Given that the parameters of linear functions become uninterpretable when modelling nonlinear change (with the intercept parameter being an exception), these models are less useful to practitioners. Third, some studies implemented unrealistic model fitting procedures by dropping a random-effect parameter from the model each time convergence failed [@finch2017]. By dropping random-effect parameters when model convergence failed, estimation accuracy could not meaningfully evaluated for parameters because values could have been obtained with reduced models. 
 
-The results of Experiment 2 are the first (to my knowledge) to provide measurement number and sample size guidelines for researchers interested in using nonlinear functions to model nonlinear change. Although previous simulation studies have investigated how to accurately model nonlinear change, three characteristics limit these results. First, some studies investigated the issue with fixed-effects models [e.g., @finch2017]. Given that researchers often model effects as random, findings with fixed-effects effects models are limited in their application.  Second, some studies used linear functions to model nonlinear change [e.g., @fine2019; @liu2022]. Given that the parameters of linear functions become uninterpretable when modelling nonlinear change, these models are less useful to practitioners. Third, some studies implemented unrealistic model fitting procedures by dropping a random-effect parameter from the model each time convergence failed [@finch2017]. By dropping random-effect parameters when model convergence failed, estimation accuracy could not meaningfully evaluated for parameters because values could have been obtained with reduced models. 
-
-In summary, the results of Experiment 2 provide measurement number-sample size guidelines for researchers interested in modelling nonlinear change. Importantly, because no measurement number-sample pairing resulted in unbiased and precise estimation of all the day-unit parameters, the guidelines provided by this study are only suggestions to obtain the greatest improvements in bias and precision. Although researchers are encouraged to use larger measurement numbers and sample sizes than suggested in the current guidelines, the improvements in bias and accuracy are likely to be incommensurate with the measurement number and sample size increments. 
+In summary, the results of Experiment 2 provide measurement number-sample size guidelines for researchers interested in modelling nonlinear change. Importantly, because no measurement number-sample pairing results in unbiased and precise estimation of all the day-unit parameters, the guidelines provided by this study are only suggestions to obtain the greatest improvements in bias and precision. Although researchers are encouraged to use larger measurement numbers and sample sizes than suggested in the current guidelines, the improvements in bias and accuracy are likely to be incommensurate with the efforts needed to increase measurement number and sample size. 
 
 
 

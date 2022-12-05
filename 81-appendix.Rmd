@@ -108,212 +108,12 @@ saveRDS(object = param_summary_exp_2, file = 'data/uf_param_summary_exp_2.RData'
 saveRDS(object = param_summary_exp_3, file = 'data/uf_param_summary_exp_3.RData')
 ```
 
-```{=tex}
-%change numbering for figures, tables, and equations for appendices
-\renewcommand\thefigure{\theapp.\arabic{figure}} %change figure numbering for appendix such that it goes A.1, A.2, etc.
-\counterwithin{figure}{app} %reset figure number counter for each appendix
+\newpage 
 
-\renewcommand\thetable{\theapp.\arabic{table}} %change figure numbering for appendix such that it goes A.1, A.2, etc.
-\counterwithin{table}{app} %reset figure number counter for each appendix
-
-\renewcommand{\theequation}{\theapp.\arabic{equation}}  %reset figure number counter for each appendix
-\counterwithin{equation}{app} %reset figure number counter for each appendix
-
-\counterwithin{chunk}{app} %reset code chunk numbering
-
-```
-\newpage
-
-
-\app{OpenMx Code for Structured Latent Growth Curve Model Used in Simulation Experiments}
-\label{structured-lgc-code}
-
-```{r structured-lgc, echo=T, eval=F, attr.source='.numberLines', ref = "structured-model", codecap = "OpenMx Code for Structured Latent Growth Curve Model"}
-#Manifest variable names (i.e., names of columns cotaining data points at each time point [e.g., ])
-manifest_vars <- nonlinSims:::extract_manifest_var_names(data_wide = data_wide)
-
-#Latent variable names (theta = baseline, alpha = maximal elevation, beta = days-to-halfway elevation, gamma = triquarter-haflway elevation)
-latent_vars <- c('theta', 'alpha', 'beta', 'gamma') 
-
-#initial checks 
-  tryCatch(expr = model_name, error = function(e) {message("Error: model_name is not a character vector")})
-  
-  manifest_vars <- extract_manifest_var_names(data_wide = data_wide)
-  latent_vars <- c('theta', 'alpha', 'beta', 'gamma')
-  measurement_days <- measurement_days
-
-  model <- mxModel(model = model_name,
-                   type = 'RAM', independent = T,
-                   mxData(observed = data_wide, type = 'raw'),
-                   
-                   manifestVars = manifest_vars,
-                   latentVars = latent_vars,
-                   
-                   #Residual variances; by using one label, they are assumed to all be equal (homogeneity of variance)
-                   mxPath(from = manifest_vars,
-                          arrows=2, free=TRUE,  labels='epsilon', values = 1, lbound = 0),
-                   
-                   #Latent variable covariances and variances
-                   mxPath(from = latent_vars,
-                          connect='unique.pairs', arrows=2,
-                          #aa(diff_rand), ab(cov_diff_beta), ac(cov_diff_gamma), bb(beta_rand), bc(var_beta_gamma), cc(gamma_rand)
-                          free = c(TRUE,FALSE, FALSE, FALSE, 
-                                   TRUE, FALSE, FALSE, 
-                                   TRUE, FALSE, 
-                                   TRUE), 
-                          values=c(1, NA, NA, NA, 
-                                   1, NA, NA, 
-                                   1, NA,
-                                   1),
-                          labels=c('theta_rand', 'NA(cov_theta_alpha)', 'NA(cov_theta_beta)', 
-                                   'NA(cov_theta_gamma)',
-                                   'alpha_rand','NA(cov_alpha_beta)', 'NA(cov_alpha_gamma)', 
-                                   'beta_rand', 'NA(cov_beta_gamma)', 
-                                   'gamma_rand'), 
-                          lbound = c(1e-3, NA, NA, NA, 
-                                     1e-3, NA, NA, 
-                                     1, NA,
-                                     1), 
-                          ubound = c(2, NA, NA, NA, 
-                                     2, NA, NA, 
-                                     90^2, NA, 
-                                     45^2)),
-                   
-                   #Latent variable means (linear parameters). Note that the nonlinear parameters of beta and gamma do not have estimated means
-                   mxPath(from = 'one', to = c('theta', 'alpha'), free = c(TRUE, TRUE), arrows = 1,
-                          labels = c('theta_fixed', 'alpha_fixed'), lbound = 0, ubound = 7, 
-                          values = c(1, 1)),
-                   
-                   #Functional constraints
-                   mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
-                            labels = 'theta_fixed', name = 't', values = 1, lbound = 0,  ubound = 7), 
-                   mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
-                            labels = 'alpha_fixed', name = 'a', values = 1, lbound = 0,  ubound = 7), 
-                   mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
-                            labels = 'beta_fixed', name = 'b', values = 1, lbound = 1, ubound = 360),
-                   mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
-                            labels = 'gamma_fixed', name = 'g', values = 1, lbound = 1, ubound = 360), 
-  
-                   mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = FALSE, 
-                            values = measurement_days, name = 'time'),
-                   
-                   #Algebra specifying first partial derivatives; 
-                   mxAlgebra(expression = 1 - 1/(1 + exp((b - time)/g)), name="Tl"),
-                   mxAlgebra(expression = 1/(1 + exp((b - time)/g)), name = 'Al'), 
-                   mxAlgebra(expression = -((a - t) * (exp((b - time)/g) * (1/g))/(1 + exp((b - time)/g))^2), name = 'Bl'),
-                   mxAlgebra(expression =  (a - t) * (exp((b - time)/g) * ((b - time)/g^2))/(1 + exp((b -time)/g))^2, name = 'Gl'),
-                   
-                   #Factor loadings; all fixed and, importantly, constrained to change according to their partial derivatives (i.e., nonlinear functions) 
-                   mxPath(from = 'theta', to = manifest_vars, arrows=1, free=FALSE,  
-                          labels = sprintf(fmt = 'Tl[%d,1]', 1:length(manifest_vars))),
-                   mxPath(from = 'alpha', to = manifest_vars, arrows=1, free=FALSE,  
-                          labels = sprintf(fmt = 'Al[%d,1]', 1:length(manifest_vars))), 
-                   mxPath(from='beta', to = manifest_vars, arrows=1,  free=FALSE,
-                          labels =  sprintf(fmt = 'Bl[%d,1]', 1:length(manifest_vars))), 
-                   mxPath(from='gamma', to = manifest_vars, arrows=1,  free=FALSE,
-                          labels =  sprintf(fmt = 'Gl[%d,1]', 1:length(manifest_vars))), 
-                   
-                   mxFitFunctionML(vector = FALSE)
-                   
-  )
-```
-
-```{r echo=T, results = 'hold'}
-names(data_wide)[2:8]
-
-```
-`r knit_exit()`
-
-
-\app{OpenMx Code for Structured Latent Growth Curve Model With Definition Variables}
-\label{def-model-code}
-
-Code Block \ref{definition-model} OpenMx Code for Structured Latent Growth Curve Model With Definition Variables OpenMx Code for Structured Latent Growth Curve Model With Definition Variables section on Appendix \ref{def-model-code}
-
-```{r def-lfc, echo=T, eval=F, attr.source='.numberLines', ref = "definition-model", codecap = "OpenMx Code for Structured Latent Growth Curve Model With Definition Variables"}
-#Manifest variable names 
-manifest_vars <- nonlinSims:::extract_manifest_var_names(data_wide = data_wide)
-
-#Latent variable names (theta = baseline, alpha = maximal elevation, beta = days-to-halfway elevation, gamma = triquarter-haflway elevation)
-latent_vars <- c('theta', 'alpha', 'beta', 'gamma') 
-
-#Definition variable (data. prefix tells OpenMx to use recorded time of observation for each person's data)
-obs_score_days <- paste('data.', extract_obs_score_days(data = data_wide), sep = '') 
-
-model <- mxModel(
-  model = model_name,
-  type = 'RAM', independent = T,
-  mxData(observed = data_wide, type = 'raw'),
-
-  #Residual variances; by using one label, they are assumed to all be equal (homogeneity of variance)
-  mxPath(from = manifest_vars,arrows=2, free=TRUE,  labels='epsilon', values = 1, lbound = 0),
-
-  #Latent variable covariances and variances
-  mxPath(from = latent_vars,
-         connect='unique.pairs', arrows=2,
-         free = c(TRUE,FALSE, FALSE, FALSE, 
-                  TRUE, FALSE, FALSE, 
-                  TRUE, FALSE, 
-                  TRUE), 
-         values=c(1, NA, NA, NA, 
-                  1, NA, NA, 
-                  1, NA,
-                  1),
-         labels=c('theta_rand', 'NA(cov_theta_alpha)', 'NA(cov_theta_beta)', 
-                  'NA(cov_theta_gamma)',
-                  'alpha_rand','NA(cov_alpha_beta)', 'NA(cov_alpha_gamma)', 
-                  'beta_rand', 'NA(cov_beta_gamma)', 
-                  'gamma_rand'), 
-         lbound = c(1e-3, NA, NA, NA, 
-                    1e-3, NA, NA, 
-                    1, NA,
-                    1), 
-         ubound = c(2, NA, NA, NA, 
-                    2, NA, NA, 
-                    90^2, NA, 
-                    45^2)),
-  
-  #Latent variable means (linear parameters). Note that the nonlinear parameters of beta and gamma do not have estimated means
-  mxPath(from = 'one', to = c('theta', 'alpha'), free = c(TRUE, TRUE), arrows = 1,
-         labels = c('theta_fixed', 'alpha_fixed'), lbound = 0, ubound = 7, 
-         values = c(1, 1)),
-  
-  #Functional constraints
-  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
-           labels = 'theta_fixed', name = 't', values = 1, lbound = 0,  ubound = 7), 
-  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
-           labels = 'alpha_fixed', name = 'a', values = 1, lbound = 0,  ubound = 7), 
-  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
-           labels = 'beta_fixed', name = 'b', values = 1, lbound = 1, ubound = 360),
-  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
-           labels = 'gamma_fixed', name = 'g', values = 1, lbound = 1, ubound = 360), 
-  
-  #Definition variables set for loadings (accounts for time-unstructured data) 
-  mxMatrix(type = 'Full', nrow = length(obs_score_days), ncol = 1, free = FALSE, 
-           labels = obs_score_days, name = 'time'),
-  
-  #Algebra specifying first partial derivatives; 
-  mxAlgebra(expression = 1 - 1/(1 + exp((b - time)/g)), name="Tl"),
-  mxAlgebra(expression = 1/(1 + exp((b - time)/g)), name = 'Al'), 
-  mxAlgebra(expression = -((a - t) * (exp((b - time)/g) * (1/g))/(1 + exp((b - time)/g))^2), name = 'Bl'),
-  mxAlgebra(expression =  (a - t) * (exp((b - time)/g) * ((b - time)/g^2))/(1 + exp((b -time)/g))^2, name = 'Gl'),
-  
-  #Factor loadings; all fixed and, importantly, constrained to change according to their partial derivatives (i.e., nonlinear functions) 
-  mxPath(from = 'theta', to = manifest_vars, arrows=1, free=FALSE,  
-         labels = sprintf(fmt = 'Tl[%d,1]', 1:length(manifest_vars))),
-  mxPath(from = 'alpha', to = manifest_vars, arrows=1, free=FALSE,  
-         labels = sprintf(fmt = 'Al[%d,1]', 1:length(manifest_vars))), 
-  mxPath(from='beta', to = manifest_vars, arrows=1,  free=FALSE,
-         labels =  sprintf(fmt = 'Bl[%d,1]', 1:length(manifest_vars))), 
-  mxPath(from='gamma', to = manifest_vars, arrows=1,  free=FALSE,
-         labels =  sprintf(fmt = 'Gl[%d,1]', 1:length(manifest_vars))), 
-  
-  mxFitFunctionML(vector = FALSE)
-)
-```
 
 
 \app{Ergodicity and the Need to Conduct Longitudinal Research}
+\label{ergodicity}
 
 
 (ref:petersen1983) [for an introduction, see @petersen1983]
@@ -360,8 +160,302 @@ The guaranteed differences in cross-sectional and longitudinal variance values t
 
 With an understanding of the conditions required for ergodicity, a brief consideration of organizational phenomena finds that these conditions are regularly violated. Focusing only on homogeneity (each person's data are generated from the same distribution), several instances in organizational research violate this condition. As examples of homogeneity violations, employees show different patterns of absenteeism over five years [@magee2016], leadership development over the course of a seminar [@day2011], career stress over the course of 10 years [@igic2017], and job performance in response to organizational restructuring [@miraglia2015]. With respect to stationarity (constant values for statistical parameters across people over time), several examples can be generated by realizing how calendar events affect psychological processes and behaviours throughout the year. As examples of stationarity violations, consider how salespeople, on average, undoubtedly sell more products during holidays, how employees, on average, take more sick days during the winter months, and how accountants, on average, experience more stress during tax season. With ergodic condition violations commonly occurring in organizational psychology, it becomes fitting to echo the commonly held sentiment that few, if any, psychological processes are ergodic [@molenaar2004; @molenaar2008; @molenaar2009; @fisher2018; @curran2011; @wang2015; @hamaker2012]. 
 
+\app{Code Used to Run Monte Carlo Simulations for all Experiments}
+\label{simulation-code}
+
+The code used to compute the simulations of each experiment are shown in Code Block \ref{sim-code}. Note that the cell size is 1000 (i.e., `num_iterations = 1000`). 
+
+```{r sim-code, echo=T, eval=F, attr.source='.numberLines', ref = "sim-code", codecap = "Code Use to Run Monte Carlo Simulations for Each Simulation Experiment"}
+devtools::install_github(repo = 'sciarraseb/nonlinSims', force=T)
+
+library(easypackages)
+packages <- c('devtools', 'nonlinSims', 'parallel', 'tidyverse', "OpenMx", "data.table", 'progress', 'tictoc')
+libraries(packages)
+
+time_period <- 360
+
+#Population values for parameters 
+#fixed effects
+sd_scale <- 1
+common_effect_size <- 0.32
+theta_fixed <- 3
+alpha_fixed <- theta_fixed + common_effect_size
+beta_fixed <- 180
+gamma_fixed <- 20
+
+#random effects 
+sd_theta <- 0.05
+sd_alpha <- 0.05
+sd_beta <- 10
+sd_gamma <- 4
+sd_error <- 0.05
+
+#List containing population parameter values
+pop_params_4l <- generate_four_param_pop_curve(
+  theta_fixed =  theta_fixed, alpha_fixed = alpha_fixed, 
+   beta_fixed = beta_fixed, gamma_fixed = gamma_fixed, 
+   sd_theta = sd_theta, sd_alpha = sd_alpha, 
+   sd_beta = sd_beta, sd_gamma = sd_gamma, sd_error = sd_error
+
+
+
+num_iterations <- 1e3 #n=1000 (cell size)
+seed <- 27 #ensures replicability 
+
+# Experiment 1 (number measurements,  spacing, midpoint) --------
+factor_list_exp_1 <- list('num_measurements' = seq(from = 5, to = 11, by = 2), 
+                          'time_structuredness' = c('time_structured'),
+                          'spacing' = c('equal', 'time_inc', 'time_dec', 'mid_ext'), 
+                          'midpoint' = c(80, 180, 280),  
+                          'sample_size' = c(225))
+
+tic()
+exp_1_data <- run_exp_simulation(factor_list = factor_list_exp_1, num_iterations = num_iterations, pop_params = pop_params_4l, 
+                                 num_cores = detectCores()-1, seed = seed)
+toc()
+
+#Average computation time is 1 iteration per second. As an example, Experiment has 48 cells x 1000 iterations/cell = 48 000 iterations and seconds/3600s/hour ~ 13.33 hours (simulations computed with 15 cores)
+write_csv(x = exp_1_data, file = '~/Desktop/exp_1_data.csv')
+
+# Experiment 2 (number measurements, spacing,  sample size) ---
+factor_list_exp_2 <- list('num_measurements' = seq(from = 5, to = 11, by = 2), 
+                          'time_structuredness' = c('time_structured'),
+                          'spacing' = c('equal', 'time_inc', 'time_dec', 'mid_ext'),
+                          'midpoint' = 180, 
+                          'sample_size' = c(30, 50, 100, 200, 500, 1000))
+
+tic()
+exp_2_data <- run_exp_simulation(factor_list = factor_list_exp_2, num_iterations = num_iterations, pop_params = pop_params_4l, 
+                                 num_cores = detectCores(), seed = seed)
+toc()
+
+write_csv(x = exp_2_data, file = 'Desktop/exp_2_data.csv')
+
+# Experiment 3 (number measurements, sample size, time structuredness) -----
+factor_list_exp_3 <- list('num_measurements' = seq(from = 5, to = 11, by = 2), 
+                          'time_structuredness' = c('time_structured', 'fast_response', 'slow_response'),
+                          'spacing' = c('equal'), 
+                          'midpoint' = 180, 
+                          'sample_size' = c(30, 50, 100, 200, 500, 1000))
+tic()
+exp_3_data <- run_exp_simulation(factor_list = factor_list_exp_3, num_iterations = num_iterations, pop_params = pop_params_4l, 
+                                 num_cores = detectCores(), seed = seed)
+toc()                
+
+write_csv(x = exp_3_data, file = '~/Desktop/exp_3_data.csv')
+
+
+
+# Experiment 3 (definition variables with slow response rate ) ------
+factor_list_exp_def <- list('num_measurements' = seq(from = 5, to = 11, by = 2), 
+                            'time_structuredness' = c('slow_response'),
+                            'spacing' = c('equal'), 
+                            'midpoint' = 180, 
+                            'sample_size' = c(30, 50, 100, 200, 500, 1000))
+tic()
+exp_3_def_data <- run_exp_simulation(factor_list = factor_list_exp_def, num_iterations = num_iterations, pop_params = pop_params_4l, 
+                                     num_cores = detectCores() - 1, seed = seed, definition = T)
+toc()                
+#240734.993 sec elapsed (7 cores used; simulation time increased by roughly a magnitude of 8). 
+write_csv(x = exp_3_def_data, file = 'exp_3_def.csv')
+
+
+```
+
+\app{Procedure for Generating Measurement Schedules Measurement Schedules}
+\label{measurement-schedules}
+
+Given that no procedure existed (to my knowledge) for creating measurement schedules, I devised a method for generating measurement schedules for the four spacing conditions (equal, time-interval increasing, time-interval decreasing, and middle-and-extreme spacing). The code I used to automate the generation of these schedules can be found within the `compute_measurement_schedules()` function documentation in the `nonlinSims` package (see [https://github.com/sciarraseb/nonlinSims](https://github.com/sciarraseb/nonlinSims)). For each measurement spacing conditions across all measurement number
+levels, a two-step procedure was employed to generate measurement
+schedules in Experiments 1 and 2. At a broad level, the first step involves
+computing setup variables and the second step computes interval lengths.
+
+\secapp{Procedure for Constructing Measurement Schedules With Equal Spacing}
+
+Figure \ref{fig:equal_spacing_schedule} shows how the two-step procedure
+is implemented to construct a measurement schedule with equal spacing
+and five measurements. In the first step, the number of intervals ($NI$)
+is computed by subtracting one from the number of measurements ($NM$). With five measurements ($NM = 5$), there are four intervals ($NI = 4$). In
+the second step, interval lengths are calculated by dividing the length
+of the measurement period ($MP$) by the number of intervals ($NI$),
+yielding an interval length of 90 days ($\frac{MP}{NI} = \frac{360}{4} = 90$) for each interval and the following measurement days:
+
+* $m_1$ = day 0
+* $m_2$ = day 90
+* $m_3$ = day 180
+* $m_4$ = day 270
+* $m_5$ = day 360. 
+
+```{=tex}
+\begin{apaFigure}
+[landscape]
+[samepage]
+{Procedure for Placing Measurements According to Equal Spacing}
+{equal_spacing_schedule}
+{0.90}
+{Figures/equal_spacing_schedule}
+{In Step 1, setup variables are calculated. With five measurements ($NM = 5$), there are four intervals ($NI = 4$). In Step 2, interval lengths are calculated by dividing the length of the measurement period ($MP$) by the number of intervals ($NI$), yielding an interval length of 90 days ($\frac{MP}{NI} = \frac{360}{4} = 90$) for each interval.}
+\end{apaFigure}
+```
+
+\secapp{Procedure for Constructing Measurement Schedules With Time-Interval Increasing Spacing}
+\label{time-inc-proc}
+
+Figure \ref{fig:time_inc_diagram} shows how the two-step procedure is used to calculate the interval lengths for a time-interval increasing spacing schedule with five measurements. In the first step, the number of intervals ($NI$) is computed by subtracting one from the number of measurements ($NM$). With five measurements ($NM = 5$), there are four intervals ($NI = 4$). Because interval lengths increase over time, I decided that intervals would increase by an integer multiple of a constant length ($c$) after each measurement day ($m_i$) according to the function shown below in Equation \ref{eq:constant-length}:
+
+\begin{align}
+\text{Constant-length increment} = \sum^{NI - 1}_{x=0} xc, 
+  (\#eq:constant-length) 
+\end{align}
+
+where $x$ represents the integer multiple that increases by 1 after each measurement day. Importantly, to calculate the constant-length increment ($c$) by which interval lengths increase over time, it is important realize that two terms contribute to the length of any interval: A shortest-interval length ($s$) and a constant-length value ($c$), as shown below in Equation \ref{eq:time-inc-interval-length}:
+
+\begin{align}
+\text{Interval length} = s + \sum^{NI - 1}_{x=0} xc. 
+  (\#eq:time-inc-interval-length) 
+\end{align}
+
+\noindent Because the shortest-interval length ($s$) contributes to the length of each interval--in this example, four intervals---then the sum of these lengths can be subtracted from the measurement period length of 360 days ($MP = 360$). In the current example with five measurements, 240 days remain ($r = 240$) after subtracting the days needed for the shortest-interval lengths (see Equation \ref{eq:eq-remaining}). 
+
+\begin{align}
+\text{Remaining days (} \textit{r})  = MP - (NI)s = 360 - (30)4 = 240 \text{ days}
+  (\#eq:eq-remaining) 
+\end{align}
+
+\noindent Having computed the number of remaining days, the constant-length value ($c$) can then be obtained by dividing the number of remaining days by the number of constant-value interval lengths ($c_i$), as shown below in Equation \ref{eq:eq-constant}: 
+
+\begin{align}
+\text{Constant-value interval length(} \textit{c}\text{)} = \frac{r}{\sum^{NI - 2}_{i = 0}i} = \frac{240}{3 + 2 + 1} = \text{40 days}
+  (\#eq:eq-constant) 
+\end{align}
+
+\noindent Therefore, having computed the value for $c$, the following interval lengths are obtained:
+
+*  $i_{1} = s + 0(c) = 30 + 0(30)$ = 30 days
+*  $i_{2} = s + 1(c) = 30 + 1(40)$ = 70 days
+*  $i_{3} = s + 0(c) = 30 + 2(40)$ = 110 days
+*  $i_{4} = s + 0(c) = 30 + 3(40)$ = 150 days
+
+\noindent and the following measurement days are obtained:
+
+* $m_1$ = day 0
+* $m_2$ = day 30
+* $m_3$ = day 100
+* $m_4$ = day 210
+* $m_5$ = day 360. 
+
+```{=tex}
+\begin{apaFigure}
+[landscape]
+[samepage]
+{Procedure for Placing Measurements According to Time-Interval Increasing Spacing}
+{time_inc_diagram}
+{0.75}
+{Figures/time_inc_schedule}
+{In Step 1, setup variables are calculated. With five measurements ($NM = 5$), there are four intervals ($NI = 4$). In Step 2, two components contribute to each interval length: A shortest-interval length ($s$) and a constant-length value ($c$), as shown in Equation \ref{eq:time-inc-interval-length}. Because the shortest-interval length ($s$) contributes to each interval, the sum of these lengths can be subtracted from the measurement period length of 360 days ($MP = 360$). In the current example with five measurements, 240 days remain ($r = 240$) after subtracting the days needed for the shortest-interval lengths (see Equation \ref{eq:eq-remaining}). To calculate the constant-length value ($c$), the remaining days ($r$) are divided by the number of constant-value interval lengths ($c_i$), as shown in Equation \ref{eq:eq-constant}.}
+\end{apaFigure}
+```
+
+\secapp{Procedure for Constructing Measurement Schedules With Time-Interval Decreasing Spacing}
+
+Figure \ref{fig:time_dec_diagram} shows how the two-step procedure is used to calculate the interval lengths for a time-interval decreasing spacing schedule with five measurements. Because the procedure for calculating time-decreasing intervals simply requires that the order of time-interval increasing intervals are reversed, the procedure is, thus, essentially identical to the procedure shown in the [previous section](#time-inc-proc). Therefore, with five measurements, time-interval decreasing spacing produces the following intervals:
+
+*  $i_{1} = s + 0(c) = 30 + 3(40)$ = 150 days
+*  $i_{2} = s + 0(c) = 30 + 2(40)$ = 110 days
+*  $i_{3} = s + 1(c) = 30 + 1(40)$ = 70 days
+*  $i_{4} = s + 0(c) = 30 + 0(30)$ = 30 days
+
+\noindent and the following measurement days are obtained:
+
+* $m_1$ = day 0
+* $m_2$ = day 150
+* $m_3$ = day 260
+* $m_4$ = day 330
+* $m_5$ = day 360. 
+
+
+```{=tex}
+\begin{apaFigure}
+[landscape]
+[samepage]
+{Procedure for Placing Measurements According to Time-Interval Decreasing Spacing}
+{time_dec_diagram}
+{0.75}
+{Figures/time_dec_schedule}
+{In Step 1, setup variables are calculated. With five measurements ($NM = 5$), there are four intervals ($NI = 4$). In Step 2, two components contribute to each interval length: A shortest-interval length ($s$) and a constant-length value ($c$), as shown in Equation \ref{eq:time-inc-interval-length}. Because the shortest-interval length ($s$) contributes to each interval, the sum of these lengths can be subtracted from the measurement period length of 360 days ($MP = 360$). In the current example with five measurements, 240 days remain ($r = 240$) after subtracting the days needed for the shortest-interval lengths (see Equation \ref{eq:eq-remaining}). To calculate the constant-length value ($c$), the remaining days ($r$) are divided by the number of constant-value interval lengths ($c_i$), as shown in Equation \ref{eq:eq-constant}.}
+\end{apaFigure}
+```
+
+
+\secapp{Procedure for Constructing Measurement Schedules With Middle-and-Extreme Spacing}
+
+Figure \ref{fig:mid_ext_diagram} shows how the two-step procedure was used to calculate the interval lengths for measurement schedules with five measurements defined
+by middle-and-extreme spacing. In the first step, the number of intervals ($NI$) is computed by subtracting one from the number of measurements ($NM$). With five measurements ($NM = 5$), there are four intervals ($NI = 4$). Importantly, because middle-and-extreme spacing places measurements near the extremities and the middle of the measurement window, the number of measurements in both these sections must also be calculated. The number of extreme measurements is first calculated by dividing the number of measurements by 3 and taking the taking the floor (i.e., rounded-down value [$\lfloor x\rfloor$]) of this value and multiplying it by 2, as shown below in Equation \ref{eq:extreme}: 
+
+\begin{align}
+\text{Number of extreme measurements(} \textit{ex}\text{)} = 2\lfloor\frac{NM}{3}\rfloor = 2\lfloor\frac{5}{3}\rfloor = 2.
+  (\#eq:extreme) 
+\end{align}
+
+\noindent The number of middle measurements can then be calculated by subtracting the number of extreme measurements ($ex$) from the number of measurements ($NM$), as shown below in Equation \ref{eq:middle}:
+
+\begin{align}
+\text{Number of middle measurements(} \textit{mi}\text{)} = NM - ex = 5 - 2 = 3.
+  (\#eq:middle) 
+\end{align}
+
+In Step 2, interval lengths are calculated. For middle-and-extreme spacing, there are two types of interval lengths: 2) Intervals between either middle or extreme measurements and 2) intervals between middle and extreme measurements an. Intervals separating middle or extreme measurements are set to the shortest-interval length ($s$), which I set to be 30 days ($w_i = s = 30$). Intervals separating middle and extreme measurements are the sum of two components: 1) A shortest-interval length ($s$) and a 2) constant-value interval length ($c$), as shown below in Equation \ref{eq:mid-ext-interval}:
+
+\begin{align}
+b_i = s + c.
+  (\#eq:middle) 
+\end{align}
+
+\noindent To obtain the constant-value interval length ($c$), the sum of shortest-value interval lengths ($s$) is subtracted from the measurement period of 360 days ($MP = 360$). In the current example with five measurements, 240 days remain ($r = 240$) after subtracting the days needed for the shortest-interval lengths (see Equation \ref{eq:eq-remaining-mid}). 
+
+\begin{align}
+\text{Remaining days (} \textit{r})  = MP - (NI)s = 360 - (30)4 = 240 \text{ days}
+  (\#eq:eq-remaining-mid) 
+\end{align}
+
+\noindent Having computed the number of remaining days, the constant-length value ($c$) can then be obtained by dividing the number of remaining days by the number of  intervals separating middle and extreme measurements, which will always be 2, as shown below in Equation \ref{eq:eq-constant-mid}: 
+
+\begin{align}
+\text{Constant-value interval length(} \textit{c}\text{)} = \frac{r}{2} = \frac{240}{2} = \text{120 days}
+  (\#eq:eq-constant-mid) 
+\end{align}
+
+\noindent Therefore, having computed the value for $c$, the following interval lengths are obtained:
+
+*  $b_{1} = s + c = 30 + 120$ = 150 days
+*  $w_{1} = s = 30$ = 30 days
+*  $w_{2} = s = 30$ = 30 days
+*  $b_{2} = s + c = 30 + 120$ = 150 days
+
+\noindent and the following measurement days are obtained:
+
+* $m_1$ = day 0
+* $m_2$ = day 150
+* $m_3$ = day 180
+* $m_4$ = day 21
+* $m_5$ = day 360. 
+
+
+```{=tex}
+\begin{apaFigure}
+[landscape]
+[samepage]
+{Procedure for Placing Measurements According to Middle-and-Extreme Spacing}
+{mid_ext_diagram}
+{0.75}
+{Figures/mid_ext_schedule}
+{In Step 1, setup variables are calculated. With five measurements ($NM = 5$), there are four intervals ($NI = 4$). Importantly, because middle-and-extreme spacing places measurements near the extremities and the middle of the measurement window, the number of measurements in both these sections must also be calculated. The number of extreme measurements is first calculated by dividing the number of measurements by 3 and taking the taking the floor (i.e., rounded-down value [$\lfloor x\rfloor$]) of this value and multiplying it by 2 (see Equation \ref{eq:extreme}). The number of middle measurements can then be calculated by subtracting the number of extreme measurements ($ex$) from the number of measurements ($NM$; see Equation \ref{eq:middle}). In Step 2, interval lengths are calculated. For middle-and-extreme spacing, there are two types of interval lengths: 2) Intervals between either middle or extreme measurements and 2) intervals between middle and extreme measurements an. Intervals separating middle or extreme measurements are set to the shortest-interval length ($s$), which I set to be 30 days ($w_i = s = 30$). Intervals separating middle and extreme measurements are the sum of two components: 1) A shortest-interval length ($s$) and a 2) constant-value interval length ($c$; see Equation \ref{eq:mid-ext-interval}). To obtain the constant-value interval length ($c$), the sum of shortest-value interval lengths ($s$) is subtracted from the measurement period of 360 days ($MP = 360$). In the current example with five measurements, 240 days remain ($r = 240$) after subtracting the days needed for the shortest-interval lengths (see Equation \ref{eq:eq-remaining-mid}). Having computed the number of remaining days, the constant-length value ($c$) can then be obtained by dividing the number of remaining days by the number of intervals separating middle and extreme measurements, which will always be 2 (see Equation \ref{eq:eq-constant-mid}).}
+\end{apaFigure}
+```
+
 
 \app{Using Nonlinear Function in the Structural Equation Modelling Framework} 
+\label{structured-lgc}
 \secapp{Nonlinear Latent Growth Curve Model Used to Analyze Each Generated Data Set}
 
 The sections that follow will first review the framework used to build
@@ -378,7 +472,7 @@ The latent growth curve model proposed by @meredith1990
 is briefly reviewed here [for a review, see @preacher2008]. Consider an example where data are collected at five time
 points ($T = 5$) to yield five observations for each $p$ person
 ($\mathbf{y_p} = [y_1, y_2, y_3, y_4, y_5$). A simple model to fit is
-one where change over is defined by a straight line and each person's
+one where change over time is defined by a straight line and each person's
 pattern of change is some variation of this straight line. In modelling
 parlance, an intercept-slope model is fit where both the intercept and
 slope are random effects whose values are allowed to vary for each
@@ -389,7 +483,7 @@ the intercept parameter is constant over time, a column of 1s is used to
 represent its effect. For the slope parameter, a pattern of linear
 growth can be specified filling the second column with a series of
 monotonically increasing numbers such as
-0--4.\footnote{The set of numbers specified for the slope starts at zero because there is presumably no effect of any variable at the first time point.}The matrix $\mathbf{\Uplambda}$ below shows a two-column matrix that
+0--4.\footnote{The set of numbers specified for the slope starts at zero because there is presumably no effect of any variable at the first time point.} The matrix $\mathbf{\Uplambda}$ below shows a two-column matrix that
 specifies the effects for an intercept and slope parameter:
 
 $$ 
@@ -702,17 +796,19 @@ Equation \ref{eq:icsf} and Example \ref{exm:icsf-ex} below).
 ```{example, icsf-ex, echo=T}
 Invariability under a constant scaling factor of logistic function (Equation \ref{eq:logistic}).  
 
-\noindent \textup{Given $t = [0, 1, 2, 3]$, $\Uptheta = [\uptheta = 3.00$, $\upalpha = 3.32$, $\upbeta = 180.00$, $\upgamma = 20.00$], and some constant scaling factor $k = 2.00$, then there exists some set of parameter values $\tilde{\Uptheta}$ that produces the same values as $kL(\Uptheta)$. In the current example, $\tilde{\Uptheta} = [\uptheta = 6.00$, $\upalpha = 6.64$, $\upbeta = 180.00$, $\upgamma = 20.00$].} 
+\textup{Given $t = [0, 1, 2, 3]$, $\Uptheta = [\uptheta = 3.00$, $\upalpha = 3.32$, $\upbeta = 180.00$, $\upgamma = 20.00$], and some constant scaling factor $k = 2.00$, then there exists some set of parameter values $\tilde{\Uptheta}$ that produces the same values as $kL(\Uptheta)$. In the current example, $\tilde{\Uptheta} = [\uptheta = 6.00$, $\upalpha = 6.64$, $\upbeta = 180.00$, $\upgamma = 20.00$].} 
 
 \begin{align*}
 \mathbf{kL(\Uptheta, t)} &= \mathbf{L(\tilde{\Uptheta}, t)} \nonumber \\ 
 2*[3.00, 3.02, 3.30, 3.32] &=  [6.00, 6.04, 6.60, 6.64] \nonumber \\ 
 [6.00, 6.04, 6.60, 6.64]  &= [6.00, 6.04, 6.60, 6.64] 1 \nonumber \\ 
 \end{align*}
-\vspace*{-25mm}
+\vspace*{-35mm}
 
-\noindent \hrulefill
+\noindent\hrulefill
 ```
+
+`r knit_exit()`
 
 \noindent If a function has the property of being invariant under a
 scaling factor, then it can also be expressed as the following
@@ -875,230 +971,115 @@ $\mathbf{\upmu}$ that maximized the sum of log-likelihoods across all $P$ people
 \noindent In OpenMx, the above problem was solved using the sequential
 least squares quadratic program [for a review, see @kraft1994].
 
+\app{OpenMx Code for Structured Latent Growth Curve Model Used in Simulation Experiments}
+\label{structured-lgc-code}
 
-\app{Procedure for Generating Measurement Schedules Measurement SchedulesMeasurement Schedules}
+The code that I used to model logistic pattern of change (see [data generation](#data-generation)) is shown in Code Block \ref{structured-model}. Note that, the code is largely excerpted from the `run_exp_simulations()` and `create_logistic_model_ns()` functions from the `nonlinSims` package, and so readers interested in obtaining more information should consult the source code of this package. One important point to mention is that the model specified in Code Block \ref{structured-model} assumes time-structured data. 
 
-Given that no procedure existed (to my knowledge) for creating
-measurement schedules, I devised a method for generating measurement
-schedules for the four spacing conditions (equal, time-interval
-increasing, time-interval decreasing, and middle-and-extreme spacing).
-For each measurement spacing conditions across all measurement number
-levels, a two-step procedure was employed to generate measurement
-schedules in Experiments 2--3. At a broad level, the first step involved
-computing setup variables and the second step computed the interval
-lengths.
+```{r structured-lgc, echo=T, eval=F, attr.source='.numberLines', ref = "structured-model", codecap = "OpenMx Code for Structured Latent Growth Curve Model That Assumes Time-Structured Data"}
+#Days on which measurements are assumed to be taken (note that model assumes time-structured data; that is, at each time point, participants provide data at the exact same moment). The measurement days obtained by finding the unique values in the `measurement_day` column of the generated data set. 
+measurement_days <- unique(data$measurement_day) 
 
-\secapp{Procedure for Constructing Measurement Schedules With Equal Spacing}
+#Manifest variable names (i.e., names of columns containing data at each time point,
+manifest_vars <- nonlinSims:::extract_manifest_var_names(data_wide = data_wide)
 
-Figure \@ref{fig:equal_spacing_diagram} shows how the two-step procedure
-was implemented to construct a measurement schedule with equal spacing
-and five measurements. In the first step, the number of intervals ($NI$)
-was computed by subtracting one from the number of measurements ($NM$),
-giving five measurements ($NM = 5$) and four intervals ($NI = 4$). In
-the second step, interval lengths were calculated by dividing the length
-of the measurement period ($MP$) by the number of intervals ($NI$),
-yielding an interval length of 90 days
-($\frac{MP}{NI} = \frac{360}{4} = 90$).
+#Now convert data to wide format (needed for OpenMx)
+data_wide <- data[ , c(1:3, 5)] %>% 
+    pivot_wider(names_from = measurement_day, values_from = c(obs_score, actual_measurement_day))
+  
+#Remove . from column names so that OpenMx does not run into error (this occurs because, with some spacing schedules, measurement days are not integer values.) 
+names(data_wide) <- str_replace(string = names(data_wide), pattern = '\\.', replacement = '_')
 
+#Latent variable names (theta = baseline, alpha = maximal elevation, beta = days-to-halfway elevation, gamma = triquarter-haflway elevation)
+latent_vars <- c('theta', 'alpha', 'beta', 'gamma') 
 
-```{=tex}
-\begin{apaFigure}
-[landscape]
-[samepage]
-{Procedure for Generating Equal Spacing Schedules With Equal Spacing}
-{equal_spacing_diagram}
-{0.75}
-{Figures/equal_spacing_diagram}
-{}
-\end{apaFigure}
+latent_growth_curve_model <- mxModel(
+  model = model_name,
+  type = 'RAM', independent = T,
+  mxData(observed = data_wide, type = 'raw'),
+  
+  manifestVars = manifest_vars,
+  latentVars = latent_vars,
+  
+  #Residual variances; by using one label, they are assumed to all be equal (homogeneity of variance). That is, there is no complex error structure. 
+  mxPath(from = manifest_vars,
+         arrows=2, free=TRUE,  labels='epsilon', values = 1, lbound = 0),
+  
+  #Latent variable covariances and variances (note that only the variances are estimated. )
+  mxPath(from = latent_vars,
+         connect='unique.pairs', arrows=2,
+         free = c(TRUE,FALSE, FALSE, FALSE, 
+                  TRUE, FALSE, FALSE, 
+                  TRUE, FALSE, 
+                  TRUE), 
+         values=c(1, NA, NA, NA, 
+                  1, NA, NA, 
+                  1, NA,
+                  1),
+         labels=c('theta_rand', 'NA(cov_theta_alpha)', 'NA(cov_theta_beta)', 
+                  'NA(cov_theta_gamma)',
+                  'alpha_rand','NA(cov_alpha_beta)', 'NA(cov_alpha_gamma)', 
+                  'beta_rand', 'NA(cov_beta_gamma)', 
+                  'gamma_rand'), 
+         lbound = c(1e-3, NA, NA, NA, 
+                    1e-3, NA, NA, 
+                    1, NA,
+                    1), 
+         ubound = c(2, NA, NA, NA, 
+                    2, NA, NA, 
+                    90^2, NA, 
+                    45^2)),
+  
+  # Latent variable means (linear parameters). Note that the parameters of beta and gamma do not have estimated means because they are nonlinear parameters (i.e., the logistic function's first-order partial derivative with respect to each of those two parameters contains those two parameters. )
+  mxPath(from = 'one', to = c('theta', 'alpha'), free = c(TRUE, TRUE), arrows = 1,
+         labels = c('theta_fixed', 'alpha_fixed'), lbound = 0, ubound = 7, 
+         values = c(1, 1)),
+  
+  #Functional constraints (needed to estimate mean values of fixed-effect parameters)
+  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+           labels = 'theta_fixed', name = 't', values = 1, lbound = 0,  ubound = 7), 
+  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+           labels = 'alpha_fixed', name = 'a', values = 1, lbound = 0,  ubound = 7), 
+  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+           labels = 'beta_fixed', name = 'b', values = 1, lbound = 1, ubound = 360),
+  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+           labels = 'gamma_fixed', name = 'g', values = 1, lbound = 1, ubound = 360), 
+
+  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = FALSE, 
+           values = measurement_days, name = 'time'),
+  
+  #Algebra specifying first-order partial derivatives; 
+  mxAlgebra(expression = 1 - 1/(1 + exp((b - time)/g)), name="Tl"),
+  mxAlgebra(expression = 1/(1 + exp((b - time)/g)), name = 'Al'), 
+  
+  mxAlgebra(expression = -((a - t) * (exp((b - time)/g) * (1/g))/(1 + exp((b - time)/g))^2), name = 'Bl'),
+  mxAlgebra(expression =  (a - t) * (exp((b - time)/g) * ((b - time)/g^2))/(1 + exp((b -time)/g))^2, name = 'Gl'),
+  
+  #Factor loadings; all fixed and, importantly, constrained to change according to their partial derivatives (i.e., nonlinear functions) 
+  mxPath(from = 'theta', to = manifest_vars, arrows=1, free=FALSE,  
+         labels = sprintf(fmt = 'Tl[%d,1]', 1:length(manifest_vars))),
+  mxPath(from = 'alpha', to = manifest_vars, arrows=1, free=FALSE,  
+         labels = sprintf(fmt = 'Al[%d,1]', 1:length(manifest_vars))), 
+  mxPath(from='beta', to = manifest_vars, arrows=1,  free=FALSE,
+         labels =  sprintf(fmt = 'Bl[%d,1]', 1:length(manifest_vars))), 
+  mxPath(from='gamma', to = manifest_vars, arrows=1,  free=FALSE,
+         labels =  sprintf(fmt = 'Gl[%d,1]', 1:length(manifest_vars))), 
+  
+  #Fit function used to estimate free parameter values. 
+  mxFitFunctionML(vector = FALSE)
+)
+
+#Use starting value function from OpenMx to generate good starting values (uses weighted least squares)
+latent_growth_model <- mxAutoStart(model = latent_growth_model)
+
+#Fit model using mxTryHard(). Increases probability of convergence by attempting model convergence by randomly shifting starting values. 
+model_results <- mxTryHard(latent_growth_model)
+  
 ```
 
-\secapp{Procedure for Constructing Measurement Schedules With Time-Interval Increasing Spacing}
-
-Figure \@ref{fig:time_inc_diagram} shows how the two-step procedure was
-used to calculate the interval lengths for measurement schedules defined
-by time-interval increasing spacing with five measurements. In the first
-step, the number of intervals was determined by subtracting one from the
-number of measurements, yielding a value of four for the number of
-intervals ($NI = NM - 1 = 5 - 1 = 4$). Importantly, the length of each
-interval increased by a constant value $c$ over time as shown below in
-Equation \ref{eq:time-inc-length}:
-
-```{=tex}
-\begin{align}
-\text{Interval length} = x + \#IN(c)
-(\#eq:time-inc-length)
-\end{align}
-```
-\noindent where $\#IN$ represents the interval number in increasing
-order such that
-$\#IN \in \{0, ..., \text{number of intervals (NI)} - 1\}$. In the
-second step, the constant value by which interval lengths increased
-($c$) was computed by first subtracting the smallest interval length
-from each interval (i.e., $x = 36$ days) from the measurement period
-($MP$), yielding 216 remaining days
-($N_{remain} = MP - NIx = 360 - 4(36) = 216$). The number of remaining
-days then had to be divided across the constant interval lengths.
-Because each interval increased by some constant value ($c$ after each
-measurement point, the total number of constant-value interval lengths
-was obtained by computing the following sum in Equation
-\ref{eq:time-sum-constants}:
-
-```{=tex}
-\begin{align}
-\text{Number constant intervals} = \sum^{\#IN}_{i = 0} i.
-(\#eq:time-sum-constants)
-\end{align}
-```
-\noindent With $\#IN = 3$, the number of constant intervals was 6, and
-so the constant value was obtained by using Equation
-\ref{eq:constant-length} below:
-
-```{=tex}
-\begin{align}
-\text{Number constant intervals} = \frac{N_{remain}}{\sum^{\#IN}_{i = 0} i},
-(\#eq:constant-length)
-\end{align}
-```
-\noindent giving a length of 36 days for the constant value
-($c = \frac{216}{6} = 36$ days). Having computed the value for $c$, the
-following interval lengths were obtained:
-
--   $i_{1} = x + \#IN(c) = 36 + 0(36)$ = 36 days
--   $i_{2} = x + \#IN(c) = 36 + 1(36)$ = 72 days
--   $i_{3} = x + \#IN(c) = 36 + 2(36)$ = 108 days
--   $i_{4} = x + \#IN(c) = 36 + 3(36)$ = 144 days
-
-
-```{=tex}
-\begin{apaFigure}
-[landscape]
-[samepage]
-{Procedure for Generating Equal Spacing Schedules With Time-Interval Increasing Spacing}
-{time_inc_diagram}
-{0.75}
-{Figures/time_inc_diagram}
-{}
-\end{apaFigure}
-```
-
-\secapp{Procedure for Constructing Measurement Schedules With Time-Interval Decreasing Spacing}
-
-Figure \@ref{fig:time_dec_diagram} shows how the two-step procedure was
-used to calculate the interval lengths for measurement schedules defined
-by time-interval decreasing spacing with five measurements. In the first
-step, the number of intervals was determined by subtracting one from the
-number of measurements, yielding a value of four for the number of
-intervals ($NI = NM - 1 = 5 - 1 = 4$). Importantly, the length of each
-interval decreased by a constant value $c$ over time as shown below in
-Equation \ref{eq:time-dec-length}:
-
-```{=tex}
-\begin{align}
-\text{Interval length} = x + \#INT(c)
-(\#eq:time-dec-length)
-\end{align}
-```
-\noindent where $\#IN$ represents the interval number in decreasing
-order such that
-$\#IN \in \{\text{number of intervals (NI)} - 1, ... , 0\}$. In the
-second step, the constant value by which interval lengths decreased
-($c$) was computed by first subtracting the smallest interval length
-from each interval (i.e., $x = 36$ days) from the measurement period
-($MP$), yielding 216 remaining days
-($N_{remain} = MP - NIx = 360 - 4(36) = 216$). The number of remaining
-days then had to be divided across the constant interval lengths.
-Because each interval decreased by some constant value ($c$ after each
-measurement point, the total number of constant-value interval lengths
-was obtained by computing the following sum in Equation
-\ref{eq:dec-sum-constants}:
-
-```{=tex}
-\begin{align}
-\text{Number constant intervals} = \sum_{\#IN}^{i = 0} i.
-(\#eq:dec-sum-constants)
-\end{align}
-```
-\noindent With $\#IN = 3$, the number of constant intervals was 6, and
-so the constant value was obtained by using Equation
-\ref{eq:constant-length-2} below:
-
-```{=tex}
-\begin{align}
-\text{Number constant intervals} = \frac{N_{remain}}{\sum^{\#IN}_{i = 0} i},
-(\#eq:constant-length-2)
-\end{align}
-```
-\noindent giving a length of 36 days for the constant value
-($c = \frac{216}{6} = 36$ days). Having computed the value for $c$, the
-following interval lengths were obtained:
-
--   $i_{1} = x + \#IN(c) = 36 + 3(36)$ = 144 days
--   $i_{4} = x + \#IN(c) = 36 + 0(36)$ = 36 days
--   $i_{3} = x + \#IN(c) = 36 + 1(36)$ = 72 days
--   $i_{2} = x + \#IN(c) = 36 + 2(36)$ = 108 days
-
-
-```{=tex}
-\begin{apaFigure}
-[landscape]
-[samepage]
-{Procedure for Generating Equal Spacing Schedules With Time-Interval Decreasing Spacing}
-{time_dec_diagram}
-{0.75}
-{Figures/time_dec_diagram}
-{}
-\end{apaFigure}
-```
-
-
-\secapp{Procedure for Constructing Measurement Schedules With Middle-and-Extreme Spacing}
-
-Figure \@ref{fig:mid_ext_diagram} shows how the two-step procedure was
-used to calculate the interval lengths for measurement schedules defined
-by middle-and-extreme spacing with five measurements. In the first step,
-the number of intervals was determined by subtracting one from the
-number of measurements, yielding a value of four for the number of
-intervals ($NI = NM - 1 = 5 - 1 = 4$)... 
-
-\app{Convergence Success Rates}
-
-```{r convergence-rates, echo=F, warning=F}
-
-exp_1_conv <- nonlinSimsAnalysis:::generate_conv_success_data(condition_data = cond_summary_exp_1, first_col = 'measurement_spacing', second_col = 'number_measurements', wide_var = 'midpoint', exp_num = 1, recode_var = 'measurement_spacing')
-
-exp_2_conv <- nonlinSimsAnalysis:::generate_conv_success_data(condition_data = cond_summary_exp_2, first_col = 'measurement_spacing', second_col = 'number_measurements', wide_var = 'sample_size', exp_num = 2, recode_var = 'measurement_spacing')
-
-exp_3_conv <- nonlinSimsAnalysis:::generate_conv_success_data(condition_data = cond_summary_exp_3, first_col = 'time_structuredness', second_col = 'number_measurements', wide_var = 'sample_size', exp_num = 3, recode_var = 'time_structuredness')
-```
-
-
-```{r conv-exp-1, echo=F}
-print_conv_table(table_ready_data = exp_1_conv, 
-                 caption_name = 'Convergence Success in Experiment 1', 
-                 col_header_name = c('Days to halfway elevation'), 
-                 IV_names =  c('Measurement Spacing', 'Number of Measurements'), 
-                 column_names = c('80', '180', '280'))
-```
-
-```{r conv-exp-2, echo=F}
-print_conv_table(table_ready_data = exp_2_conv, 
-                 caption_name = 'Convergence Success in Experiment 2', 
-                 col_header_name = c('Sample size (\\\\textit{N})'), 
-                 IV_names =  c('Measurement Spacing', 'Number of Measurements'), 
-                 column_names = c('30', '50', '100', '200', '500', '1000'))
-```
-
-```{r conv-exp-3, echo=F}
-print_conv_table(table_ready_data = exp_3_conv, 
-                 caption_name = 'Convergence Success in Experiment 3', 
-                 col_header_name = c('Sample size (\\\\textit{N})'), 
-                 IV_names =  c('Time Structuredness', 'Number of Measurements'), 
-                 column_names = c('30', '50', '100', '200', '500', '1000'))
-```
 
 \app{Complete Versions of Parameter Estimation Plots (Day- and Likert-Unit Parameters)}
-
+\label{complete-versions}
 \secapp{Experiment 1}
 \subapp{Equal Spacing}
 ```{=tex}
@@ -1215,7 +1196,7 @@ print_conv_table(table_ready_data = exp_3_conv,
 
 
 
-\secapp{Experiment 1}
+\secapp{Experiment 2}
 \subapp{Equal Spacing}
 ```{=tex}
 \begin{apaFigure}
@@ -1329,9 +1310,159 @@ print_conv_table(table_ready_data = exp_3_conv,
 \end{apaFigure}
 ```
 
-\app{Parameter Estimate Tables}
+\secapp{Experiment 3}
+\subapp{Time-Structured Data }
+```{=tex}
+\begin{apaFigure}
+[portrait]
+[samepage]
+[0cm]
+{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Structured Data in Experiment 3}
+{exp3_plot_days_time_struc_app}
+{0.16}
+{Figures/exp3_plot_days_time structured}
+{}
+\end{apaFigure}
 
-\secapp{Experiment 1}
+\addtocounter{figure}{-1}
+
+\begin{apaFigure}
+[portrait]
+[samepage]
+[0cm]
+{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Structured Data in Experiment 3 (continued)}
+{exp3_plot_days_time_struc_app}
+{0.16}
+{Figures/exp3_plot_likert_time structured}
+{Panels A--B: Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3} for specific values estimated for each parameter.}
+[notrack]
+\end{apaFigure}
+```
+
+\subapp{Time-Unstructured Data Characterized by a Fast Response Rate}
+```{=tex}
+\begin{apaFigure}
+[portrait]
+[samepage]
+[0cm]
+{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Unstructured Data Characterized by a Fast Response Rate in Experiment 3}
+{exp3_plot_days_fast_app}
+{0.16}
+{Figures/exp3_plot_days_time unstructured (fast response)}
+{}
+\end{apaFigure}
+
+\addtocounter{figure}{-1}
+
+\begin{apaFigure}
+[portrait]
+[samepage]
+[0cm]
+{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Unstructured Data Characterized by a Fast Response Rate in Experiment 3 (continued)}
+{exp3_plot_days_fast_app}
+{0.16}
+{Figures/exp3_plot_likert_time unstructured (fast response)}
+{Panels A--B: Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3} for specific values estimated for each parameter.}
+[notrack]
+\end{apaFigure}
+```
+
+\subapp{Time-Unstructured Data Characterized by a Slow Response Rate}
+```{=tex}
+\begin{apaFigure}
+[portrait]
+[samepage]
+[0cm]
+{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Unstructured Data Characterized by a Slow Response Rate in Experiment 3}
+{exp3_plot_days_slow_app}
+{0.16}
+{Figures/exp3_plot_days_time unstructured (slow response)}
+{}
+\end{apaFigure}
+
+\addtocounter{figure}{-1}
+
+\begin{apaFigure}
+[portrait]
+[samepage]
+[0cm]
+{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Unstructured Data Characterized by a Slow Response Rate in Experiment 3 (continued)}
+{exp3_plot_days_slow_app}
+{0.16}
+{Figures/exp3_plot_likert_time unstructured (slow response)}
+{Panels A--B: Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3} for specific values estimated for each parameter.}
+[notrack]
+\end{apaFigure}
+```
+
+\subapp{Time-Unstructured Data Characterized by a Slow Response Rate and Modelled with Definition Variables}
+
+```{=tex}
+\begin{apaFigure}
+[portrait]
+[samepage]
+[-0.2cm]
+{Bias/Precision Plots for Day- and Likert-Unit Parameters When Using Definition Variables To Model Time-Unstructured Data Characterized by a Slow Response Rate}
+{exp3_plot_days_def_app}
+{0.165}
+{Figures/exp3_defplot_days_time unstructured (slow response)}
+{}
+\end{apaFigure}
+
+\addtocounter{figure}{-1}
+
+\begin{apaFigure}
+[portrait]
+[samepage]
+[-0.2cm]
+{Bias/Precision Plots for Day- and Likert-Unit Parameters When Using Definition Variables To Model Time-Unstructured Data Characterized by a Slow Response Rate (continued)}
+{exp3_plot_days_def_app}
+{0.165}
+{Figures/exp3_defplot_likert_time unstructured (slow response)}
+{Panels A--B: Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3-def} for specific values estimated for each parameter.}
+\end{apaFigure}
+```
+
+
+\app{Convergence Success Rates}
+\label{convergence-tables}
+
+```{r convergence-rates, echo=F, warning=F}
+
+exp_1_conv <- nonlinSimsAnalysis:::generate_conv_success_data(condition_data = cond_summary_exp_1, first_col = 'measurement_spacing', second_col = 'number_measurements', wide_var = 'midpoint', exp_num = 1, recode_var = 'measurement_spacing')
+
+exp_2_conv <- nonlinSimsAnalysis:::generate_conv_success_data(condition_data = cond_summary_exp_2, first_col = 'measurement_spacing', second_col = 'number_measurements', wide_var = 'sample_size', exp_num = 2, recode_var = 'measurement_spacing')
+
+exp_3_conv <- nonlinSimsAnalysis:::generate_conv_success_data(condition_data = cond_summary_exp_3, first_col = 'time_structuredness', second_col = 'number_measurements', wide_var = 'sample_size', exp_num = 3, recode_var = 'time_structuredness')
+```
+
+
+```{r conv-exp-1, echo=F}
+print_conv_table(table_ready_data = exp_1_conv, 
+                 caption_name = 'Convergence Success in Experiment 1', 
+                 col_header_name = c('Days to halfway elevation'), 
+                 IV_names =  c('Measurement Spacing', 'Number of Measurements'), 
+                 column_names = c('80', '180', '280'))
+```
+
+```{r conv-exp-2, echo=F}
+print_conv_table(table_ready_data = exp_2_conv, 
+                 caption_name = 'Convergence Success in Experiment 2', 
+                 col_header_name = c('Sample size (\\\\textit{N})'), 
+                 IV_names =  c('Measurement Spacing', 'Number of Measurements'), 
+                 column_names = c('30', '50', '100', '200', '500', '1000'))
+```
+
+```{r conv-exp-3, echo=F}
+print_conv_table(table_ready_data = exp_3_conv, 
+                 caption_name = 'Convergence Success in Experiment 3', 
+                 col_header_name = c('Sample size (\\\\textit{N})'), 
+                 IV_names =  c('Time Structuredness', 'Number of Measurements'), 
+                 column_names = c('30', '50', '100', '200', '500', '1000'))
+```
+
+
+\app{Parameter Estimate Tables}
 
 
 ```{r exp-table-generation, echo=F}
@@ -2009,6 +2140,109 @@ Time Structuredness & Number of Measurements & 30 & 50 & 100 & 200 & 500 & 1000\
 \restoregeometry
 
 ```
+
+
+\app{OpenMx Code for Structured Latent Growth Curve Model With Definition Variables}
+\label{def-model-code}
+
+The code that I used to model logistic pattern of change using definition variables (see [definition variables](#definition-variables)) is shown in Code Block \ref{definition-model}. Note that, the code is largely excerpted from the `run_exp_simulations()` and `create_definition_model()` functions from the `nonlinSims` package, and so readers interested in obtaining more information should consult the source code of this package. One important point to mention is that the model specified in Code Block \ref{definition-model} can accurately model time-unstructured data because it uses definition variables. 
+
+```{r def-lfc, echo=T, eval=F, attr.source='.numberLines', ref = "definition-model", codecap = "OpenMx Code for Structured Latent Growth Curve Model With Definition Variables"}
+#Now convert data to wide format (needed for OpenMx)
+data_wide <- data[ , c(1:3, 5)] %>% 
+    pivot_wider(names_from = measurement_day, values_from = c(obs_score, actual_measurement_day))
+
+#Definition variable (data. prefix tells OpenMx to use recorded time of observation for each person's data)
+obs_score_days <- paste('data.', extract_obs_score_days(data = data_wide), sep = '') 
+
+#Remove . from column names so that OpenMx does not run into error (this occurs because, with some spacing schedules, measurement days are not integer values.) 
+names(data_wide) <- str_replace(string = names(data_wide), pattern = '\\.', replacement = '_')
+
+#Latent variable names (theta = baseline, alpha = maximal elevation, beta = days-to-halfway elevation, gamma = triquarter-halfway elevation)
+latent_vars <- c('theta', 'alpha', 'beta', 'gamma') 
+
+def_growth_curve_model <- mxModel(
+  model = model_name,
+  type = 'RAM', independent = T,
+  mxData(observed = data_wide, type = 'raw'),
+  
+  manifestVars = manifest_vars,
+  latentVars = latent_vars,
+  
+  #Residual variances; by using one label, they are assumed to all be equal (homogeneity of variance). That is, there is no complex error structure. 
+  mxPath(from = manifest_vars,
+         arrows=2, free=TRUE,  labels='epsilon', values = 1, lbound = 0),
+  
+  #Latent variable covariances and variances (note that only the variances are estimated. )
+  mxPath(from = latent_vars,
+         connect='unique.pairs', arrows=2,
+         free = c(TRUE,FALSE, FALSE, FALSE, 
+                  TRUE, FALSE, FALSE, 
+                  TRUE, FALSE, 
+                  TRUE), 
+         values=c(1, NA, NA, NA, 
+                  1, NA, NA, 
+                  1, NA,
+                  1),
+         labels=c('theta_rand', 'NA(cov_theta_alpha)', 'NA(cov_theta_beta)', 
+                  'NA(cov_theta_gamma)',
+                  'alpha_rand','NA(cov_alpha_beta)', 'NA(cov_alpha_gamma)', 
+                  'beta_rand', 'NA(cov_beta_gamma)', 
+                  'gamma_rand'), 
+         lbound = c(1e-3, NA, NA, NA, 
+                    1e-3, NA, NA, 
+                    1, NA,
+                    1), 
+         ubound = c(2, NA, NA, NA, 
+                    2, NA, NA, 
+                    90^2, NA, 
+                    45^2)),
+  
+  # Latent variable means (linear parameters). Note that the parameters of beta and gamma do not have estimated means because they are nonlinear parameters (i.e., the logistic function's first-order partial derivative with respect to each of those two parameters contains those two parameters)
+  mxPath(from = 'one', to = c('theta', 'alpha'), free = c(TRUE, TRUE), arrows = 1,
+         labels = c('theta_fixed', 'alpha_fixed'), lbound = 0, ubound = 7, 
+         values = c(1, 1)),
+  
+  #Functional constraints (needed to estimate mean values of fixed-effect parameters)
+  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+           labels = 'theta_fixed', name = 't', values = 1, lbound = 0,  ubound = 7), 
+  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+           labels = 'alpha_fixed', name = 'a', values = 1, lbound = 0,  ubound = 7), 
+  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+           labels = 'beta_fixed', name = 'b', values = 1, lbound = 1, ubound = 360),
+  mxMatrix(type = 'Full', nrow = length(manifest_vars), ncol = 1, free = TRUE, 
+           labels = 'gamma_fixed', name = 'g', values = 1, lbound = 1, ubound = 360), 
+
+  #Definition variables set for loadings (accounts for time-unstructured data) 
+  mxMatrix(type = 'Full', nrow = length(obs_score_days), ncol = 1, free = FALSE, 
+  labels = obs_score_days, name = 'time'),
+
+  #Algebra specifying first-order partial derivatives; 
+  mxAlgebra(expression = 1 - 1/(1 + exp((b - time)/g)), name="Tl"),
+  mxAlgebra(expression = 1/(1 + exp((b - time)/g)), name = 'Al'), 
+  mxAlgebra(expression = -((a - t) * (exp((b - time)/g) * (1/g))/(1 + exp((b - time)/g))^2), name = 'Bl'),
+  mxAlgebra(expression =  (a - t) * (exp((b - time)/g) * ((b - time)/g^2))/(1 + exp((b -time)/g))^2, name = 'Gl'),
+  
+  #Factor loadings; all fixed and, importantly, constrained to change according to their partial derivatives (i.e., nonlinear functions) 
+  mxPath(from = 'theta', to = manifest_vars, arrows=1, free=FALSE,  
+         labels = sprintf(fmt = 'Tl[%d,1]', 1:length(manifest_vars))),
+  mxPath(from = 'alpha', to = manifest_vars, arrows=1, free=FALSE,  
+         labels = sprintf(fmt = 'Al[%d,1]', 1:length(manifest_vars))), 
+  mxPath(from='beta', to = manifest_vars, arrows=1,  free=FALSE,
+         labels =  sprintf(fmt = 'Bl[%d,1]', 1:length(manifest_vars))), 
+  mxPath(from='gamma', to = manifest_vars, arrows=1,  free=FALSE,
+         labels =  sprintf(fmt = 'Gl[%d,1]', 1:length(manifest_vars))), 
+  
+  #Fit function used to estimate free parameter values. 
+  mxFitFunctionML(vector = FALSE)
+)
+
+#Fit model using mxTryHard(). Increases probability of convergence by attempting model convergence by randomly shifting starting values. 
+model_results <- mxTryHard(def_growth_curve_model)
+
+
+```
+
 
 
 

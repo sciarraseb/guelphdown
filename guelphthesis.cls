@@ -18,7 +18,7 @@
 \ProvidesClass{guelphthesis}[2022/10/11] %info in square brackets specifies release date
 
 %Parameters
-\let\cleardoublepage\clearpage  %#removes blank pages in dissertation preamble
+%\let\cleardoublepage\clearpage  %#removes blank pages in dissertation preamble
 
 \providecommand{\baseclass}{book} %define \baseclass command
 
@@ -29,7 +29,7 @@
 %----------------------------------------------------------------------------------------
 %	REQUIRED PACKAGES
 %----------------------------------------------------------------------------------------
-\usepackage[hyperfootnotes = false]{hyperref} %turn off footnote hyperlinking (doesn't work well and also not necessary)
+\usepackage{xurl} %ensures urls do not go outside page margins
 \usepackage{titlecaps} %capitalizes first letter of words (needed to toc entries when using \addcontentsline)
 \usepackage{titlesec}
 \usepackage{fancyhdr} %needed for header and footer formatting
@@ -59,18 +59,6 @@
 \usepackage{xargs} %needed to create environments with multiple optional arguments (e.g., apaFigure)
 \usepackage{enumitem} %needed to remove spacing between list items
 
- % Required for customising links and the PDF
-\hypersetup{pdfpagemode={UseOutlines},
-bookmarksopen=true, %allows bookmarks in pdf
-hypertexnames=true, %enables counting when referencing to sections
-colorlinks = true, % Set to true to enable coloring links, a nice option, false to turn them off
-citecolor = blue, % The color of citations
-linkcolor = red, % The color of references to document elements (sections, figures, etc)
-urlcolor= blue,
-anchorcolor = blue, % The color of hyperlinks (URLs)
-pdfstartview={FitV},
-breaklinks=true
-}
 
 \setlist{nolistsep} %remove spacings between list items
 
@@ -116,21 +104,7 @@ breaklinks=true
 \newcommand{\Dedication}[1]{\def\@Dedication{#1}}
 \newcommand{\Preface}[1]{\def\@Preface{#1}}
 
-%----------------------------------------------------------------------------------------
-%	GLOBAL SETTINGS
-%----------------------------------------------------------------------------------------
 
-\AtBeginDocument{%
-  \setlength{\parindent}{1cm} %indentation of first line of paragraphs (important to load indentfirst for first-paragraph indentation
-}
-
-
-%necessary to define tighlist
-%\providecommand{\tightlist}{%
-%  \setlength{\itemsep}{0pt}
-%  \setlength{\parskip}{0pt}
-%  }
-\def\tightlist{}
 
 %----------------------------------------------------------------------------------------
 % HEADER LEVEL FORMATTING
@@ -298,6 +272,8 @@ breaklinks=true
 %----------------------------------------------------------------------------------------
 
 \newenvironment{abstract}[2]{%
+ \cleardoublepage
+ \phantomsection
  \addcontentsline{toc}{chapter}{\titlecap{Abstract}}  %adds abstract to toc
   \begin{center}
 
@@ -347,7 +323,9 @@ breaklinks=true
 
   %settings needed for text
   \setlength{\parindent}{1cm} %paragraph indentation
+  \phantomsection
   \addcontentsline{toc}{chapter}{\titlecap{#2}}
+  \vspace{20pt}
 
  #3
 }
@@ -359,15 +337,17 @@ breaklinks=true
 %----------------------------------------------------------------------------------------
 %	TABLE & FIGURE FORMATTING
 %----------------------------------------------------------------------------------------
-
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareCaptionFont{CaptionFont}{\fontfamily{phv}} %sets caption font to sans serif font of Helvetica (used in Tables and Figures)
 \DeclareCaptionFont{titleSize}{\fontsize{11pt}{13.2pt}\fontfamily{phv}\selectfont}
 \DeclareCaptionLabelSeparator{captionSep}{\newline} %separates figure label and figure title with newlin
-\captionsetup[table]{labelfont={CaptionFont, titleSize, bf}, textfont = {it, CaptionFont, titleSize}, labelsep = captionSep, justification= raggedright, singlelinecheck=off, skip = 0pt}
+\DeclareCaptionLabelFormat{tableLabel}{Table \thetable}
+
+\captionsetup[table]{labelformat = tableLabel, labelfont={CaptionFont, titleSize, bf}, textfont = {it, CaptionFont, titleSize}, labelsep = captionSep, justification= raggedright, singlelinecheck=off, skip = 0pt}
 
 \AtBeginEnvironment{ThreePartTable}{\vspace{0.4cm}\par\setstretch{1.5}\fontfamily{phv}\fontsize{10.5pt}{12pt}\selectfont\relax}
 \AtBeginEnvironment{TableNotes}{\setstretch{1.5}\fontfamily{phv}\fontsize{10pt}{12pt}\selectfont}
+\AtBeginEnvironment{longtable}{\vspace{0.4cm}\par\setstretch{1.5}\fontfamily{phv}\fontsize{10.5pt}{12pt}\selectfont\relax} %table without figure notes
 
 %set table line widths
 \setlength\cmidrulewidth{1pt} %line thickness of lines within table and in multi-row headers
@@ -375,7 +355,8 @@ breaklinks=true
 
 
 %Figure settings
-\captionsetup[figure]{labelfont={CaptionFont, titleSize, bf}, textfont = {it, CaptionFont, titleSize},  justification= raggedright, singlelinecheck=off, labelsep = captionSep, skip = 10pt}
+\DeclareCaptionLabelFormat{figureLabel}{Figure \thefigure}
+\captionsetup[figure]{labelformat = figureLabel, labelfont={CaptionFont, titleSize, bf}, textfont = {it, CaptionFont, titleSize},  justification= raggedright, singlelinecheck=off, labelsep = captionSep, skip = 10pt}
 \newcommand{\figurefootnote}{\raggedright\linespread{1.5}\fontfamily{phv}\fontsize{9.5pt}{11.4pt}\selectfont \textit{Note. }}
 \newcommand{\emptyfootnote}{}
 
@@ -418,7 +399,7 @@ breaklinks=true
    \caption[]{#4}
   \fi
   \label{fig:#5}
-  \includegraphics[scale = #6]{#7}
+  \includegraphics[scale = #6, clip]{#7}
   \end{figure}
 
   %no footnote if empty
@@ -441,7 +422,7 @@ breaklinks=true
   \fi
 
   \label{fig:#5}
-  \includegraphics[scale = #6]{#7}
+  \includegraphics[scale = #6, clip]{#7}
   \end{figure}
 
   \ifx\ft\ftTarget
@@ -461,8 +442,6 @@ breaklinks=true
 %https://stackoverflow.com/questions/50702942/does-rmarkdown-allow-captions-and-references-for-code-chunks
 %chunk numbering
 
-
-
 \usepackage{fvextra}
 %syntax highlighting
 %see https://gist.github.com/Manuel-S/f285795979f42f65a144bf87ac52013b for all possible syntax highlighting customizations
@@ -471,9 +450,6 @@ breaklinks=true
   \definecolor{shadecolor}{rgb}{0.94, 0.97, 1.0} %background color for code chunks
 }
 
-\AtBeginEnvironment{verbatim}{
-  \definecolor{shadecolor}{rgb}{0.94, 0.97, 1.0} %background color for code chunks
-}
 
 \AtBeginEnvironment{Highlighting}{
   \setstretch{1}\fontsize{10pt}{10pt}
@@ -489,35 +465,102 @@ breaklinks=true
 
 
 
-\usepackage{newfloat} %cannot use floatrow when using caption (or else formatting of figures and tables will be messed up)
-
-\DeclareFloatingEnvironment[fileext = chk, name =]{chunk}
-
-
-%\usepackage{floatrow}
-%\DeclareNewFloatType{chunk}{placement=H, fileext=chk, name=}
-\captionsetup{options=chunk}
-\renewcommand{\thechunk}{\theapp.\arabic{chunk}}
-\DeclareCaptionLabelFormat{chunkLabel}{Code Block \thechunk}
-
-\makeatletter
-\@addtoreset{chunk}{section}
-\makeatother
-
-\captionsetup[chunk]{labelformat = chunkLabel,  labelfont={CaptionFont, titleSize, bf}, textfont = {it, CaptionFont, titleSize}, labelsep = captionSep, justification= raggedright, singlelinecheck=off, skip = 30pt}
-
-
 %vertical space above and below chunk
 %\setlength{\OuterFrameSep}{-20pt}
 \usepackage{framed}
 \setlength{\topsep}{-20pt}
 \AfterEndEnvironment{Shaded}{\vspace{20pt}}
 
+\usepackage{float} %cannot use floatrow when using caption (or else formatting of figures and tables will be messed up)
+\newfloat{chunk}{placement = t}{chk}
+%\usepackage{floatrow}
+%\DeclareNewFloatType{chunk}{placement=H, fileext=chk, name=}
+\captionsetup{options=chunk}
+\renewcommand{\thechunk}{\theapp.\arabic{chunk}}
+\DeclareCaptionLabelFormat{chunkLabel}{Code Block \thechunk}
+\captionsetup[chunk]{labelformat = chunkLabel,  labelfont={CaptionFont, titleSize, bf}, textfont = {it, CaptionFont, titleSize}, labelsep = captionSep, justification= raggedright, singlelinecheck=off, skip = 30pt}
+
 %restores paragraph indenting after using captionof for caption of code blocks
 \edef\restoreparindent{\parindent = 1cm}
 \restoreparindent
 
 
+%----------------------------------------------------------------------------------------
+%	Change Figure, Table, Equation, and Code Block numbering after references
+%----------------------------------------------------------------------------------------
+%example numbering
+
+
+\AfterEndEnvironment{CSLReferences}{
+%change numbering for figures, tables, and equations for appendices
+\renewcommand\thefigure{\theapp.\arabic{figure}} %change figure numbering for appendix such that it goes A.1, A.2, etc.
+\counterwithin{figure}{app} %reset figure number counter for each appendix
+
+\renewcommand\thetable{\theapp.\arabic{table}} %change figure numbering for appendix such that it goes A.1, A.2, etc.
+\counterwithin{table}{app} %reset figure number counter for each appendix
+
+%reset equation number number counter for each appendix
+\renewcommand{\theequation}{\theapp.\arabic{equation}}
+\counterwithin{equation}{app} %reset figure number counter for each appendix
+
+\counterwithin{chunk}{app} %reset code chunk numbering
+}
+
+%----------------------------------------------------------------------------------------
+%	Quote formatting, list formatting, etc.
+%----------------------------------------------------------------------------------------
+\AtBeginDocument{%
+  \setlength{\parindent}{1cm} %indentation of first line of paragraphs (important to load indentfirst for first-paragraph indentation
+  \frenchspacing %sets all spaces between sentences to one space
+}
+
+
+%necessary to define tighlist
+%\providecommand{\tightlist}{%
+%  \setlength{\itemsep}{0pt}
+%  \setlength{\parskip}{0pt}
+%  }
+\def\tightlist{}
+
+%no hyphenation across pages
+\brokenpenalty10000\relax
+\AtBeginEnvironment{quote} {
+  \vspace{20pt}
+  \setstretch{1.25}
+}
+
+\AfterEndEnvironment{quote}{
+
+%empty line to ensure paragaph indent after quo
+}
+
+\AfterEndEnvironment{example}{
+  \vspace{30pt}
+}
+
+\AfterEndEnvironment{itemize}{
+
+%empty line to ensure paragaph indent after quo
+}
+
+
+
+\newcommand{\tabitem}{\textbullet\hspace{0.2cm}}
+\usepackage[hyperfootnotes = false]{hyperref}
+
+
+ % Required for customising links and the PDF
+\hypersetup{pdfpagemode={UseOutlines},
+bookmarksopen=true, %allows bookmarks in pdf
+hypertexnames=true, %enables counting when referencing to sections
+colorlinks = true, % Set to true to enable coloring links, a nice option, false to turn them off
+citecolor = blue, % The color of citations
+linkcolor = blue, % The color of references to document elements (sections, figures, etc)
+urlcolor= blue,
+anchorcolor = blue, % The color of hyperlinks (URLs)
+pdfstartview={FitV},
+breaklinks=true
+}
 
 
 
