@@ -546,21 +546,6 @@
 
 
 \newcommand{\tabitem}{\textbullet\hspace{0.2cm}}
-\usepackage[hyperfootnotes = false]{hyperref}
-
-
- % Required for customising links and the PDF
-\hypersetup{pdfpagemode={UseOutlines},
-bookmarksopen=true, %allows bookmarks in pdf
-hypertexnames=true, %enables counting when referencing to sections
-colorlinks = true, % Set to true to enable coloring links, a nice option, false to turn them off
-citecolor = blue, % The color of citations
-linkcolor = blue, % The color of references to document elements (sections, figures, etc)
-urlcolor= blue,
-anchorcolor = blue, % The color of hyperlinks (URLs)
-pdfstartview={FitV},
-breaklinks=true
-}
 
 
 

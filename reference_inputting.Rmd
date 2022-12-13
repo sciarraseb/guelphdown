@@ -1,0 +1,17 @@
+---
+bibliography: bib/dissertation_references.bib
+---
+
+@vandenberg2006
+
+@newman2003
+
+@kim2014
+
+@sivo2000
+
+@blozis2018
+
+@sivo2008
+
+@10.1080/10705511.2010.489006

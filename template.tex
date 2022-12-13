@@ -22,11 +22,10 @@
 $fontsize$, % The default document font size, options: 10pt, 11pt, 12pt
 twoside,
 english]{guelphthesis}
-
 %----------------------------------------------------------------------------------------
 % PACKAGES
 %----------------------------------------------------------------------------------------
-\usepackage{hyperref}
+
 \usepackage{tocloft} %needed for table of contents, list of figures, list of tables, list of appendices
 \usepackage{graphicx,latexsym}
 \usepackage{amsmath}
@@ -172,12 +171,12 @@ $endif$
     hypertexnames=true,
     colorlinks = true,
     citecolor = true,
-    linkcolor = $linkcolor$,
+    linkcolor = blue,
     urlcolor= blue,
     anchorcolor = blue,
     pdfstartview={FitV},
     breaklinks=true,
-    hyperindex = true}
+    hyperindex = true, backref=page}
 
   $if(ArialFont)$
    \fancyfoot[C]{\sffamily\arabic{page}}
@@ -571,6 +570,23 @@ $for(header-includes)$
 $endfor$
 
 
+\usepackage{hyperref}
+
+ % Required for customising links and the PDF
+\hypersetup{pdfpagemode={UseOutlines},
+bookmarksopen=true, %allows bookmarks in pdf
+hypertexnames=true, %enables counting when referencing to sections
+colorlinks = true, % Set to true to enable coloring links, a nice option, false to turn them off
+citecolor = blue, % The color of citations
+linkcolor = blue, % The color of references to document elements (sections, figures, etc)
+urlcolor= blue,
+anchorcolor = blue, % The color of hyperlinks (URLs)
+pdfstartview={FitV},
+breaklinks=true, backref=page
+}
+
+
+
 
 % BEGIN DOCUMENT
 \begin{document}
@@ -649,3 +665,5 @@ $endif$
 $body$
 
 \end{document}
+
+
