@@ -4,14 +4,38 @@ bibliography: bib/dissertation_references.bib
 
 @vandenberg2006
 
-@newman2003
+@kim2014a
 
-@kim2014
+@bliese2007
 
-@sivo2000
+@chou2004
 
-@blozis2018
+@kohli2013
 
-@sivo2008
+@sayer2001
 
-@10.1080/10705511.2010.489006
+@hancock2001
+
+@borsboom2004
+
+@cronbach1955
+
+@meehl1978
+
+@jeon2020
+
+@kim2014b
+
+@larson2014
+
+@bauer2007
+
+@vandernest2020
+
+@chan1998
+
+@jung2007
+
+@fuller2003
+
+@10.5465/amr.2014.0415
