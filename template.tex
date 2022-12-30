@@ -53,6 +53,8 @@ $if(highlighting-macros)$
   $highlighting-macros$
 $endif$
 
+
+
 % To pass between YAML and LaTeX the dollar signs are added by CII
 \title{$title$}
 \author{$author$}
@@ -76,30 +78,37 @@ $endif$
 \department{$department$}
 
 
-% From {rticles}
-$if(csl-refs)$
-\newlength{\cslhangindent}
-\setlength{\cslhangindent}{1cm} %indentation of hanging lines
-% for Pandoc 2.8 to 2.10.1
-\newenvironment{cslreferences}%
-  {$if(csl-hanging-indent)$\setlength{\parindent}{0pt}%
-  \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces$endif$}%
-  {\par}
 
-% For Pandoc 2.11+
-% As noted by @mirh [2] is needed instead of [3] for 2.12
-\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
- {% don't indent paragraphs
-  \setlength{\parindent}{0pt}
-  % turn on hanging indent if param 1 is 1
-  \ifodd #1 \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces\fi
-  % set entry spacing
-  \ifnum #2 > 0
-  \setlength{\parskip}{\linespacing{$linespacing$}}
-  \fi
- }%
- {}
+$if(print)$
+$else$
+  \let\cleardoublepage\clearpage
 $endif$
+
+% From {rticles}
+%$if(csl-refs)$
+%\newlength{\cslhangindent}
+%\setlength{\cslhangindent}{1cm} %indentation of hanging lines
+%% for Pandoc 2.8 to 2.10.1
+%\newenvironment{CSLReferences}%
+%  {$if(csl-hanging-indent)$\setlength{\parindent}{0pt}%
+%  \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces$endif$}%
+%  {\par}
+%
+%% For Pandoc 2.11+
+%% As noted by @mirh [2] is needed instead of [3] for 2.12
+%\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+% {% don't indent paragraphs
+%  \setlength{\parindent}{0pt}
+%  % turn on hanging indent if param 1 is 1
+%  \ifodd #1 \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces\fi
+%  % set entry spacing
+%  \ifnum #2 > 0
+%  \setlength{\parskip}{\linespacing{$linespacing$}}
+%  \fi
+% }%
+% {}
+%$endif$
+
 
 
 \urlstyle{rm}
@@ -166,21 +175,25 @@ $endif$
   \renewcommand{\headrulewidth}{0pt}
   \fancyfoot[C]{\arabic{page}}% Roman page number in footer centre
 
- \hypersetup{pdfpagemode={UseOutlines},
+   \hypersetup{pdfpagemode={UseOutlines},
     bookmarksopen=true,
     hypertexnames=true,
     colorlinks = true,
-    citecolor = true,
-    linkcolor = blue,
-    urlcolor= blue,
-    anchorcolor = blue,
+    allcolors = $linkcolor$,
+    %linkcolor = $linkcolor$,
+    %urlcolor= $linkcolor$,
+    %anchorcolor = $linkcolor$,
     pdfstartview={FitV},
     breaklinks=true,
-    hyperindex = true, backref=page}
+    hyperindex = true,
+    backref=page}
+
+  \cleardoublepage
 
   $if(ArialFont)$
    \fancyfoot[C]{\sffamily\arabic{page}}
   $endif$
+
 
 
 }
@@ -332,7 +345,7 @@ $endif$
 \renewcommand{\cftmarklot}{}
 
 %LIST OF FIGURES
-\renewcommand{\cftfigfont}{\mdseries} %set font for entries in lot
+\renewcommand{\cftfigfont}{\mdseries} %set font for entries in lof
 \renewcommand{\cftfigpagefont}{\mdseries} %set front for page numbers
 
 \setlength{\cftbeforeloftitleskip}{0cm} %remove vertical space above table of contents
@@ -367,7 +380,7 @@ $endif$
 \setlength{\cftafterloatitleskip}{0.5cm} %space between title for loa and list entries
 \renewcommand{\cftmarkloa}{} %remove header titles
 
-%two lines below ensure centered title for toc
+%two lines below ensure centered title for loa
 %needed so that table of contents entry is not indented
 \renewcommand{\cftloatitlefont}{\hfill\fontsize{14}{14}\selectfont\bfseries\MakeUppercase}
 \renewcommand{\cftafterloatitle}{\hfill\hfill} %sometimes another \hfill is needed; depends on some setting in above code
@@ -561,7 +574,70 @@ $endif$
  {\cftsubsubparaappleader}\nobreak{\cftsubsubparaapppagefont #1}\par\cftsubsubparaappafterpnum
 }
 
+\newcommand{\listabbname}{List of Abbreviations}
+\newlistof[chapter]{abb}{loab}{\listabbname} %creates a new appendix counter that will be reset at the start of each \chapter
 
+\setlength{\cftbeforeloabtitleskip}{0cm} %remove vertical space above loab
+\setlength{\cftafterloabtitleskip}{0.2cm} %space between title for loab and list entries
+
+\renewcommand{\cftmarkloab}{} %remove header titles
+
+%two lines below ensure centered title for loa
+%needed so that table of contents entry is not indented
+\renewcommand{\cftloabtitlefont}{\hfill\fontsize{14}{14}\selectfont\bfseries\MakeUppercase}
+\renewcommand{\cftafterloabtitle}{\hfill\hfill} %sometimes another \hfill is needed; depends on some setting in above code
+
+
+
+%----------------------------------------------------------------------------------------
+% REFERENCES & HYPERLINKING
+%----------------------------------------------------------------------------------------
+
+\usepackage{hyperref}
+
+$if(backref)$
+\PassOptionsToPackage{backref=true}{biblatex}
+$endif$
+
+
+
+
+\RequirePackage[autocite=inline, style = apa]{biblatex}
+\addbibresource{$bibliography$}
+%\addbibresource{bib/references.bib}
+\DeclareSourcemap{\maps[datatype = bibtex]{\map{\step[fieldsource = journal, match = \regexp{\x{26}}, replace = \regexp{\{\\\x{26}\}}] }}}
+
+$if(backref)$
+\hypersetup{pdfpagemode={UseOutlines},
+    bookmarksopen=true,
+    backref=page}
+\usepackage{hypernat}
+%%adds escape character to ampersand characters in journal fields of .bib file
+\DefineBibliographyStrings{english}{backrefpage={cited on p.},backrefpages={cited on pp.}}
+$endif$
+
+
+
+
+\hypersetup{pdfpagemode={UseOutlines},
+bookmarksopen=true, %allows bookmarks in pdf
+hypertexnames=true, %enables counting when referencing to sections
+colorlinks = true, % Set to true to enable coloring links, a nice option, false to turn them off
+%citecolor = blue, % The color of citations
+%linkcolor = blue, % The color of references to document elements (sections, figures, etc)
+%urlcolor= blue,
+%anchorcolor = blue, % The color of hyperlinks (URLs)
+allcolors = $linkcolor$,
+pdfstartview={FitV},
+breaklinks=true, backref=page
+}
+
+
+%example numbering
+\newtheorem{theorem}{Theorem}[section]
+\renewcommand{\thetheorem}{\theapp.\arabic{theorem}}
+\newtheorem{example}{Example}
+\renewcommand{\theexample}{\theapp.\arabic{example}}
 
 
 %load additional latex packages needed within document
@@ -569,24 +645,9 @@ $for(header-includes)$
 	$header-includes$
 $endfor$
 
-
-\usepackage{hyperref}
-
- % Required for customising links and the PDF
-\hypersetup{pdfpagemode={UseOutlines},
-bookmarksopen=true, %allows bookmarks in pdf
-hypertexnames=true, %enables counting when referencing to sections
-colorlinks = true, % Set to true to enable coloring links, a nice option, false to turn them off
-citecolor = blue, % The color of citations
-linkcolor = blue, % The color of references to document elements (sections, figures, etc)
-urlcolor= blue,
-anchorcolor = blue, % The color of hyperlinks (URLs)
-pdfstartview={FitV},
-breaklinks=true, backref=page
-}
-
-
-
+%----------------------------------------------------------------------------------------
+% DOCUMENT OUTLINE
+%----------------------------------------------------------------------------------------
 
 % BEGIN DOCUMENT
 \begin{document}
@@ -599,6 +660,7 @@ $endif$
 \setcounter{page}{2} %ensures abstract page number starts at roman numberal ii
 
 $if(abstract)$
+\cleardoublepage
 \thispagestyle{empty} %removes page number only for abstract page
   \begin{abstract}{$linespacing$}{$abstract$}  %[linespacing][abstract][
 
@@ -608,11 +670,13 @@ $endif$
 
 % notice how yaml variables are indexed with dollar signs and then passed into second argument of preambleItem environments
 $if(dedication)$
+  \cleardoublepage
   \begin{preambleItem}{$linespacing$}{Dedication}{$dedication$}
   \end{preambleItem}
 $endif$
 
 $if(acknowledgements)$
+  \cleardoublepage
    \begin{preambleItem}{$linespacing$}{Acknowledgements}{$acknowledgements$}
   \end{preambleItem}
 $endif$
@@ -632,6 +696,7 @@ $endif$
 
 %table of contents
 $if(toc)$
+  \cleardoublepage
   \hypersetup{linkcolor = black, pdfborder= 0 0 0} %remove red borders around toc items
   \setcounter{secnumdepth}{$toc-depth$}
   \setcounter{tocdepth}{$toc-depth$}
@@ -641,18 +706,36 @@ $endif$
 
 %list of tables
 $if(lot)$
+  \cleardoublepage
   \listoftables
   \newpage
 $endif$
 
 %list of figures
 $if(lof)$
+  \cleardoublepage
   \listoffigures
   \newpage
 $endif$
 
+$if(abbreviations)$
+\cleardoublepage
+  \phantomsection
+  \addcontentsline{toc}{chapter}{\listabbname}
+  \listofabb
+\fontsize{12}{12}\selectfont
+\begin{table}[h]
+    \begin{tabular}{ll}
+        $for(abbreviations/pairs)$
+         \textbf{$it.key$} & $it.value$ \\
+        $endfor$
+    \end{tabular}
+\end{table}
+$endif$
+
 %list of appendices
 $if(loa)$
+  \cleardoublepage
   \phantomsection
   \addcontentsline{toc}{chapter}{\listappname}
   \listofapp
@@ -664,6 +747,15 @@ $endif$
 
 $body$
 
-\end{document}
+$if(print_refs)$
+\newpage
+\renewcommand\bibname{References}
+\phantomsection
+\addcontentsline{toc}{chapter}{\bibname}
+\printbibliography
 
+$endif$
+
+
+\end{document}
 

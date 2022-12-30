@@ -17,8 +17,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{guelphthesis}[2022/10/11] %info in square brackets specifies release date
 
-%Parameters
-%\let\cleardoublepage\clearpage  %#removes blank pages in dissertation preamble
+
 
 \providecommand{\baseclass}{book} %define \baseclass command
 
@@ -82,10 +81,12 @@
 \def\advisor#1{\gdef \@advisor{#1}}
 \def\@advisor{\@latex@warning@no@line{No \noexpand\advisor given}}
 
+
 \def\specialization#1{\gdef \@specialization{#1} \@specializationtrue}
 \global\let\@specialization\@empty
 \newif\if@specialization
 \@specializationfalse
+
 
 \def\altadvisor#1{\gdef \@altadvisor{#1} \@altadvisortrue}
 \global\let\@altadvisor\@empty
@@ -96,6 +97,7 @@
 \global\let\@field\@empty
 \newif\if@field
 \@fieldfalse
+
 
 \renewcommand{\title}[1]{\def\@title{#1}}
 \newcommand{\linespacing}[1]{\def \@linespacing{#1}}
@@ -272,7 +274,7 @@
 %----------------------------------------------------------------------------------------
 
 \newenvironment{abstract}[2]{%
- \cleardoublepage
+ %\cleardoublepage
  \phantomsection
  \addcontentsline{toc}{chapter}{\titlecap{Abstract}}  %adds abstract to toc
   \begin{center}
@@ -488,10 +490,7 @@
 %----------------------------------------------------------------------------------------
 %	Change Figure, Table, Equation, and Code Block numbering after references
 %----------------------------------------------------------------------------------------
-%example numbering
-
-
-\AfterEndEnvironment{CSLReferences}{
+\AfterEndEnvironment{bibliography}{
 %change numbering for figures, tables, and equations for appendices
 \renewcommand\thefigure{\theapp.\arabic{figure}} %change figure numbering for appendix such that it goes A.1, A.2, etc.
 \counterwithin{figure}{app} %reset figure number counter for each appendix

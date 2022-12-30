@@ -1,4 +1,19 @@
 
+```{=tex}
+%change numbering for figures, tables, and equations for appendices
+\renewcommand\thefigure{\theapp.\arabic{figure}} %change figure numbering for appendix such that it goes A.1, A.2, etc.
+\counterwithin{figure}{app} %reset figure number counter for each appendix
+
+\renewcommand\thetable{\theapp.\arabic{table}} %change figure numbering for appendix such that it goes A.1, A.2, etc.
+\counterwithin{table}{app} %reset figure number counter for each appendix
+
+%reset equation number number counter for each appendix
+\renewcommand{\theequation}{\theapp.\arabic{equation}}
+\counterwithin{equation}{app} %reset figure number counter for each appendix
+
+\counterwithin{chunk}{app} %reset code chunk numbering
+
+```
 
 `r if(knitr:::is_latex_output()) '\\appendix'`
 
@@ -36,28 +51,43 @@ exp_2_raw <-nonlinSimsAnalysis:::convert_raw_var_to_sd(raw_data = read_csv('data
 exp_3_raw <-nonlinSimsAnalysis:::convert_raw_var_to_sd(raw_data = read_csv('data/exp_3_data.csv')) %>%
   mutate_at(.vars = c("number_measurements", "time_structuredness", "sample_size"), factor)
 
+exp_3_def_raw <-nonlinSimsAnalysis:::convert_raw_var_to_sd(raw_data = read_csv('data/exp_3_def.csv')) %>%
+  mutate_at(.vars = c("number_measurements", "time_structuredness", "sample_size"), factor)
+
+
 #unfiltered data 
 param_summary_exp_1 <- readRDS(file = 'data/uf_param_summary_exp_1.RData')
 param_summary_exp_2 <- readRDS(file = 'data/uf_param_summary_exp_2.RData')
 param_summary_exp_3 <- readRDS(file = 'data/uf_param_summary_exp_3.RData')
+param_summary_exp_3_def <- readRDS(file = 'data/uf_param_summary_exp_3_def.RData')
 
 #create analytical versions of summary data + converts vars to sds
 exp_1_analytical <- generate_likert_days_data_sets(summary_data = param_summary_exp_1, exp_num = '1')
 exp_2_analytical <- generate_likert_days_data_sets(summary_data = param_summary_exp_2, exp_num = '2')
 exp_3_analytical <- generate_likert_days_data_sets(summary_data = param_summary_exp_3, exp_num = '3')
+exp_3_def_analytical <- generate_likert_days_data_sets(summary_data = param_summary_exp_3_def, exp_num = '3')
+exp_3_def_analytical$days$time_structuredness <-  factor(x = 'slow_response',labels = 'Time unstructured (slow response)')
+exp_3_def_analytical$likert$time_structuredness <-  factor(x = 'slow_response',labels = 'Time unstructured (slow response)')
 
 combined_analytical_exp_1 <- rbind(exp_1_analytical$likert, exp_1_analytical$days)
 combined_analytical_exp_2 <- rbind(exp_2_analytical$likert, exp_2_analytical$days)
 combined_analytical_exp_3 <- rbind(exp_3_analytical$likert, exp_3_analytical$days)
+combined_analytical_exp_3_def <- rbind(exp_3_def_analytical$likert, exp_3_def_analytical$days)
+
 
 #create condition summary data sets 
 cond_summary_exp_1 <- compute_condition_summary(param_summary_data = combined_analytical_exp_1, facet_var = 'measurement_spacing', 
                           ind_vars = c('number_measurements', 'measurement_spacing', 'midpoint'))
 cond_summary_exp_2 <- compute_condition_summary(param_summary_data = combined_analytical_exp_2, facet_var = 'measurement_spacing', 
-                  ind_vars = c('number_measurements', 'measurement_spacing', 'sample_size'))
+                      ind_vars = c('number_measurements', 'measurement_spacing', 'sample_size'))
 
 cond_summary_exp_3 <- compute_condition_summary(param_summary_data = combined_analytical_exp_3, facet_var = 'time_structuredness', 
                           ind_vars = c('number_measurements', 'sample_size', 'time_structuredness'))
+
+cond_summary_exp_3_def <- compute_condition_summary(param_summary_data = combined_analytical_exp_3_def, facet_var = 'time_structuredness', 
+                          ind_vars = c('number_measurements', 'sample_size', 'time_structuredness'))
+
+
 ```
 
 ```{r pre_knitting_setup_unfiltered_int_app, echo=F, eval=F, include=F}
@@ -66,6 +96,7 @@ cond_summary_exp_3 <- compute_condition_summary(param_summary_data = combined_an
 exp_1 <- read_csv(file = 'data/exp_1_data.csv') %>% filter(code == 0)
 exp_2 <- read_csv(file = 'data/exp_2_data.csv')
 exp_3 <- read_csv(file = 'data/exp_3_data.csv')
+exp_3_def <-  read_csv(file = 'data/exp_3_def.csv')
 
 #compute parameter summary statistics  
 exp_1_long <- exp_1 %>%
@@ -76,20 +107,13 @@ exp_1_long <- exp_1 %>%
     filter(parameter == 'beta_fixed') %>%
     mutate(pop_value = midpoint)
 
-exp_1_ordered <- order_param_spacing_levels(data = exp_1_long)
+exp_1_ordered <- nonlinSimsAnalysis:::order_param_spacing_levels(data = exp_1_long)
 
-exp_1_ordered %>%
-      #compute statistics for each parameter for each experimental variable
-      group_by(parameter, .dots = locate_ivs(exp_1_ordered)) %>%
-      summarize(
-       lower_ci = compute_middle_95_estimate(param_data = estimate)[1],
-       upper_ci = compute_middle_95_estimate(param_data = estimate)[2])
-
-compute_parameter_summary(data = exp_1, exp_num = '1')
 
 param_summary_exp_1 <- compute_parameter_summary(data = exp_1, exp_num = 1)
 param_summary_exp_2 <- compute_parameter_summary(data = exp_2, exp_num = 2)
 param_summary_exp_3 <- compute_parameter_summary(data = exp_3, exp_num = 3)
+param_summary_exp_3_def <- compute_parameter_summary(data = exp_3_def, exp_num = 2)
 
 #necessary factor conversions 
 param_summary_exp_1$number_measurements <- factor(param_summary_exp_1$number_measurements, levels = c(5, 7, 9,11))
@@ -101,23 +125,26 @@ param_summary_exp_2$sample_size <- factor(param_summary_exp_2$sample_size, level
 param_summary_exp_3$number_measurements <- factor(param_summary_exp_3$number_measurements, levels = c(5, 7, 9,11))
 param_summary_exp_3$sample_size <- factor(param_summary_exp_3$sample_size, levels = c(30, 50, 100, 200, 500, 1000))
 
+param_summary_exp_3_def$number_measurements <- factor(param_summary_exp_3_def$number_measurements, levels = c(5, 7, 9,11))
+param_summary_exp_3_def$sample_size <- factor(param_summary_exp_3_def$sample_size, levels = c(30, 50, 100, 200, 500, 1000))
+
+
 #write data sets 
 #save parameter summary files as RData files so that metadata are correctly stored (e.g., factor levels, variable types)
 saveRDS(object = param_summary_exp_1, file = 'data/uf_param_summary_exp_1.RData')
 saveRDS(object = param_summary_exp_2, file = 'data/uf_param_summary_exp_2.RData')
 saveRDS(object = param_summary_exp_3, file = 'data/uf_param_summary_exp_3.RData')
+saveRDS(object = param_summary_exp_3_def, file = 'data/uf_param_summary_exp_3_def.RData')
+
 ```
 
+
 \newpage 
-
-
 
 \app{Ergodicity and the Need to Conduct Longitudinal Research}
 \label{ergodicity}
 
 
-(ref:petersen1983) [for an introduction, see @petersen1983]
-(ref:birkhoff1931) @birkhoff1931 [for a review, see @choe2005, Chapter 3]
 
 To understand why cross-sectional results are unlikely to agree with longitudinal results for any given analysis, a discussion of data structure is apropos. Consider an example where a researcher obtains data from 50 people measured over 100 time points such that each row contains a $p$ person's data over the 100 time points and each column contains data from 50 people at a $t$ time point. For didactic purposes, all data are assumed to be sampled from a normal distribution. To understand whether findings in any given cross-sectional data set yield the same findings in any given longitudinal data set, the researcher randomly samples one cross-sectional and one longitudinal data set and computes the mean and variance in each set. To conduct a cross-sectional analysis, the researcher randomly samples the data across the 50 people at a given time point and computes a mean of the scores at the sampled time point ($\bar{X}_t$) using Equation \ref{eq:cross-mean} shown below:
 
@@ -129,7 +156,7 @@ To understand why cross-sectional results are unlikely to agree with longitudina
 \noindent where the scores of all $P$ people are summed ($x_p$) and then divided by the number of people ($P$). To compute the variance of the scores at the sampled time point ($S^2_t$), the researcher uses Equation \ref{eq:cross-variance} shown below:
 
 \begin{align}
-\S^2_t = \frac{1}{P}\sum^P_{p = 1} (x_p - \bar{X}_t)^2,
+S^2_t = \frac{1}{P}\sum^P_{p = 1} (x_p - \bar{X}_t)^2,
 (\#eq:cross-variance)
 \end{align}
 
@@ -143,22 +170,21 @@ To understand why cross-sectional results are unlikely to agree with longitudina
 \noindent where the scores at each $t$ time point are summed ($x_t$) and then divided by the number of time points ($T$). The researcher also computes a variance of the sampled person's scores across all time points ($S^2_p$) using Equation \ref{eq:long-variance} shown below:
 
 \begin{align}
-\S^2_p = \frac{1}{T}\sum^T_{t = 1} (x_t - \bar{X}_p)^2,
+S^2_p = \frac{1}{T}\sum^T_{t = 1} (x_t - \bar{X}_p)^2,
 (\#eq:long-variance)
 \end{align}
 
 \noindent where the sum of squared differences between the score at each time point ($x_t$) and the average value of the $p$ person's scores ($\bar{X}_p$) is computed and then divided by the number of time points ($T$). 
 
-If the researcher wants treat the mean and variance values computed from the cross-sectional and longitudinal data sets as interchangeable, then two conditions outlined by ergodic theory must be satisfied [@molenaar2004; @molenaar2009].\footnote{Note that ergodic theory is an entire mathematical discipline (ref:petersen1983). In the current context, the most important ergodic theorems are those proven by (ref:birkhoff1931).} First, a given cross-sectional mean and variance can only closely estimate the mean and variance of any given person's data (i.e., a longitudinal data set) to the extent that each person's data are generated from a normal distribution with the same mean and variance. If each person's data were generated from a different normal distribution, the computing the mean and variance at a given time point would, at best, describe the values of one person. When each person's data are generated from the same normal distribution, the condition of *homogeneity* is met. Importantly, satisfying the condition of homogeneity does not guarantee that the mean and variance obtained from another cross-sectional data set will closely estimate the mean and variance of any given person (i.e., any given longitudinal data set). The mean and variance values computed from any given cross-sectional data set can only closely estimate the values of any given person to the extent that the cross-sectional mean and variance remain constant over time. If the mean and variance of observations remain constant over time, then the the second condition of *stationarity* is satisfied. Therefore, the researcher can only treat means and variances from cross-sectional and longitudinal data sets as interchangeable if each person's data is generated from the same normal distribution (homogeneity) and if the mean and variance remain constant over time (stationarity). When the conditions of homogeneity and stationarity are satisfied, a process is said to be *ergodic*: Analyses of cross-sectional data sets return the same values as analyses on longitudinal data sets.
+If the researcher wants treat the mean and variance values computed from the cross-sectional and longitudinal data sets as interchangeable, then two conditions outlined by ergodic theory must be satisfied [@molenaar2004; @molenaar2009].\footnote{Note that ergodic theory is an entire mathematical discipline \parencite[for an introduction, see][]{petersen1983}. In the current context, the most important ergodic theorems are those proven by \citeauthor{birkhoff1931} \parentext{\cite*{birkhoff1931}, \cite[for a review, see][Chapter 3]{choe2005}}} First, a given cross-sectional mean and variance can only closely estimate the mean and variance of any given person's data (i.e., a longitudinal data set) to the extent that each person's data are generated from a normal distribution with the same mean and variance. If each person's data were generated from a different normal distribution, the computing the mean and variance at a given time point would, at best, describe the values of one person. When each person's data are generated from the same normal distribution, the condition of *homogeneity* is met. Importantly, satisfying the condition of homogeneity does not guarantee that the mean and variance obtained from another cross-sectional data set will closely estimate the mean and variance of any given person (i.e., any given longitudinal data set). The mean and variance values computed from any given cross-sectional data set can only closely estimate the values of any given person to the extent that the cross-sectional mean and variance remain constant over time. If the mean and variance of observations remain constant over time, then the the second condition of *stationarity* is satisfied. Therefore, the researcher can only treat means and variances from cross-sectional and longitudinal data sets as interchangeable if each person's data is generated from the same normal distribution (homogeneity) and if the mean and variance remain constant over time (stationarity). When the conditions of homogeneity and stationarity are satisfied, a process is said to be *ergodic*: Analyses of cross-sectional data sets return the same values as analyses on longitudinal data sets.
 
 Given that psychological studies almost never collect data from only one person, one potential reservation may be that the conditions required for ergodicity only hold when a longitudinal data set contains the data of one person. That is, if the researcher used the full data set containing the data of 100 people sampled over 100 time points and computed 100 cross-sectional means and variances (Equation \ref{eq:cross-mean} and Equation \ref{eq:cross-variance}, respectively) and 100 longitudinal means and variances (Equation \ref{eq:long-mean} and Equation \ref{eq:long-variance}, respectively), wouldn't the average of the cross-sectional means and variances be the same as the average of the longitudinal means and variances? Although the averaging the cross-sectional mean returns the same value as averaging the longitudinal means, the average longitudinal variance remains different from the average cross-sectional variance [for several empirical examples, see @fisher2018]. Therefore, the conditions of ergodicity apply even with larger longitudinal and cross-sectional sample sizes. 
 
-(ref:voelkle2014spector2019) [@voelkle2014; for similar discussion, see @spector2019]
-(ref:adolf2019medaglia2019) [@adolf2019; @medaglia2019]
 
-The guaranteed differences in cross-sectional and longitudinal variance values that result from non-ergodic processes have far-reaching implications. Almost every analysis employed in organizational research---whether it be correlation, regression, factor analysis, mediation analysis, etc.---analyzes variability, and so, when a process is non-ergodic, cross-sectional variability will differ from longitudinal variability, and the results obtained from applying any given analysis on each of the variabilities will differ as a consequence. Because variability is central to so many analyses, the non-equivalence of longitudinal and cross-sectional variances that results from a non-ergodic process explains why discussions of ergodicity often comment that "for non-ergodic processes, an analysis of the structure of IEV [interindividual variability] will yield results that differ from results obtained in an analogous analysis of IAV [intraindividual variability]"[@molenaar2004, p. 202].\footnote{It is important to note that a violation of one or both ergodic conditions (homogeneity and stationarity) does not mean that an analysis of cross-sectional variability yields results that have no relation to the results gained from applying the analysis on longitudinal variability (i.e., the causes of cross-sectional variability are independent from the causes of longitudinal variability). An analysis of cross-sectional variability can still give insight into temporal dynamics if the causes of non-ergodicity can be identified (ref:voelkle2014spector2019). Thus, conceptualizing ergodicity on a continuum with non-erdogicity and ergodicity on opposite ends provides a more balanced perspective for understanding ergodicity (ref:adolf2019medaglia2019).}
+The guaranteed differences in cross-sectional and longitudinal variance values that result from non-ergodic processes have far-reaching implications. Almost every analysis employed in organizational research---whether it be correlation, regression, factor analysis, mediation analysis, etc.---analyzes variability, and so, when a process is non-ergodic, cross-sectional variability will differ from longitudinal variability, and the results obtained from applying any given analysis on each of the variabilities will differ as a consequence. Because variability is central to so many analyses, the non-equivalence of longitudinal and cross-sectional variances that results from a non-ergodic process explains why discussions of ergodicity often comment that "for non-ergodic processes, an analysis of the structure of IEV [interindividual variability] will yield results that differ from results obtained in an analogous analysis of IAV [intraindividual variability]"[@molenaar2004, p. 202].\footnote{It is important to note that a violation of one or both ergodic conditions (homogeneity and stationarity) does not mean that an analysis of cross-sectional variability yields results that have no relation to the results gained from applying the analysis on longitudinal variability (i.e., the causes of cross-sectional variability are independent from the causes of longitudinal variability). An analysis of cross-sectional variability can still give insight into temporal dynamics if the causes of non-ergodicity can be identified \parencites{voelkle2014}[for similar discussion, see][]{spector2019}. Thus, conceptualizing ergodicity on a continuum with non-erdogicity and ergodicity on opposite ends provides a more balanced perspective for understanding ergodicity \parencites{adolf2019}{medaglia2019}.}
 
 With an understanding of the conditions required for ergodicity, a brief consideration of organizational phenomena finds that these conditions are regularly violated. Focusing only on homogeneity (each person's data are generated from the same distribution), several instances in organizational research violate this condition. As examples of homogeneity violations, employees show different patterns of absenteeism over five years [@magee2016], leadership development over the course of a seminar [@day2011], career stress over the course of 10 years [@igic2017], and job performance in response to organizational restructuring [@miraglia2015]. With respect to stationarity (constant values for statistical parameters across people over time), several examples can be generated by realizing how calendar events affect psychological processes and behaviours throughout the year. As examples of stationarity violations, consider how salespeople, on average, undoubtedly sell more products during holidays, how employees, on average, take more sick days during the winter months, and how accountants, on average, experience more stress during tax season. With ergodic condition violations commonly occurring in organizational psychology, it becomes fitting to echo the commonly held sentiment that few, if any, psychological processes are ergodic [@molenaar2004; @molenaar2008; @molenaar2009; @fisher2018; @curran2011; @wang2015; @hamaker2012]. 
+
 
 \app{Code Used to Run Monte Carlo Simulations for all Experiments}
 \label{simulation-code}
@@ -373,7 +399,6 @@ Figure \ref{fig:time_dec_diagram} shows how the two-step procedure is used to ca
 * $m_4$ = day 330
 * $m_5$ = day 360. 
 
-
 ```{=tex}
 \begin{apaFigure}
 [landscape]
@@ -404,7 +429,7 @@ by middle-and-extreme spacing. In the first step, the number of intervals ($NI$)
   (\#eq:middle) 
 \end{align}
 
-In Step 2, interval lengths are calculated. For middle-and-extreme spacing, there are two types of interval lengths: 2) Intervals between either middle or extreme measurements and 2) intervals between middle and extreme measurements an. Intervals separating middle or extreme measurements are set to the shortest-interval length ($s$), which I set to be 30 days ($w_i = s = 30$). Intervals separating middle and extreme measurements are the sum of two components: 1) A shortest-interval length ($s$) and a 2) constant-value interval length ($c$), as shown below in Equation \ref{eq:mid-ext-interval}:
+In Step 2, interval lengths are calculated. For middle-and-extreme spacing, there are two types of interval lengths: 2) Intervals between either middle or extreme measurements and 2) intervals between middle and extreme measurements an. Intervals separating middle or extreme measurements are set to the shortest-interval length ($s$), which I set to be 30 days ($w_i = s = 30$). Intervals separating middle and extreme measurements are the sum of two components: 1) A shortest-interval length ($s$) and a 2) constant-value interval length ($c$), as shown below in Equation \ref{eq:middle}:
 
 \begin{align}
 b_i = s + c.
@@ -449,7 +474,7 @@ b_i = s + c.
 {mid_ext_diagram}
 {0.75}
 {Figures/mid_ext_schedule}
-{In Step 1, setup variables are calculated. With five measurements ($NM = 5$), there are four intervals ($NI = 4$). Importantly, because middle-and-extreme spacing places measurements near the extremities and the middle of the measurement window, the number of measurements in both these sections must also be calculated. The number of extreme measurements is first calculated by dividing the number of measurements by 3 and taking the taking the floor (i.e., rounded-down value [$\lfloor x\rfloor$]) of this value and multiplying it by 2 (see Equation \ref{eq:extreme}). The number of middle measurements can then be calculated by subtracting the number of extreme measurements ($ex$) from the number of measurements ($NM$; see Equation \ref{eq:middle}). In Step 2, interval lengths are calculated. For middle-and-extreme spacing, there are two types of interval lengths: 2) Intervals between either middle or extreme measurements and 2) intervals between middle and extreme measurements an. Intervals separating middle or extreme measurements are set to the shortest-interval length ($s$), which I set to be 30 days ($w_i = s = 30$). Intervals separating middle and extreme measurements are the sum of two components: 1) A shortest-interval length ($s$) and a 2) constant-value interval length ($c$; see Equation \ref{eq:mid-ext-interval}). To obtain the constant-value interval length ($c$), the sum of shortest-value interval lengths ($s$) is subtracted from the measurement period of 360 days ($MP = 360$). In the current example with five measurements, 240 days remain ($r = 240$) after subtracting the days needed for the shortest-interval lengths (see Equation \ref{eq:eq-remaining-mid}). Having computed the number of remaining days, the constant-length value ($c$) can then be obtained by dividing the number of remaining days by the number of intervals separating middle and extreme measurements, which will always be 2 (see Equation \ref{eq:eq-constant-mid}).}
+{In Step 1, setup variables are calculated. With five measurements ($NM = 5$), there are four intervals ($NI = 4$). Importantly, because middle-and-extreme spacing places measurements near the extremities and the middle of the measurement window, the number of measurements in both these sections must also be calculated. The number of extreme measurements is first calculated by dividing the number of measurements by 3 and taking the taking the floor (i.e., rounded-down value [$\lfloor x\rfloor$]) of this value and multiplying it by 2 (see Equation \ref{eq:extreme}). The number of middle measurements can then be calculated by subtracting the number of extreme measurements ($ex$) from the number of measurements ($NM$; see Equation \ref{eq:middle}). In Step 2, interval lengths are calculated. For middle-and-extreme spacing, there are two types of interval lengths: 2) Intervals between either middle or extreme measurements and 2) intervals between middle and extreme measurements an. Intervals separating middle or extreme measurements are set to the shortest-interval length ($s$), which I set to be 30 days ($w_i = s = 30$). Intervals separating middle and extreme measurements are the sum of two components: 1) A shortest-interval length ($s$) and a 2) constant-value interval length ($c$; see Equation \ref{eq:eq-constant-mid}). To obtain the constant-value interval length ($c$), the sum of shortest-value interval lengths ($s$) is subtracted from the measurement period of 360 days ($MP = 360$). In the current example with five measurements, 240 days remain ($r = 240$) after subtracting the days needed for the shortest-interval lengths (see Equation \ref{eq:eq-remaining-mid}). Having computed the number of remaining days, the constant-length value ($c$) can then be obtained by dividing the number of remaining days by the number of intervals separating middle and extreme measurements, which will always be 2 (see Equation \ref{eq:eq-constant-mid}).}
 \end{apaFigure}
 ```
 
@@ -462,11 +487,8 @@ The sections that follow will first review the framework used to build
 latent growth curve models and then explain how nonlinear functions can
 be modified to fit into this framework.
 
+
 \subapp{Brief Review of the Latent Growth Curve Model Framework}
-
-(ref:meredith1990browne1993) [@meredith1990; @browne1993]
-
-(ref:blozis2004) [@blozis2004]
 
 The latent growth curve model proposed by @meredith1990
 is briefly reviewed here [for a review, see @preacher2008]. Consider an example where data are collected at five time
@@ -499,7 +521,7 @@ $$
 
 \noindent To create a model that allows different linear patterns to be
 fit to each person's data, a weight can be applied to each column of
-$\mathbf{\Uplambda}$ and each weight can vary across individuals.\footnote{The columns of $\mathbf{\Uplambda}$ are called basis curves (ref:blozis2004) or basis functions (ref:meredith1990browne1993) because each column specifies a particular component of change.}That is, each $p$ person's pattern of change is predicted with a unique set of weights in $\mathbf{\upiota_p}$ that determines the extent to
+$\mathbf{\Uplambda}$ and each weight can vary across individuals.\footnote{The columns of $\mathbf{\Uplambda}$ are called basis curves \parencite{blozis2004} or basis functions \parencites{meredith1990}{browne1993} because each column specifies a particular component of change.}That is, each $p$ person's pattern of change is predicted with a unique set of weights in $\mathbf{\upiota_p}$ that determines the extent to
 which each basis column of $\mathbf{\Uplambda}$ contributes to that
 person's change over time. Discrepancies between the values predicted by
 $\mathbf{\Uplambda\upiota_p}$ and a person's observed scores across all
@@ -808,7 +830,7 @@ Invariability under a constant scaling factor of logistic function (Equation \re
 \noindent\hrulefill
 ```
 
-`r knit_exit()`
+
 
 \noindent If a function has the property of being invariant under a
 scaling factor, then it can also be expressed as the following
@@ -1078,7 +1100,7 @@ model_results <- mxTryHard(latent_growth_model)
 ```
 
 
-\app{Complete Versions of Parameter Estimation Plots (Day- and Likert-Unit Parameters)}
+\app{Complete Versions of Bias/Precision Plots (Day- and Likert-Unit Parameters)}
 \label{complete-versions}
 \secapp{Experiment 1}
 \subapp{Equal Spacing}
@@ -1087,7 +1109,7 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Equal Spacing in Experiment 1}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Equal Spacing in Experiment 1}
 {exp1_plot_equal_app}
 {0.16}
 {Figures/exp1_plot_days_equal spacing}
@@ -1100,11 +1122,11 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Equal Spacing in Experiment 1 (continued)}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Equal Spacing in Experiment 1 (continued)}
 {exp1_plot_equal_app}
 {0.16}
 {Figures/exp1_plot_likert_equal spacing}
-{Panels A--B:  Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:param-exp-1} for specific values estimated for each parameter.}
+{Panels A--B:  Bias/precision plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Bias/precision plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Bias/precision plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Bias/precision plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:param-exp-1} for specific values estimated for each parameter.}
 [notrack]
 \end{apaFigure}
 ```
@@ -1115,7 +1137,7 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Interval Increasing Spacing in Experiment 1}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Time-Interval Increasing Spacing in Experiment 1}
 {exp1_plot_equal_app}
 {0.16}
 {Figures/exp1_plot_days_time-interval increasing}
@@ -1128,11 +1150,11 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Interval Increasing Spacing in Experiment 1 (continued)}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Time-Interval Increasing Spacing in Experiment 1 (continued)}
 {exp1_plot_equal_app}
 {0.16}
 {Figures/exp1_plot_likert_time-interval increasing}
-{Panels A--B:  Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:param-exp-1} for specific values estimated for each parameter.}
+{Panels A--B:  Bias/precision plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Bias/precision plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Bias/precision plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Bias/precision plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:param-exp-1} for specific values estimated for each parameter.}
 [notrack]
 \end{apaFigure}
 ```
@@ -1143,7 +1165,7 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Interval Decreasing Spacing in Experiment 1}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Time-Interval Decreasing Spacing in Experiment 1}
 {exp1_plot_equal_app}
 {0.16}
 {Figures/exp1_plot_days_time-interval decreasing}
@@ -1156,11 +1178,11 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Interval Decreasing Spacing in Experiment 1 (continued)}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Time-Interval Decreasing Spacing in Experiment 1 (continued)}
 {exp1_plot_equal_app}
 {0.16}
 {Figures/exp1_plot_likert_time-interval decreasing}
-{Panels A--B:  Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:param-exp-1} for specific values estimated for each parameter.}
+{Panels A--B:  Bias/precision plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Bias/precision plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Bias/precision plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Bias/precision plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:param-exp-1} for specific values estimated for each parameter.}
 [notrack]
 \end{apaFigure}
 ```
@@ -1172,7 +1194,7 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Middle-and-Extreme Spacing in Experiment 1}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Middle-and-Extreme Spacing in Experiment 1}
 {exp1_plot_equal_app}
 {0.16}
 {Figures/exp1_plot_days_middle-and-extreme spacing}
@@ -1185,11 +1207,11 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Middle-and-Extreme Spacing in Experiment 1 (continued)}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Middle-and-Extreme Spacing in Experiment 1 (continued)}
 {exp1_plot_equal_app}
 {0.16}
 {Figures/exp1_plot_likert_middle-and-extreme spacing}
-{Panels A--B:  Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:param-exp-1} for specific values estimated for each parameter.}
+{Panels A--B:  Bias/precision plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Bias/precision plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Bias/precision plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Bias/precision plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. Importantly, across all nature-of-change values (i.e., population values used for $\upbeta_{fixed}$), the acceptable amount of bias and precision was based on a population value of 180. See Table \ref{tab:param-exp-1} for specific values estimated for each parameter.}
 [notrack]
 \end{apaFigure}
 ```
@@ -1203,7 +1225,7 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Equal Spacing in Experiment 2}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Equal Spacing in Experiment 2}
 {exp2_plot_equal_app}
 {0.16}
 {Figures/exp2_plot_days_equal spacing}
@@ -1216,11 +1238,11 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Equal Spacing in Experiment 2 (continued)}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Equal Spacing in Experiment 2 (continued)}
 {exp2_plot_equal_app}
 {0.16}
 {Figures/exp2_plot_likert_equal spacing}
-{Panels A--B: Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-2} for specific values estimated for each parameter.}
+{Panels A--B: Bias/precision plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Bias/precision plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Bias/precision plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Bias/precision plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-2} for specific values estimated for each parameter.}
 [notrack]
 \end{apaFigure}
 ```
@@ -1231,7 +1253,7 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Interval Increasing Spacing in Experiment 2}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Time-Interval Increasing Spacing in Experiment 2}
 {exp2_plot_time_inc_app}
 {0.16}
 {Figures/exp2_plot_days_time-interval increasing}
@@ -1244,11 +1266,11 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Interval Increasing Spacing in Experiment 2 (continued)}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Time-Interval Increasing Spacing in Experiment 2 (continued)}
 {exp2_plot_time_inc_app}
 {0.16}
 {Figures/exp2_plot_likert_time-interval increasing}
-{Panels A--B:  Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-2} for specific values estimated for each parameter.}
+{Panels A--B:  Bias/precision plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Bias/precision plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Bias/precision plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Bias/precision plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-2} for specific values estimated for each parameter.}
 [notrack]
 \end{apaFigure}
 ```
@@ -1259,7 +1281,7 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{[]{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Interval Decreasing Spacing in Experiment 2}}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Time-Interval Decreasing Spacing in Experiment 2}
 {exp2_plot_time_dec_app}
 {0.16}
 {Figures/exp2_plot_days_time-interval decreasing}
@@ -1272,11 +1294,11 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Interval Decreasing Spacing in Experiment 2 (continued)}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Time-Interval Decreasing Spacing in Experiment 2 (continued)}
 {exp2_plot_time_dec_app}
 {0.16}
 {Figures/exp1_plot_likert_time-interval decreasing}
-{Panels A--B: Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-2} for specific values estimated for each parameter.}
+{Panels A--B: Bias/precision plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Bias/precision plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Bias/precision plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Bias/precision plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-2} for specific values estimated for each parameter.}
 [notrack]
 \end{apaFigure}
 ```
@@ -1288,7 +1310,7 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Middle-and-Extreme Spacing in Experiment 2}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Middle-and-Extreme Spacing in Experiment 2}
 {exp2_plot_mid_ext_app}
 {0.16}
 {Figures/exp2_plot_days_middle-and-extreme spacing}
@@ -1301,23 +1323,23 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Middle-and-Extreme Spacing in Experiment 2 (continued)}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Middle-and-Extreme Spacing in Experiment 2 (continued)}
 {exp2_plot_mid_ext_app}
 {0.16}
 {Figures/exp2_plot_likert_middle-and-extreme spacing}
-{Panels A--B:  Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-2} for specific values estimated for each parameter.}
+{Panels A--B:  Bias/precision plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Bias/precision plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Bias/precision plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Bias/precision plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-2} for specific values estimated for each parameter.}
 [notrack]
 \end{apaFigure}
 ```
 
 \secapp{Experiment 3}
-\subapp{Time-Structured Data }
+\subapp{Time-Structured Data}
 ```{=tex}
 \begin{apaFigure}
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Structured Data in Experiment 3}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Time-Structured Data in Experiment 3}
 {exp3_plot_days_time_struc_app}
 {0.16}
 {Figures/exp3_plot_days_time structured}
@@ -1330,11 +1352,11 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Structured Data in Experiment 3 (continued)}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Time-Structured Data in Experiment 3 (continued)}
 {exp3_plot_days_time_struc_app}
 {0.16}
 {Figures/exp3_plot_likert_time structured}
-{Panels A--B: Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3} for specific values estimated for each parameter.}
+{Panels A--B: Bias/precision plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Bias/precision plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Bias/precision plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Bias/precision plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3} for specific values estimated for each parameter.}
 [notrack]
 \end{apaFigure}
 ```
@@ -1345,7 +1367,7 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Unstructured Data Characterized by a Fast Response Rate in Experiment 3}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Time-Unstructured Data Characterized by a Fast Response Rate in Experiment 3}
 {exp3_plot_days_fast_app}
 {0.16}
 {Figures/exp3_plot_days_time unstructured (fast response)}
@@ -1358,11 +1380,11 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Unstructured Data Characterized by a Fast Response Rate in Experiment 3 (continued)}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Time-Unstructured Data Characterized by a Fast Response Rate in Experiment 3 (continued)}
 {exp3_plot_days_fast_app}
 {0.16}
 {Figures/exp3_plot_likert_time unstructured (fast response)}
-{Panels A--B: Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3} for specific values estimated for each parameter.}
+{Panels A--B: Bias/precision plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Bias/precision plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Bias/precision plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Bias/precision plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3} for specific values estimated for each parameter.}
 [notrack]
 \end{apaFigure}
 ```
@@ -1373,7 +1395,7 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Unstructured Data Characterized by a Slow Response Rate in Experiment 3}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Time-Unstructured Data Characterized by a Slow Response Rate in Experiment 3}
 {exp3_plot_days_slow_app}
 {0.16}
 {Figures/exp3_plot_days_time unstructured (slow response)}
@@ -1386,11 +1408,11 @@ model_results <- mxTryHard(latent_growth_model)
 [portrait]
 [samepage]
 [0cm]
-{Parameter Estimation Plots for Day- and Likert-Unit Parameters With Time-Unstructured Data Characterized by a Slow Response Rate in Experiment 3 (continued)}
+{Bias/Precision Plots for Day- and Likert-Unit Parameters With Time-Unstructured Data Characterized by a Slow Response Rate in Experiment 3 (continued)}
 {exp3_plot_days_slow_app}
 {0.16}
 {Figures/exp3_plot_likert_time unstructured (slow response)}
-{Panels A--B: Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3} for specific values estimated for each parameter.}
+{Panels A--B: Bias/precision plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Bias/precision plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Bias/precision plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Bias/precision plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3} for specific values estimated for each parameter.}
 [notrack]
 \end{apaFigure}
 ```
@@ -1419,7 +1441,7 @@ model_results <- mxTryHard(latent_growth_model)
 {exp3_plot_days_def_app}
 {0.165}
 {Figures/exp3_defplot_likert_time unstructured (slow response)}
-{Panels A--B: Parameter estimation plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Parameter estimation plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Parameter estimation plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Parameter estimation plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3-def} for specific values estimated for each parameter.}
+{Panels A--B: Bias/precision plots for the fixed- and random-effect days-to-halfway elevation parameters, respectively ($\upbeta_{fixed}$ and $\upbeta_{random}$). Panels C--D: Bias/precision plots for the fixed- and random-effect triquarter-halfway elevation parameters, respectively ($\upgamma_{fixed}$ and $\upgamma_{random}$). Panels E--F: Bias/precision plots for the fixed- and random-effect baseline parameters, respectively ($\uptheta_{fixed}$ and $\uptheta_{random}$). Panels G--H: Bias/precision plots for the fixed- and random-effect maximal elevation parameters, respectively ($\upalpha_{fixed}$ and $\upalpha_{random}$). Blue horizontal lines in each panel represent the population value for each parameter. Population values for each day-unit parameter are as follows: $\upbeta_{fixed} \in$ {80, 180, 280}, $\upbeta_{random}$ = 10.00, $\upgamma_{fixed}$ = 20.00, $\upgamma_{random}$ = 4.00, $\uptheta_{fixed}$ = 3.00, $\uptheta_{random}$ = 0.05, $\upalpha_{fixed}$ = 3.32, $\upalpha_{random}$ = 0.05, $\upepsilon$ = 0.05. Gray bands indicate the $\pm 10\%$ margin of error for each parameter and unfilled dots indicate cells with average parameter estimates outside of the margin or biased estimates. Error bars represent the middle 95\% of estimated values, with light blue error bars indicating imprecise estimation. I considered dots that fell outside the gray bands as biased and error bar lengths with at least one whisker length exceeding the 10\% cutoff (i.e., or longer than the portion of the gray band underlying the whisker) as imprecise. Note that random-effect parameter units are in standard deviation units. See Table \ref{tab:param-exp-3} for specific values estimated for each parameter.}
 \end{apaFigure}
 ```
 
@@ -1434,28 +1456,48 @@ exp_1_conv <- nonlinSimsAnalysis:::generate_conv_success_data(condition_data = c
 exp_2_conv <- nonlinSimsAnalysis:::generate_conv_success_data(condition_data = cond_summary_exp_2, first_col = 'measurement_spacing', second_col = 'number_measurements', wide_var = 'sample_size', exp_num = 2, recode_var = 'measurement_spacing')
 
 exp_3_conv <- nonlinSimsAnalysis:::generate_conv_success_data(condition_data = cond_summary_exp_3, first_col = 'time_structuredness', second_col = 'number_measurements', wide_var = 'sample_size', exp_num = 3, recode_var = 'time_structuredness')
+
+exp_3_conv_def <-  nonlinSimsAnalysis:::generate_conv_success_data(condition_data = cond_summary_exp_3_def, first_col = 'time_structuredness', second_col = 'number_measurements', wide_var = 'sample_size', exp_num = 3, recode_var = 'time_structuredness')
 ```
 
+\secapp{Experiment 1}
 
 ```{r conv-exp-1, echo=F}
 print_conv_table(table_ready_data = exp_1_conv, 
-                 caption_name = 'Convergence Success in Experiment 1', 
+                 caption_name = 'Convergence Success Rates in Experiment 1', 
                  col_header_name = c('Days to halfway elevation'), 
                  IV_names =  c('Measurement Spacing', 'Number of Measurements'), 
                  column_names = c('80', '180', '280'))
 ```
 
+\secapp{Experiment 2}
+
 ```{r conv-exp-2, echo=F}
 print_conv_table(table_ready_data = exp_2_conv, 
-                 caption_name = 'Convergence Success in Experiment 2', 
+                 caption_name = 'Convergence Success Rates in Experiment 2', 
                  col_header_name = c('Sample size (\\\\textit{N})'), 
                  IV_names =  c('Measurement Spacing', 'Number of Measurements'), 
                  column_names = c('30', '50', '100', '200', '500', '1000'))
 ```
 
+\secapp{Experiment 3}
+\label{conv-exp-3}
 ```{r conv-exp-3, echo=F}
-print_conv_table(table_ready_data = exp_3_conv, 
-                 caption_name = 'Convergence Success in Experiment 3', 
+exp_3_conv_def$time_structuredness <- 'Time unstructured (slow response) with definition variables'
+exp_3_combined <- rbind(exp_3_conv, exp_3_conv_def)
+
+print_conv_table(table_ready_data = exp_3_combined, 
+                 caption_name = 'Convergence Success Rates in Experiment 3', 
+                 col_header_name = c('Sample size (\\\\textit{N})'), 
+                 IV_names =  c('Time Structuredness', 'Number of Measurements'), 
+                 column_names = c('30', '50', '100', '200', '500', '1000'))
+```
+
+```{r conv-exp-3-def, incllude=F}
+
+
+print_conv_table(table_ready_data = exp_3_conv_def, 
+                 caption_name = 'Convergence Success in Experiment 3 With  ', 
                  col_header_name = c('Sample size (\\\\textit{N})'), 
                  IV_names =  c('Time Structuredness', 'Number of Measurements'), 
                  column_names = c('30', '50', '100', '200', '500', '1000'))
@@ -1463,7 +1505,7 @@ print_conv_table(table_ready_data = exp_3_conv,
 
 
 \app{Parameter Estimate Tables}
-
+\secapp{Experiment 1}
 
 ```{r exp-table-generation, echo=F}
 exp_1_tables <- nonlinSimsAnalysis:::create_table_data_sets(param_summary_data = param_summary_exp_1, 
@@ -1472,7 +1514,17 @@ exp_1_tables <- nonlinSimsAnalysis:::create_table_data_sets(param_summary_data =
 exp_2_tables <- nonlinSimsAnalysis:::create_table_data_sets(param_summary_data = param_summary_exp_2, 
                                        wide_var = 'sample_size', first_col = 'measurement_spacing', second_col = 'number_measurements')
 
-exp_3_tables <- nonlinSimsAnalysis:::create_table_data_sets(param_summary_data = param_summary_exp_3, 
+param_summary_exp_3_def <- readRDS(file = 'data/uf_param_summary_exp_3_def.RData')
+
+param_summary_exp_3_def$time_structuredness <- factor(x = 'slow_response_def',labels = 'Time unstructured (slow response) with definition variables')
+
+param_summary_exp_3_def <- param_summary_exp_3_def %>% 
+  select(names(param_summary_exp_3))
+
+param_summary_exp_3_comb <- rbind(param_summary_exp_3, param_summary_exp_3_def)
+
+
+exp_3_tables <- nonlinSimsAnalysis:::create_table_data_sets(param_summary_data = param_summary_exp_3_comb, 
                                        wide_var = 'sample_size', first_col = 'time_structuredness', second_col = 'number_measurements') 
 
 #remove measurement spacing columns 
@@ -1600,7 +1652,11 @@ Measurement Spacing & Number of Measurements & 80 & 180 & 280 & 80 & 180 & 280 &
 \insertTableNotes
 \end{longtable}
 \end{ThreePartTable}
+
+\secapp{Experiment 2}
+
 \end{landscape}
+
 \restoregeometry
 ```
 
@@ -1643,8 +1699,6 @@ print_param_table(table_ready_data = exp_2_tables$estimate_table, parameter_name
 ```
 
 ```{=tex}
-
-
 \newgeometry{margin=2.54cm}
 \begin{landscape}
 \begin{ThreePartTable}
@@ -1886,6 +1940,7 @@ Measurement Spacing & Number of Measurements & 30 & 50 & 100 & 200 & 500 & 1000\
 \insertTableNotes
 \end{longtable}
 \end{ThreePartTable}
+\secapp{Experiment 3}
 \end{landscape}
 \restoregeometry
 
@@ -1894,7 +1949,7 @@ Measurement Spacing & Number of Measurements & 30 & 50 & 100 & 200 & 500 & 1000\
 
 ```{r param-exp-3, eval=F, include=F}
 print_param_table(table_ready_data = exp_3_tables$estimate_table, parameter_name = 'beta', 
-            caption_name = 'Parameter Values Estimated in Experiment 3 (continued)', 
+            caption_name = 'Parameter Values Estimated in Experiment 3', 
             col_header_name = c('\\\\thead{$\\\\upbeta_{fixed}$ (Days to halfway elevation) \\\\\\\\ Pop value = 180.00}', 
                                '\\\\thead{$\\\\upbeta_{random}$ (Days to halfway elevation) \\\\\\\\ Pop value = 10.00}'), 
             IV_names =  c('Time Structuredness', 'Number of Measurements'), 
@@ -1902,13 +1957,13 @@ print_param_table(table_ready_data = exp_3_tables$estimate_table, parameter_name
 
 print_param_table(table_ready_data = exp_3_tables$estimate_table, parameter_name = 'gamma', 
             caption_name = 'Parameter Values Estimated in Experiment 3 (continued)', 
-            col_header_name = c('\\\\thead{$\\\\upbeta_{fixed}$ (Days to halfway elevation) \\\\\\\\ Pop value = 180.00}', 
-                               '\\\\thead{$\\\\upbeta_{random}$ (Days to halfway elevation) \\\\\\\\ Pop value = 10.00}'), 
+            col_header_name = c('\\\\thead{$\\\\upgamma_{fixed}$ (Triquarter-halfway delta) \\\\\\\\ Pop value = 20.00}', 
+                                '\\\\thead{$\\\\upgamma_{random}$ (Triquarter-halfway delta) \\\\\\\\ Pop value = 4.00}'),
             IV_names =  c('Time Structuredness', 'Number of Measurements'), 
             column_names = c("30", "50", "100", "200", "500", "1000"), footnote = "")
 
 print_param_table(table_ready_data = exp_3_tables$estimate_table, parameter_name = 'theta', 
-            caption_name = 'Parameter Values Estimated in Experiment 3', 
+            caption_name = 'Parameter Values Estimated in Experiment 3 (continued)', 
            col_header_name = c('\\\\thead{$\\\\uptheta_{fixed}$ (Baseline) \\\\\\\\ Pop value = 3.00}', 
                                '\\\\thead{$\\\\uptheta_{random}$ (Baseline) \\\\\\\\ Pop value = 0.05}'),
            IV_names =  c( 'Time Structuredness', 'Number of Measurements'), 
@@ -1930,7 +1985,6 @@ print_param_table(table_ready_data = exp_3_tables$estimate_table, parameter_name
 ```
 
 ```{=tex}
-\setlength{\tabcolsep}{5pt}
 
 \newgeometry{margin=2.54cm}
 \begin{landscape}
@@ -1939,7 +1993,7 @@ print_param_table(table_ready_data = exp_3_tables$estimate_table, parameter_name
 \item 
 \end{TableNotes}
 \begin{longtable}[l]{>{\raggedright\arraybackslash}p{3cm}>{\raggedright\arraybackslash}p{3cm}cccccccccccc}
-\caption{Parameter Values Estimated in Experiment 3}\label{tab:param-exp-3}\\
+\caption{Parameter Values Estimated in Experiment 3}\label{param-exp-3}\\
 \toprule
 \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{6}{c}{\thead{$\upbeta_{fixed}$ (Days to halfway elevation) \\ Pop value = 180.00}} & \multicolumn{6}{c}{\thead{$\upbeta_{random}$ (Days to halfway elevation) \\ Pop value = 10.00}} \\
 \cmidrule(l{3pt}r{3pt}){3-8} \cmidrule(l{3pt}r{3pt}){9-14}
@@ -1968,21 +2022,29 @@ Time Structuredness & Number of Measurements & 30 & 50 & 100 & 200 & 500 & 1000 
  & 9 & \cellcolor[HTML]{ffffff}{173.37} & \cellcolor[HTML]{ffffff}{173.37} & \cellcolor[HTML]{ffffff}{173.54} & \cellcolor[HTML]{ffffff}{173.52} & \cellcolor[HTML]{ffffff}{173.50} & \cellcolor[HTML]{ffffff}{173.49} & \cellcolor[HTML]{8cb9e3}{11.26$^{\square}$} & \cellcolor[HTML]{8cb9e3}{11.38$^{\square}$} & \cellcolor[HTML]{8cb9e3}{11.42$^{\square}$} & \cellcolor[HTML]{8cb9e3}{11.40$^{\square}$} & \cellcolor[HTML]{8cb9e3}{11.47$^{\square}$} & \cellcolor[HTML]{8cb9e3}{11.46$^{\square}$}\\
 \nopagebreak
 \multirow{-4}{3cm}{\raggedright\arraybackslash Time unstructured (slow response)} & 11 & \cellcolor[HTML]{ffffff}{173.58} & \cellcolor[HTML]{ffffff}{173.56} & \cellcolor[HTML]{ffffff}{173.50} & \cellcolor[HTML]{ffffff}{173.51} & \cellcolor[HTML]{ffffff}{173.49} & \cellcolor[HTML]{ffffff}{173.47} & \cellcolor[HTML]{8cb9e3}{10.87} & \cellcolor[HTML]{8cb9e3}{10.98} & \cellcolor[HTML]{8cb9e3}{11.12$^{\square}$} & \cellcolor[HTML]{8cb9e3}{11.18$^{\square}$} & \cellcolor[HTML]{8cb9e3}{11.14$^{\square}$} & \cellcolor[HTML]{8cb9e3}{11.16$^{\square}$}\\
+\cmidrule{1-14}\pagebreak[0]
+ & 5 & \cellcolor[HTML]{ffffff}{179.92} & \cellcolor[HTML]{ffffff}{179.87} & \cellcolor[HTML]{ffffff}{179.97} & \cellcolor[HTML]{ffffff}{179.92} & \cellcolor[HTML]{ffffff}{179.87} & \cellcolor[HTML]{ffffff}{179.88} & \cellcolor[HTML]{8cb9e3}{10.70} & \cellcolor[HTML]{8cb9e3}{10.40} & \cellcolor[HTML]{8cb9e3}{10.35} & \cellcolor[HTML]{8cb9e3}{10.50} & \cellcolor[HTML]{8cb9e3}{10.66} & \cellcolor[HTML]{8cb9e3}{10.61}\\
+\nopagebreak
+ & 7 & \cellcolor[HTML]{ffffff}{180.07} & \cellcolor[HTML]{ffffff}{179.96} & \cellcolor[HTML]{ffffff}{179.96} & \cellcolor[HTML]{ffffff}{179.92} & \cellcolor[HTML]{ffffff}{179.91} & \cellcolor[HTML]{ffffff}{179.94} & \cellcolor[HTML]{8cb9e3}{10.32} & \cellcolor[HTML]{8cb9e3}{10.32} & \cellcolor[HTML]{8cb9e3}{10.33} & \cellcolor[HTML]{8cb9e3}{10.52} & \cellcolor[HTML]{8cb9e3}{10.53} & \cellcolor[HTML]{8cb9e3}{10.50}\\
+\nopagebreak
+ & 9 & \cellcolor[HTML]{ffffff}{180.17} & \cellcolor[HTML]{ffffff}{179.86} & \cellcolor[HTML]{ffffff}{179.88} & \cellcolor[HTML]{ffffff}{179.97} & \cellcolor[HTML]{ffffff}{179.95} & \cellcolor[HTML]{ffffff}{179.98} & \cellcolor[HTML]{8cb9e3}{10.12} & \cellcolor[HTML]{8cb9e3}{10.26} & \cellcolor[HTML]{8cb9e3}{10.43} & \cellcolor[HTML]{8cb9e3}{10.32} & \cellcolor[HTML]{8cb9e3}{10.40} & \cellcolor[HTML]{8cb9e3}{10.38}\\
+\nopagebreak
+\multirow{-4}{3cm}{\raggedright\arraybackslash Time unstructured (slow response) with definition variables} & 11 & \cellcolor[HTML]{ffffff}{179.93} & \cellcolor[HTML]{ffffff}{180.20} & \cellcolor[HTML]{ffffff}{179.94} & \cellcolor[HTML]{ffffff}{179.97} & \cellcolor[HTML]{ffffff}{179.99} & \cellcolor[HTML]{ffffff}{179.99} & \cellcolor[HTML]{8cb9e3}{10.11} & \cellcolor[HTML]{8cb9e3}{10.20} & \cellcolor[HTML]{8cb9e3}{10.34} & \cellcolor[HTML]{8cb9e3}{10.31} & \cellcolor[HTML]{8cb9e3}{10.27} & \cellcolor[HTML]{8cb9e3}{10.32}\\
 \bottomrule
+\insertTableNotes
 \end{longtable}
 \end{ThreePartTable}
 
 \addtocounter{table}{-1}
-\newpage
 
 \begin{ThreePartTable}
 \begin{TableNotes}
 \item 
 \end{TableNotes}
 \begin{longtable}[l]{>{\raggedright\arraybackslash}p{3cm}>{\raggedright\arraybackslash}p{3cm}cccccccccccc}
-\caption[]{Parameter Values Estimated in Experiment 3 (continued)}\\
+\caption{Parameter Values Estimated in Experiment 3 (continued)}\\
 \toprule
-\multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{6}{c}{\thead{$\upbeta_{fixed}$ (Days to halfway elevation) \\ Pop value = 180.00}} & \multicolumn{6}{c}{\thead{$\upbeta_{random}$ (Days to halfway elevation) \\ Pop value = 10.00}} \\
+\multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{6}{c}{\thead{$\upgamma_{fixed}$ (Triquarter-halfway delta) \\ Pop value = 20.00}} & \multicolumn{6}{c}{\thead{$\upgamma_{random}$ (Triquarter-halfway delta) \\ Pop value = 4.00}} \\
 \cmidrule(l{3pt}r{3pt}){3-8} \cmidrule(l{3pt}r{3pt}){9-14}
 Time Structuredness & Number of Measurements & 30 & 50 & 100 & 200 & 500 & 1000 & 30 & 50 & 100 & 200 & 500 & 1000\\
 \midrule
@@ -2009,19 +2071,27 @@ Time Structuredness & Number of Measurements & 30 & 50 & 100 & 200 & 500 & 1000 
  & 9 & \cellcolor[HTML]{8cb9e3}{20.91} & \cellcolor[HTML]{8cb9e3}{20.82} & \cellcolor[HTML]{8cb9e3}{20.82} & \cellcolor[HTML]{8cb9e3}{20.89} & \cellcolor[HTML]{8cb9e3}{20.94} & \cellcolor[HTML]{ffffff}{20.89} & \cellcolor[HTML]{8cb9e3}{ 6.00$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 5.32$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 4.97$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 4.67$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 4.74$^{\square}$} & \cellcolor[HTML]{8cb9e3}{4.70$^{\square}$}\\
 \nopagebreak
 \multirow{-4}{3cm}{\raggedright\arraybackslash Time unstructured (slow response)} & 11 & \cellcolor[HTML]{8cb9e3}{20.98} & \cellcolor[HTML]{8cb9e3}{20.85} & \cellcolor[HTML]{8cb9e3}{20.90} & \cellcolor[HTML]{8cb9e3}{20.92} & \cellcolor[HTML]{ffffff}{20.90} & \cellcolor[HTML]{ffffff}{20.90} & \cellcolor[HTML]{8cb9e3}{ 5.26$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 4.92$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 4.83$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 4.69$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 4.75$^{\square}$} & \cellcolor[HTML]{8cb9e3}{4.71$^{\square}$}\\
+\cmidrule{1-14}\pagebreak[0]
+ & 5 & \cellcolor[HTML]{8cb9e3}{20.58} & \cellcolor[HTML]{8cb9e3}{20.64} & \cellcolor[HTML]{8cb9e3}{20.76} & \cellcolor[HTML]{8cb9e3}{20.86} & \cellcolor[HTML]{8cb9e3}{20.90} & \cellcolor[HTML]{8cb9e3}{20.94} & \cellcolor[HTML]{8cb9e3}{11.12$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 9.82$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 8.51$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 6.86$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 5.78$^{\square}$} & \cellcolor[HTML]{8cb9e3}{5.17$^{\square}$}\\
+\nopagebreak
+ & 7 & \cellcolor[HTML]{8cb9e3}{20.55} & \cellcolor[HTML]{8cb9e3}{20.68} & \cellcolor[HTML]{8cb9e3}{20.73} & \cellcolor[HTML]{8cb9e3}{20.87} & \cellcolor[HTML]{8cb9e3}{20.81} & \cellcolor[HTML]{ffffff}{20.78} & \cellcolor[HTML]{8cb9e3}{ 6.68$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 5.93$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 5.14$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 4.74$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 4.11} & \cellcolor[HTML]{8cb9e3}{4.12}\\
+\nopagebreak
+ & 9 & \cellcolor[HTML]{8cb9e3}{20.69} & \cellcolor[HTML]{8cb9e3}{20.68} & \cellcolor[HTML]{8cb9e3}{20.69} & \cellcolor[HTML]{8cb9e3}{20.74} & \cellcolor[HTML]{ffffff}{20.70} & \cellcolor[HTML]{ffffff}{20.73} & \cellcolor[HTML]{8cb9e3}{ 5.22$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 4.77$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 4.53$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 4.24} & \cellcolor[HTML]{8cb9e3}{ 4.05} & \cellcolor[HTML]{8cb9e3}{4.05}\\
+\nopagebreak
+\multirow{-4}{3cm}{\raggedright\arraybackslash Time unstructured (slow response) with definition variables} & 11 & \cellcolor[HTML]{8cb9e3}{20.66} & \cellcolor[HTML]{8cb9e3}{20.77} & \cellcolor[HTML]{8cb9e3}{20.69} & \cellcolor[HTML]{8cb9e3}{20.69} & \cellcolor[HTML]{ffffff}{20.67} & \cellcolor[HTML]{ffffff}{20.69} & \cellcolor[HTML]{8cb9e3}{ 4.79$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 4.72$^{\square}$} & \cellcolor[HTML]{8cb9e3}{ 4.32} & \cellcolor[HTML]{8cb9e3}{ 4.01} & \cellcolor[HTML]{8cb9e3}{ 4.14} & \cellcolor[HTML]{8cb9e3}{4.11}\\
 \bottomrule
+\insertTableNotes
 \end{longtable}
 \end{ThreePartTable}
 
 \addtocounter{table}{-1}
-\newpage
 
 \begin{ThreePartTable}
 \begin{TableNotes}
 \item 
 \end{TableNotes}
 \begin{longtable}[l]{>{\raggedright\arraybackslash}p{3cm}>{\raggedright\arraybackslash}p{3cm}cccccccccccc}
-\caption[]{Parameter Values Estimated in Experiment 3 (continued)}\\
+\caption{Parameter Values Estimated in Experiment 3 (continued)}\\
 \toprule
 \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{6}{c}{\thead{$\uptheta_{fixed}$ (Baseline) \\ Pop value = 3.00}} & \multicolumn{6}{c}{\thead{$\uptheta_{random}$ (Baseline) \\ Pop value = 0.05}} \\
 \cmidrule(l{3pt}r{3pt}){3-8} \cmidrule(l{3pt}r{3pt}){9-14}
@@ -2050,19 +2120,27 @@ Time Structuredness & Number of Measurements & 30 & 50 & 100 & 200 & 500 & 1000 
  & 9 & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
 \nopagebreak
 \multirow{-4}{3cm}{\raggedright\arraybackslash Time unstructured (slow response)} & 11 & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
+\cmidrule{1-14}\pagebreak[0]
+ & 5 & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
+\nopagebreak
+ & 7 & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
+\nopagebreak
+ & 9 & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
+\nopagebreak
+\multirow{-4}{3cm}{\raggedright\arraybackslash Time unstructured (slow response) with definition variables} & 11 & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{ffffff}{3.00} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
 \bottomrule
+\insertTableNotes
 \end{longtable}
 \end{ThreePartTable}
 
 \addtocounter{table}{-1}
-\newpage
 
 \begin{ThreePartTable}
 \begin{TableNotes}
 \item 
 \end{TableNotes}
 \begin{longtable}[l]{>{\raggedright\arraybackslash}p{3cm}>{\raggedright\arraybackslash}p{3cm}cccccccccccc}
-\caption[]{Parameter Values Estimated in Experiment 3 (continued)}\\
+\caption{Parameter Values Estimated in Experiment 3 (continued)}\\
 \toprule
 \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{6}{c}{\thead{$\upalpha_{fixed}$ (Maximal elevation) \\ Pop value = 3.32}} & \multicolumn{6}{c}{\thead{$\upalpha_{random}$ (Maximal elevation) \\ Pop value = 0.05}} \\
 \cmidrule(l{3pt}r{3pt}){3-8} \cmidrule(l{3pt}r{3pt}){9-14}
@@ -2091,19 +2169,27 @@ Time Structuredness & Number of Measurements & 30 & 50 & 100 & 200 & 500 & 1000 
  & 9 & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
 \nopagebreak
 \multirow{-4}{3cm}{\raggedright\arraybackslash Time unstructured (slow response)} & 11 & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
+\cmidrule{1-14}\pagebreak[0]
+ & 5 & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
+\nopagebreak
+ & 7 & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
+\nopagebreak
+ & 9 & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
+\nopagebreak
+\multirow{-4}{3cm}{\raggedright\arraybackslash Time unstructured (slow response) with definition variables} & 11 & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{ffffff}{3.32} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
 \bottomrule
+\insertTableNotes
 \end{longtable}
 \end{ThreePartTable}
-
 \addtocounter{table}{-1}
-\newpage
+
 
 \begin{ThreePartTable}
 \begin{TableNotes}
 \item \textit{Note. }Cells shaded in light blue indicate cells where estimation is imprecise (i.e., lower and/or upper whisker lengths exceeding 10\% of the parameter's population value. Empty superscript squares ($^{\square}$) indicate biased estimates (i.e., bias exceeding 10\% of parameter's population value).
 \end{TableNotes}
 \begin{longtable}[l]{>{\raggedright\arraybackslash}p{3cm}>{\raggedright\arraybackslash}p{3cm}cccccc}
-\caption[]{Parameter Values Estimated in Experiment 3 (continued)}\\
+\caption{Parameter Values Estimated in Experiment 3 (continued)}\\
 \toprule
 \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{6}{c}{\thead{$\upepsilon$(error) \\ Pop value = 0.03}} \\
 \cmidrule(l{3pt}r{3pt}){3-8}
@@ -2132,6 +2218,14 @@ Time Structuredness & Number of Measurements & 30 & 50 & 100 & 200 & 500 & 1000\
  & 9 & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
 \nopagebreak
 \multirow{-4}{3cm}{\raggedright\arraybackslash Time unstructured (slow response)} & 11 & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
+\cmidrule{1-8}\pagebreak[0]
+ & 5 & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
+\nopagebreak
+ & 7 & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
+\nopagebreak
+ & 9 & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
+\nopagebreak
+\multirow{-4}{3cm}{\raggedright\arraybackslash Time unstructured (slow response) with definition variables} & 11 & \cellcolor[HTML]{8cb9e3}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05} & \cellcolor[HTML]{ffffff}{0.05}\\
 \bottomrule
 \insertTableNotes
 \end{longtable}
@@ -2140,7 +2234,6 @@ Time Structuredness & Number of Measurements & 30 & 50 & 100 & 200 & 500 & 1000\
 \restoregeometry
 
 ```
-
 
 \app{OpenMx Code for Structured Latent Growth Curve Model With Definition Variables}
 \label{def-model-code}

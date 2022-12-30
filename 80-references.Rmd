@@ -3,17 +3,10 @@ The bib chunk below must go last in this document according to how R Markdown re
 -->
 
 
-
 \newpage
-# References
+\renewcommand\bibname{References}
+\phantomsection
+\addcontentsline{toc}{chapter}{\bibname}
+\printbibliography
 
-```{=tex}
-\begingroup
-```
-::: {#refs custom-style="Bibliography"}
-:::
-
-```{=tex}
-\endgroup
-```
 
