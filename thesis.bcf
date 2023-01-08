@@ -1125,6 +1125,11 @@
         <bcf:map_step map_field_source="journal" map_match="\x{26}" map_replace="\{\\\x{26}\}"/>
       </bcf:map>
     </bcf:maps>
+    <bcf:maps datatype="bibtex" level="user">
+      <bcf:map>
+        <bcf:map_step map_field_source="title" map_match="\x{26}" map_replace="\{\\\x{26}\}"/>
+      </bcf:map>
+    </bcf:maps>
     <bcf:maps datatype="bibtex" level="style">
       <bcf:map>
         <bcf:map_step map_type_source="reference" map_type_target="book"/>
@@ -2817,118 +2822,7 @@
     <bcf:datasource type="file" datatype="bibtex" glob="false">bib/references.bib</bcf:datasource>
   </bcf:bibdata>
   <bcf:section number="0">
-    <bcf:citekey order="1" intorder="1">navarro2015</bcf:citekey>
-    <bcf:citekey order="2" intorder="1">zaheer1999</bcf:citekey>
-    <bcf:citekey order="3" intorder="1">mitchell2001</bcf:citekey>
-    <bcf:citekey order="4" intorder="1">lawrence2001</bcf:citekey>
-    <bcf:citekey order="5" intorder="1">fisher2008</bcf:citekey>
-    <bcf:citekey order="5" intorder="2">dalal2014</bcf:citekey>
-    <bcf:citekey order="6" intorder="1">roe2012</bcf:citekey>
-    <bcf:citekey order="7" intorder="1">fried2004</bcf:citekey>
-    <bcf:citekey order="8" intorder="1">george2000</bcf:citekey>
-    <bcf:citekey order="8" intorder="2">roe2008</bcf:citekey>
-    <bcf:citekey order="8" intorder="3">ployhart2010</bcf:citekey>
-    <bcf:citekey order="8" intorder="4">sonnentag2012</bcf:citekey>
-    <bcf:citekey order="8" intorder="5">navarro2015</bcf:citekey>
-    <bcf:citekey order="8" intorder="6">shipp2015</bcf:citekey>
-    <bcf:citekey order="8" intorder="7">kunisch2017</bcf:citekey>
-    <bcf:citekey order="8" intorder="8">vantilborgh2018</bcf:citekey>
-    <bcf:citekey order="8" intorder="9">aguinis2021</bcf:citekey>
-    <bcf:citekey order="9" intorder="1">whetten1989</bcf:citekey>
-    <bcf:citekey order="10" intorder="1">whetten1989</bcf:citekey>
-    <bcf:citekey order="11" intorder="1">mitchell2001</bcf:citekey>
-    <bcf:citekey order="11" intorder="2">george2000</bcf:citekey>
-    <bcf:citekey order="12" intorder="1">whetten1989</bcf:citekey>
-    <bcf:citekey order="13" intorder="1">whetten1989</bcf:citekey>
-    <bcf:citekey order="14" intorder="1">mill2011</bcf:citekey>
-    <bcf:citekey order="15" intorder="1">roe2008</bcf:citekey>
-    <bcf:citekey order="16" intorder="1">maxwell2007</bcf:citekey>
-    <bcf:citekey order="17" intorder="1">mitchell2013</bcf:citekey>
-    <bcf:citekey order="18" intorder="1">maxwell2007</bcf:citekey>
-    <bcf:citekey order="19" intorder="1">maxwell2007</bcf:citekey>
-    <bcf:citekey order="20" intorder="1">mitchell2013</bcf:citekey>
-    <bcf:citekey order="21" intorder="1">mitchell2013</bcf:citekey>
-    <bcf:citekey order="22" intorder="1">baron1986</bcf:citekey>
-    <bcf:citekey order="23" intorder="1">maxwell2007</bcf:citekey>
-    <bcf:citekey order="24" intorder="1">mitchell2013</bcf:citekey>
-    <bcf:citekey order="25" intorder="1">cole2003</bcf:citekey>
-    <bcf:citekey order="25" intorder="2">maxwell2007</bcf:citekey>
-    <bcf:citekey order="25" intorder="3">maxwell2011</bcf:citekey>
-    <bcf:citekey order="25" intorder="4">mitchell2013</bcf:citekey>
-    <bcf:citekey order="25" intorder="5">olaughlin2018</bcf:citekey>
-    <bcf:citekey order="26" intorder="1">molenaar2004</bcf:citekey>
-    <bcf:citekey order="26" intorder="2">molenaar2009</bcf:citekey>
-    <bcf:citekey order="27" intorder="1">curran2011</bcf:citekey>
-    <bcf:citekey order="28" intorder="1">curran2011</bcf:citekey>
-    <bcf:citekey order="29" intorder="1">nixon2011</bcf:citekey>
-    <bcf:citekey order="29" intorder="2">fisher2018</bcf:citekey>
-    <bcf:citekey order="30" intorder="1">fisher2018</bcf:citekey>
-    <bcf:citekey order="31" intorder="1">fisher2018</bcf:citekey>
-    <bcf:citekey order="32" intorder="1">cole2003</bcf:citekey>
-    <bcf:citekey order="32" intorder="2">maxwell2007</bcf:citekey>
-    <bcf:citekey order="32" intorder="3">maxwell2011</bcf:citekey>
-    <bcf:citekey order="32" intorder="4">olaughlin2018</bcf:citekey>
-    <bcf:citekey order="33" intorder="1">hamaker2005</bcf:citekey>
-    <bcf:citekey order="34" intorder="1">beal2015</bcf:citekey>
-    <bcf:citekey order="35" intorder="1">raudenbush2002</bcf:citekey>
-    <bcf:citekey order="36" intorder="1">wang2007</bcf:citekey>
-    <bcf:citekey order="37" intorder="1">ram2013</bcf:citekey>
-    <bcf:citekey order="38" intorder="1">olaughlin2018</bcf:citekey>
-    <bcf:citekey order="39" intorder="1">roe2008</bcf:citekey>
-    <bcf:citekey order="40" intorder="1">mitchell2013</bcf:citekey>
-    <bcf:citekey order="41" intorder="1">cohen1993</bcf:citekey>
-    <bcf:citekey order="41" intorder="2">griffeth2000</bcf:citekey>
-    <bcf:citekey order="41" intorder="3">hom1992</bcf:citekey>
-    <bcf:citekey order="41" intorder="4">riketta2008</bcf:citekey>
-    <bcf:citekey order="41" intorder="5">steel1984</bcf:citekey>
-    <bcf:citekey order="41" intorder="6">steel1990</bcf:citekey>
-    <bcf:citekey order="42" intorder="1">larsen1990</bcf:citekey>
-    <bcf:citekey order="43" intorder="1">bodenmann2010</bcf:citekey>
-    <bcf:citekey order="44" intorder="1">huh2015</bcf:citekey>
-    <bcf:citekey order="45" intorder="1">cudeck2007</bcf:citekey>
-    <bcf:citekey order="46" intorder="1">burchinal1991</bcf:citekey>
-    <bcf:citekey order="47" intorder="1">murre2015</bcf:citekey>
-    <bcf:citekey order="48" intorder="1">fournier2017</bcf:citekey>
-    <bcf:citekey order="49" intorder="1">xia2020</bcf:citekey>
-    <bcf:citekey order="50" intorder="1">bergman1993</bcf:citekey>
-    <bcf:citekey order="51" intorder="1">podsakoff2003</bcf:citekey>
-    <bcf:citekey order="52" intorder="1">ostroff2002</bcf:citekey>
-    <bcf:citekey order="53" intorder="1">newman2008</bcf:citekey>
-    <bcf:citekey order="53" intorder="2">dillman2014</bcf:citekey>
-    <bcf:citekey order="54" intorder="1">orne1962</bcf:citekey>
-    <bcf:citekey order="55" intorder="1">nederhof1985</bcf:citekey>
-    <bcf:citekey order="56" intorder="1">grimm2010a</bcf:citekey>
-    <bcf:citekey order="57" intorder="1">mellenbergh1989</bcf:citekey>
-    <bcf:citekey order="58" intorder="1">enders2007</bcf:citekey>
-    <bcf:citekey order="58" intorder="2">wang2015</bcf:citekey>
-    <bcf:citekey order="59" intorder="1">coulombe2016</bcf:citekey>
-    <bcf:citekey order="59" intorder="2">timmons2015</bcf:citekey>
-    <bcf:citekey order="59" intorder="3">finch2017</bcf:citekey>
-    <bcf:citekey order="59" intorder="4">fine2019</bcf:citekey>
-    <bcf:citekey order="60" intorder="1">ployhart2010</bcf:citekey>
-    <bcf:citekey order="61" intorder="1">mitchell2001</bcf:citekey>
-    <bcf:citekey order="61" intorder="2">cole2003</bcf:citekey>
-    <bcf:citekey order="61" intorder="3">collins2006</bcf:citekey>
-    <bcf:citekey order="61" intorder="4">dormann2014</bcf:citekey>
-    <bcf:citekey order="61" intorder="5">dormann2015</bcf:citekey>
-    <bcf:citekey order="62" intorder="1">mitchell2001</bcf:citekey>
-    <bcf:citekey order="62" intorder="2">dormann2014</bcf:citekey>
-    <bcf:citekey order="63" intorder="1">chen2014</bcf:citekey>
-    <bcf:citekey order="64" intorder="1">cole2009</bcf:citekey>
-    <bcf:citekey order="65" intorder="1">cole2009</bcf:citekey>
-    <bcf:citekey order="66" intorder="1">mehta2000</bcf:citekey>
-    <bcf:citekey order="67" intorder="1">mehta2005</bcf:citekey>
-    <bcf:citekey order="68" intorder="1">day2011</bcf:citekey>
-    <bcf:citekey order="69" intorder="1">mehta2000</bcf:citekey>
-    <bcf:citekey order="69" intorder="2">mehta2005</bcf:citekey>
-    <bcf:citekey order="69" intorder="3">coulombe2016</bcf:citekey>
-    <bcf:citekey order="70" intorder="1">robert2010</bcf:citekey>
-    <bcf:citekey order="71" intorder="1">boneau1960</bcf:citekey>
-    <bcf:citekey order="72" intorder="1">boneau1960</bcf:citekey>
-    <bcf:citekey order="73" intorder="1">stanley2014</bcf:citekey>
-    <bcf:citekey order="74" intorder="1">kenny2014</bcf:citekey>
-    <bcf:citekey order="75" intorder="1">stockdale2007</bcf:citekey>
-    <bcf:citekey order="75" intorder="2">tiberio2008</bcf:citekey>
+    <bcf:citekey order="1" intorder="1" nocite="1">R-nonlinSimsAnalysis</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="apa">

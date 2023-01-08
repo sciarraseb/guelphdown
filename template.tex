@@ -599,13 +599,12 @@ $if(backref)$
 \PassOptionsToPackage{backref=true}{biblatex}
 $endif$
 
-
-
-
 \RequirePackage[autocite=inline, style = apa]{biblatex}
 \addbibresource{$bibliography$}
-%\addbibresource{bib/references.bib}
+
+
 \DeclareSourcemap{\maps[datatype = bibtex]{\map{\step[fieldsource = journal, match = \regexp{\x{26}}, replace = \regexp{\{\\\x{26}\}}] }}}
+\DeclareSourcemap{\maps[datatype = bibtex]{\map{\step[fieldsource = title, match = \regexp{\x{26}}, replace = \regexp{\{\\\x{26}\}}] }}}
 
 $if(backref)$
 \hypersetup{pdfpagemode={UseOutlines},
@@ -753,7 +752,6 @@ $if(print_refs)$
 \phantomsection
 \addcontentsline{toc}{chapter}{\bibname}
 \printbibliography
-
 $endif$
 
 

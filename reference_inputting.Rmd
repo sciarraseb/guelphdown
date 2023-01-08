@@ -2,6 +2,3 @@
 bibliography: bib/references.bib
 ---
 
-
-
-

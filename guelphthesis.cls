@@ -490,20 +490,7 @@
 %----------------------------------------------------------------------------------------
 %	Change Figure, Table, Equation, and Code Block numbering after references
 %----------------------------------------------------------------------------------------
-\AfterEndEnvironment{bibliography}{
-%change numbering for figures, tables, and equations for appendices
-\renewcommand\thefigure{\theapp.\arabic{figure}} %change figure numbering for appendix such that it goes A.1, A.2, etc.
-\counterwithin{figure}{app} %reset figure number counter for each appendix
 
-\renewcommand\thetable{\theapp.\arabic{table}} %change figure numbering for appendix such that it goes A.1, A.2, etc.
-\counterwithin{table}{app} %reset figure number counter for each appendix
-
-%reset equation number number counter for each appendix
-\renewcommand{\theequation}{\theapp.\arabic{equation}}
-\counterwithin{equation}{app} %reset figure number counter for each appendix
-
-\counterwithin{chunk}{app} %reset code chunk numbering
-}
 
 %----------------------------------------------------------------------------------------
 %	Quote formatting, list formatting, etc.

@@ -1,21 +1,8 @@
 \contentsline {chapter}{\titlecap {Abstract}}{ii}{section*.1}%
-\contentsline {chapter}{\titlecap {Dedication}}{iii}{section*.2}%
-\contentsline {chapter}{\titlecap {Acknowledgements}}{iv}{section*.3}%
-\contentsline {chapter}{Table of Contents}{v}{section*.4}%
-\contentsline {chapter}{List of Tables}{vi}{section*.5}%
-\contentsline {chapter}{List of Figures}{vii}{section*.6}%
-\contentsline {chapter}{List of Appendices}{viii}{section*.7}%
-\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
-\contentsline {section}{\numberline {1.1}The Need to Conduct Longitudinal Research}{3}{section.1.1}%
-\contentsline {section}{\numberline {1.2}Understanding Patterns of Change That Emerge Over Time}{6}{section.1.2}%
-\contentsline {section}{\numberline {1.3}Challenges Involved in Conducting Longitudinal Research}{7}{section.1.3}%
-\contentsline {subsection}{\numberline {1.3.1}Number of Measurements}{8}{subsection.1.3.1}%
-\contentsline {subsection}{\numberline {1.3.2}Spacing of Measurements}{8}{subsection.1.3.2}%
-\contentsline {subsection}{\numberline {1.3.3}Time Structuredness}{9}{subsection.1.3.3}%
-\contentsline {subsubsection}{\numberline {1.3.3.1}Time-Structured Data}{9}{subsubsection.1.3.3.1}%
-\contentsline {subsubsection}{\numberline {1.3.3.2}Time-Unstructured Data}{11}{subsubsection.1.3.3.2}%
-\contentsline {subsection}{\numberline {1.3.4}Summary}{12}{subsection.1.3.4}%
-\contentsline {section}{\numberline {1.4}Using Simulations To Assess Modelling Accuracy}{12}{section.1.4}%
-\contentsline {section}{\numberline {1.5}Systematic Review of Simulation Literature}{16}{section.1.5}%
-\contentsline {subsection}{\numberline {1.5.1}Systematic Review Methodology}{17}{subsection.1.5.1}%
-\contentsline {chapter}{References}{19}{section*.10}%
+\contentsline {chapter}{\titlecap {Dedication}}{iv}{section*.2}%
+\contentsline {chapter}{\titlecap {Acknowledgements}}{v}{section*.3}%
+\contentsline {chapter}{Table of Contents}{vi}{section*.4}%
+\contentsline {chapter}{List of Tables}{vii}{section*.5}%
+\contentsline {chapter}{List of Figures}{viii}{section*.6}%
+\contentsline {chapter}{List of Appendices}{ix}{section*.7}%
+\contentsline {chapter}{References}{1}{section*.8}%

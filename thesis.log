@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.12.27)  30 DEC 2022 15:48
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.12.27)  8 JAN 2023 02:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1046,21 +1046,21 @@ Package biblatex Info: ... and expl3
 (/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/biblatex/blx-case-expl3.sty
 Package: blx-case-expl3 2022/07/12 v3.18b expl3 case changing code for biblatex
 ))
-Package hyperref Info: Option `bookmarksopen' set `true' on input line 551.
+Package hyperref Info: Option `bookmarksopen' set `true' on input line 550.
 
 Package hyperref Warning: Option `backref' has already been used,
-(hyperref)                setting the option has no effect on input line 551.
+(hyperref)                setting the option has no effect on input line 550.
 
 (/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/hypernat/hypernat.sty
 Package: hypernat 2001/07/09 v1.0b hyperref and natbib compatibility (jb)
 )
-Package hyperref Info: Option `bookmarksopen' set `true' on input line 570.
-Package hyperref Info: Option `hypertexnames' set `true' on input line 570.
-Package hyperref Info: Option `colorlinks' set `true' on input line 570.
-Package hyperref Info: Option `breaklinks' set `true' on input line 570.
+Package hyperref Info: Option `bookmarksopen' set `true' on input line 569.
+Package hyperref Info: Option `hypertexnames' set `true' on input line 569.
+Package hyperref Info: Option `colorlinks' set `true' on input line 569.
+Package hyperref Info: Option `breaklinks' set `true' on input line 569.
 
 Package hyperref Warning: Option `backref' has already been used,
-(hyperref)                setting the option has no effect on input line 570.
+(hyperref)                setting the option has no effect on input line 569.
 
 \c@theorem=\count507
 \c@example=\count508
@@ -1092,30 +1092,30 @@ Package xcolor Info: Model `wave' substituted by `hsb' on input line 1376.
 )
 \@quotelevel=\count509
 \@quotereset=\count510
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 601.
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 600.
 (/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 ) (./thesis.aux)
 \openout1 = `thesis.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 601.
-LaTeX Font Info:    ... okay on input line 601.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 601.
-LaTeX Font Info:    ... okay on input line 601.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 601.
-LaTeX Font Info:    ... okay on input line 601.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 601.
-LaTeX Font Info:    ... okay on input line 601.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 601.
-LaTeX Font Info:    ... okay on input line 601.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 601.
-LaTeX Font Info:    ... okay on input line 601.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 601.
-LaTeX Font Info:    ... okay on input line 601.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 601.
-LaTeX Font Info:    ... okay on input line 601.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 601.
-LaTeX Font Info:    ... okay on input line 601.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 600.
+LaTeX Font Info:    ... okay on input line 600.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 600.
+LaTeX Font Info:    ... okay on input line 600.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 600.
+LaTeX Font Info:    ... okay on input line 600.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 600.
+LaTeX Font Info:    ... okay on input line 600.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 600.
+LaTeX Font Info:    ... okay on input line 600.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 600.
+LaTeX Font Info:    ... okay on input line 600.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 600.
+LaTeX Font Info:    ... okay on input line 600.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 600.
+LaTeX Font Info:    ... okay on input line 600.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 600.
+LaTeX Font Info:    ... okay on input line 600.
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
 Package caption Info: hyperref package is loaded.
@@ -1167,7 +1167,7 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring ON on input line 601.
+Package hyperref Info: Link coloring ON on input line 600.
 (./thesis.out) (./thesis.out)
 \@outlinefile=\write5
 \openout5 = `thesis.out'.
@@ -1202,8 +1202,8 @@ Package biblatex Info: Automatic encoding selection.
 Package biblatex Info: Trying to load bibliographic data...
 Package biblatex Info: ... file 'thesis.bbl' found.
 (./thesis.bbl)
-Package biblatex Info: Reference section=0 on input line 601.
-Package biblatex Info: Reference segment=0 on input line 601.
+Package biblatex Info: Reference section=0 on input line 600.
+Package biblatex Info: Reference segment=0 on input line 600.
 *geometry* verbose mode - [ newgeometry ] result:
 * driver: pdftex
 * paper: a4paper
@@ -1236,7 +1236,7 @@ Package biblatex Info: Reference segment=0 on input line 601.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 605.
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 604.
 (/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 ) [1{/Users/sebastiansciarra/Library/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
@@ -1247,16 +1247,41 @@ File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 ]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\titlecap' on input line 610.
+(hyperref)                removing `\titlecap' on input line 609.
 
-[2
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 609.
+(/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
+File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 609.
+(/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
+File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 609.
+(/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/lm/omxlmex.fd
+File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <12> on input line 609.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <8> on input line 609.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <6> on input line 609.
+LaTeX Font Info:    Trying to load font information for U+lasy on input line 609.
+(/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/base/ulasy.fd
+File: ulasy.fd 1998/08/17 v2.2e LaTeX symbol font definitions
+)
+LaTeX Font Info:    Trying to load font information for U+msa on input line 609.
+(/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 609.
+(/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+) [2
 
 
 ]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\titlecap' on input line 616.
-
 
 Package fancyhdr Warning: \headheight is too small (0.0pt): 
 (fancyhdr)                Make it at least 14.49998pt, for example:
@@ -1264,12 +1289,10 @@ Package fancyhdr Warning: \headheight is too small (0.0pt):
 (fancyhdr)                You might also make \topmargin smaller to compensate:
 (fancyhdr)                \addtolength{\topmargin}{-14.49998pt}.
 
-[3
-
-]
+[3]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\titlecap' on input line 619.
+(hyperref)                removing `\titlecap' on input line 615.
 
 
 Package fancyhdr Warning: \headheight is too small (0.0pt): 
@@ -1280,37 +1303,21 @@ Package fancyhdr Warning: \headheight is too small (0.0pt):
 
 [4
 
-] (./thesis.toc
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 1.
-(/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
-File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 1.
-(/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
-File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 1.
-(/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/lm/omxlmex.fd
-File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 1.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 1.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 1.
-LaTeX Font Info:    Trying to load font information for U+lasy on input line 1.
-(/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/base/ulasy.fd
-File: ulasy.fd 1998/08/17 v2.2e LaTeX symbol font definitions
-)
-LaTeX Font Info:    Trying to load font information for U+msa on input line 1.
-(/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
-File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-)
-LaTeX Font Info:    Trying to load font information for U+msb on input line 1.
-(/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
-File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-))
+]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\titlecap' on input line 618.
+
+
+Package fancyhdr Warning: \headheight is too small (0.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-14.49998pt}.
+
+[5
+
+] (./thesis.toc)
 \tf@toc=\write6
 \openout6 = `thesis.toc'.
 
@@ -1321,7 +1328,7 @@ Package fancyhdr Warning: \headheight is too small (0.0pt):
 (fancyhdr)                You might also make \topmargin smaller to compensate:
 (fancyhdr)                \addtolength{\topmargin}{-14.49998pt}.
 
-[5
+[6
 
 ] (./thesis.lot)
 \tf@lot=\write7
@@ -1334,7 +1341,7 @@ Package fancyhdr Warning: \headheight is too small (0.0pt):
 (fancyhdr)                You might also make \topmargin smaller to compensate:
 (fancyhdr)                \addtolength{\topmargin}{-14.49998pt}.
 
-[6
+[7
 
 ] (./thesis.lof)
 \tf@lof=\write8
@@ -1347,7 +1354,7 @@ Package fancyhdr Warning: \headheight is too small (0.0pt):
 (fancyhdr)                You might also make \topmargin smaller to compensate:
 (fancyhdr)                \addtolength{\topmargin}{-14.49998pt}.
 
-[7
+[8
 
 ] (./thesis.loa)
 \tf@loa=\write9
@@ -1360,124 +1367,58 @@ Package fancyhdr Warning: \headheight is too small (0.0pt):
 (fancyhdr)                You might also make \topmargin smaller to compensate:
 (fancyhdr)                \addtolength{\topmargin}{-14.49998pt}.
 
-[8
+[9
 
 ]
 
 Package hyperref Warning: Option `pdfpagemode' has already been used,
-(hyperref)                setting the option has no effect on input line 658.
+(hyperref)                setting the option has no effect on input line 657.
 
-Package hyperref Info: Option `bookmarksopen' set `true' on input line 658.
-Package hyperref Info: Option `hypertexnames' set `true' on input line 658.
+Package hyperref Info: Option `bookmarksopen' set `true' on input line 657.
+Package hyperref Info: Option `hypertexnames' set `true' on input line 657.
 
 Package hyperref Warning: Option `colorlinks' has already been used,
-(hyperref)                setting the option has no effect on input line 658.
+(hyperref)                setting the option has no effect on input line 657.
 
 
 Package hyperref Warning: Option `pdfstartview' has already been used,
-(hyperref)                setting the option has no effect on input line 658.
+(hyperref)                setting the option has no effect on input line 657.
 
-Package hyperref Info: Option `breaklinks' set `true' on input line 658.
+Package hyperref Info: Option `breaklinks' set `true' on input line 657.
 
 Package hyperref Warning: Option `hyperindex' has already been used,
-(hyperref)                setting the option has no effect on input line 658.
+(hyperref)                setting the option has no effect on input line 657.
 
 
 Package hyperref Warning: Option `backref' has already been used,
-(hyperref)                setting the option has no effect on input line 658.
+(hyperref)                setting the option has no effect on input line 657.
 
-LaTeX Font Info:    Trying to load font information for OT1+lmss on input line 661.
+LaTeX Font Info:    Trying to load font information for OT1+lmss on input line 665.
 (/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/lm/ot1lmss.fd
 File: ot1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 ) [1
 
 
-]
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 675.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 675.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 675.
-[2] [3]
-
-LaTeX Warning: Reference `ergodicity' on page 4 undefined on input line 684.
-
-[4] [5] [6]
-Overfull \hbox (1.65854pt too wide) in paragraph at lines 700--701
-\OT1/lmr/m/n/12 chal-lenges are those from cross-sectional re-search only am-pli-fied (for a re-view, see[][] Bergman
- []
-
-[7] [8] [9] [10] [11] [12] [13]
-LaTeX Font Info:    Trying to load font information for OT1+phv on input line 753.
-(/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/tex/latex/psnfss/ot1phv.fd
-File: ot1phv.fd 2020/03/25 scalable font definitions for OT1/phv.
-)
-LaTeX Font Info:    Font shape `OT1/phv/m/it' in size <11> not available
-(Font)              Font shape `OT1/phv/m/sl' tried instead on input line 753.
-<Figures/Monte_Carlo_comparison.png, id=407, 936.49875pt x 528.97626pt>
-File: Figures/Monte_Carlo_comparison.png Graphic file (type png)
-<use Figures/Monte_Carlo_comparison.png>
-Package pdftex.def Info: Figures/Monte_Carlo_comparison.png  used on input line 753.
-(pdftex.def)             Requested size: 655.54466pt x 370.28085pt.
-LaTeX Font Info:    Font shape `OT1/phv/m/it' in size <9.5> not available
-(Font)              Font shape `OT1/phv/m/sl' tried instead on input line 753.
-[14
-
- <./Figures/Monte_Carlo_comparison.png>] [15] [16
-
-]
-
-LaTeX Warning: Reference `tab:systematicReviewCount' on page 17 undefined on input line 767.
-
-
-LaTeX Warning: Reference `tab:systematicReview' on page 17 undefined on input line 767.
-
-
-LaTeX Warning: Reference `tab:systematicReviewCount' on page 17 undefined on input line 767.
-
-
-LaTeX Warning: Reference `tab:systematicReview' on page 17 undefined on input line 767.
-
-
-LaTeX Warning: Reference `tab:systematicReviewCount' on page 17 undefined on input line 767.
-
-
-LaTeX Warning: Reference `tab:systematicReview' on page 17 undefined on input line 767.
-
-[17]
-<Figures/prisma_diagram.png, id=447, 854.19125pt x 517.935pt>
-File: Figures/prisma_diagram.png Graphic file (type png)
-<use Figures/prisma_diagram.png>
-Package pdftex.def Info: Figures/prisma_diagram.png  used on input line 775.
-(pdftex.def)             Requested size: 597.92981pt x 362.55202pt.
-[18
-
- <./Figures/prisma_diagram.png>] [19
-
-] [20] [21] [22] [23] [24] [25] [26] [27] [28] [29] [30] (./thesis.aux)
-
-LaTeX Warning: There were undefined references.
-
+] (./thesis.aux)
 Package rerunfilecheck Info: File `thesis.out' has not changed.
-(rerunfilecheck)             Checksum: 73920E1F0BA9C4E199B6B4D3D84D3C93;3733.
+(rerunfilecheck)             Checksum: 12ADDABD5907BA448A3B64985BF2DDF3;908.
 Package logreq Info: Writing requests to 'thesis.run.xml'.
 \openout1 = `thesis.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 27127 strings out of 478053
- 493196 string characters out of 5839225
- 1870793 words of memory out of 5000000
- 46605 multiletter control sequences out of 15000+600000
- 585181 words of font info for 116 fonts, out of 8000000 for 9000
+ 26222 strings out of 478053
+ 470007 string characters out of 5839225
+ 1857793 words of memory out of 5000000
+ 45873 multiletter control sequences out of 15000+600000
+ 550860 words of font info for 72 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 102i,12n,106p,2402b,5182s stack positions out of 10000i,1000n,20000p,200000b,200000s
-{/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}{/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}</Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/euler/eurm10.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi12.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri12.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmss8.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on thesis.pdf (38 pages, 584512 bytes).
+ 102i,12n,106p,2211b,5182s stack positions out of 10000i,1000n,20000p,200000b,200000s
+{/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}</Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi12.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri12.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmss8.pfb></Users/sebastiansciarra/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb>
+Output written on thesis.pdf (10 pages, 126739 bytes).
 PDF statistics:
- 854 PDF objects out of 1000 (max. 8388607)
- 771 compressed objects within 8 object streams
- 158 named destinations out of 1000 (max. 500000)
- 191 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 141 PDF objects out of 1000 (max. 8388607)
+ 112 compressed objects within 2 object streams
+ 21 named destinations out of 1000 (max. 500000)
+ 65 words of extra memory for PDF output out of 10000 (max. 10000000)
 
