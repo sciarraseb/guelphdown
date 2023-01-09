@@ -108,7 +108,7 @@ saveRDS(object = param_summary_exp_3_def, file = 'data/uf_param_summary_exp_3_de
 
 # Experiment 3 {#Exp3}
 
-In Experiment 3, I was interested in examining how time structuredness affected modelling accuracy. Before presenting the results of Experiment 3, I will present my design and and analysis goals. For the design, I conducted a 3 (time structuredness: time-structured data, time-unstructured data resulting from a fast response rate, time-unstructured data resulting from a slow response rate) x 4 (number of measurements: 5, 7, 9, 11) x 6 (sample size: 30, 50, 100, 200, 500, 1000) study. For the analysis, I examined whether the number of measurements and sample sizes needed to obtain high modelling accuracy (i.e., low bias, high precision) increased as time structuredness decreased.
+In Experiment 3, I was interested in examining how time structuredness affected modelling accuracy. Before presenting the results of Experiment 3, I present my design and and analysis goals. For my design goals, I conducted a 3 (time structuredness: time-structured data, time-unstructured data resulting from a fast response rate, time-unstructured data resulting from a slow response rate) x 4 (number of measurements: 5, 7, 9, 11) x 6 (sample size: 30, 50, 100, 200, 500, 1000) study. For my analysis goals, I examined whether the number of measurements and sample sizes needed to obtain high modelling accuracy (i.e., low bias, high precision) increased as time structuredness decreased.
 
 
 ## Methods
@@ -275,14 +275,14 @@ set_panel_size(p = cdf_plot, height = unit(x = 28,
 
 #### Constants 
 
-Because the nature of change not manipulated in Experiment 3, I set it to have a constant value across all cells. To keep the nature of change constant across all cells, I set the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$) to have a value of 180. Another variable set to a constant value across the cells was measurement spacing (equal spacing was used). 
+Given that each simulation experiment manipulated no more than three independent variables so that results could be readily interpreted [@halford2005], other variables had to be set to constant values. In Experiment 3, two important variables were set to constant values: nature of change and measurement spacing. For nature of change, I set the value for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$) across all cells to have a value of 180. For measurement spacing, I set the value across all cells to have equal spacing. 
 
 #### Dependent Variables
 
 ##### Convergence Success Rate
 
 The proportion of iterations in a cell where models converged defined
-the **convergence success rate**.\footnote{Specifically, convergence was obtained if the convergence code returned by OpenMx was 0.} Equation \@ref(eq:convergence) below shows the calculation used to compute the convergence success rate:
+the *convergence success rate*.\footnote{Specifically, convergence was obtained if the convergence code returned by OpenMx was 0.} Equation \@ref(eq:convergence) below shows the calculation used to compute the convergence success rate:
 
 ```{=tex}
 \begin{align}

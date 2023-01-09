@@ -99,7 +99,7 @@ saveRDS(object = param_summary_exp_3, file = 'data/uf_param_summary_exp_3.RData'
 
 # Experiment 2 {#Exp2}
 
-In Experiment 2, I investigated the combinations of measurement number and sample size needed to obtain high model performance (i.e., unbiased and precise parameter estimation) under different spacing schedules. Before presenting the results of Experiment 2, I will present my design and and analysis goals. For the design, I conducted a 4 (spacing schedule: equal, time-interval increasing, time-interval decreasing, middle-and-extreme) x 4(number of measurements: 5, 7, 9, 11) x 6(sample size: 30, 50, 100, 200, 500, 1000) study. For the analysis, I was interested in determining, for each spacing schedule, the combinations of number of measurements and sample size that achieved accurate modelling (i.e., unbiased and precise parameter estimation). For parsimony, I present the sample size by number of measurements results for each level of spacing schedule.
+In Experiment 2, I investigated the combinations of measurement number and sample size needed to obtain high model performance (i.e., unbiased and precise parameter estimation) under different spacing schedules. Before presenting the results of Experiment 2, I present my design and and analysis goals. For my design goals, I conducted a 4 (spacing schedule: equal, time-interval increasing, time-interval decreasing, middle-and-extreme) x 4(number of measurements: 5, 7, 9, 11) x 6(sample size: 30, 50, 100, 200, 500, 1000) study. For my analysis goals, I was interested in determining, for each spacing schedule, the combinations of number of measurements and sample size that achieved accurate modelling (i.e., unbiased and precise parameter estimation). For parsimony, I present the sample size by number of measurements results for each level of spacing schedule.
 
 ## Methods
 ### Overview of Data Generation
@@ -134,14 +134,14 @@ and 1000.
 
 #### Constants {#constants-exp2}
 
-Because the nature of change not manipulated in Experiment 2, I set it to have a constant value across all cells. To keep the nature of change constant across all cells, I set the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$) to have a value of 180. Another variable set to a constant value across the cells was time structuredness (data were assumed to be time structured). That is, data were generated such that, at each time point, all data were obtained at the exact same time.  
+Given that each simulation experiment manipulated no more than three independent variables so that results could be readily interpreted [@halford2005], other variables had to be set to constant values. In Experiment 2, two important variables were set to constant values: nature of change and time structuredness. For nature of change, I set the value for the fixed-effect days-to-halfway elevation parameter ($\upbeta_{fixed}$) across all cells to have a value of 180. For time structuredness, data across all cells were generated to be time structured. 
 
 #### Dependent Variables
 
 ##### Convergence Success Rate
 
 The proportion of iterations in a cell where models converged defined
-the **convergence success rate**.\footnote{Specifically, convergence was obtained if the convergence code returned by OpenMx was 0.} Equation \@ref(eq:convergence) below shows the calculation used to compute the convergence success rate:
+the *convergence success rate*.\footnote{Specifically, convergence was obtained if the convergence code returned by OpenMx was 0.} Equation \@ref(eq:convergence) below shows the calculation used to compute the convergence success rate:
 
 ```{=tex}
 \begin{align}

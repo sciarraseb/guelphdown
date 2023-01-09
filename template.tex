@@ -638,6 +638,9 @@ breaklinks=true, backref=page
 \newtheorem{example}{Example}
 \renewcommand{\theexample}{\theapp.\arabic{example}}
 
+$if(nocite)$
+\nocite{$nocite$}
+$endif$
 
 %load additional latex packages needed within document
 $for(header-includes)$
